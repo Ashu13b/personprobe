@@ -708,11 +708,17 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   its PS Yadav) settles identity without CrossRef — applied to two 2024
   Current Science papers (Veer Gaurav OPU-IVF; Nuh dissemination, Yadav first
   author), dossier-only since draft publications already cover representative
-  works. Operating loop (Sep 2026): the AI
-  drives the companion browser itself via /browser/navigate + /content and
-  only calls the human for a genuine CAPTCHA solve — the phone /browser/ view
-  is the solve station, not the driving seat. Proven on NDTV + Zee (both
-  rendered fully first-hand, zero human steps). Exhaustive sweep (Sep 2026):
+  works. Operating loop (Sep 2026): For web scraping and bot-protected sites
+  (ResearchGate, Cloudflare, news outlets), the AI must NOT use the local
+  VM Playwright browser on /browser/navigate (port 3890), as its datacenter IP
+  (130.210.59.249) gets blocked immediately. Instead, the AI drives the OpenScrape
+  Android Mobile Browser bridge on port 8765 via
+  `python3 /home/ubuntu/Expeei/android-browser/phone_ctl.py <url>` or
+  `MobileBrowserClient` from `/home/ubuntu/Expeei/android-browser/openscrape_client.py`.
+  This loads on the physical phone's Indian cellular network, bypassing IP blocks.
+  The AI only calls the human if a genuine CAPTCHA, login, or slider puzzle appears
+  (`phone_ctl.py solve <url>`). Proven on ResearchGate + NDTV + Zee (all rendered
+  first-hand on phone network, zero human steps for open sites). Exhaustive sweep (Sep 2026):
   IE/Hindu/Scroll/Wire/Quint carry only NDRI-2009 or unrelated stories —
   none ever covered Yadav; PIB/DD News have nothing. AR 2019-20 read from the
   full PDF first-hand (project team + "first report of its kind" + 25

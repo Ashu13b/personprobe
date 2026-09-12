@@ -77,7 +77,27 @@ research dossier.
 - Phone companion UI: the Android phone can browse this app via a reverse SSH
   tunnel — setup, notifications (`phone_ctl.sh toast/say`), and gotchas in
   `PHONE_WORKFLOW.md`. Direct phone→VM access is tailnet-blocked.
-
+- Web Scraping & Bot Walls (CRITICAL RULE FOR AGENTS):
+  - **DO NOT curl `http://localhost:3890/browser/navigate`** for external web scraping. Port 3890 runs Playwright on the VM's Google Cloud datacenter IP (`130.210.59.249`), which is immediately blocked by Cloudflare (Ray ID), ResearchGate, and bot mitigation systems.
+  - **NEVER tell the user "write links in scrap browser".**
+  - **Always scrape via OpenScrape Mobile Browser Bridge**:
+    ```bash
+    python3 /home/ubuntu/Expeei/android-browser/phone_ctl.py <url>
+    ```
+    or in Python:
+    ```python
+    import sys
+    sys.path.append("/home/ubuntu/Expeei/android-browser")
+    from openscrape_client import MobileBrowserClient
+    client = MobileBrowserClient()
+    data = client.scrape(url)
+    ```
+    This navigates and extracts the DOM and cookies via the physical phone's Indian mobile carrier network, bypassing all bot walls.
+  - If a CAPTCHA, login wall, or slider drag puzzle appears, run:
+    ```bash
+    python3 /home/ubuntu/Expeei/android-browser/phone_ctl.py solve <url>
+    ```
+    and ask the human to solve it on the phone screen.
 
 ## 4. Non-obvious rules
 See `AGENT_KNOWLEDGE.md`. Keep it current — when you learn *why* something is

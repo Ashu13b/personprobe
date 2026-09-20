@@ -7,9 +7,9 @@ from . import store
 
 from .schemas import DraftRequest
 
-from wiki.wiki_check import draft_generation_allowed
-from wiki.draft import audit_profile, render_draft
-from wiki.draft_hi import render_hindi_draft
+from adapters.wiki.wiki_check import draft_generation_allowed
+from adapters.wiki.draft import audit_profile, render_draft
+from adapters.wiki.draft_hi import render_hindi_draft
 
 draft_router = APIRouter()
 
@@ -59,7 +59,7 @@ def draft_links(body: dict) -> dict:
     profile = store._get_profile(body["profile_name"])
     if not profile.wikitext_en:
         raise HTTPException(400, "No draft has been generated yet.")
-    from wiki.draft_verifier import (
+    from adapters.wiki.draft_verifier import (
         extract_draft_links,
         check_draft_links,
         extract_draft_wikilinks,
@@ -96,7 +96,7 @@ def draft_preview(body: dict) -> dict:
     profile = store._get_profile(body["profile_name"])
     if not profile.wikitext_en:
         raise HTTPException(400, "No draft has been generated yet.")
-    from wiki.draft_verifier import render_preview
+    from adapters.wiki.draft_verifier import render_preview
 
     try:
         html = render_preview(profile.wikitext_en)
@@ -111,7 +111,7 @@ def draft_qa(body: dict) -> dict:
     profile = store._get_profile(body["profile_name"])
     if not profile.wikitext_en:
         raise HTTPException(400, "No draft has been generated yet.")
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     report = qa_draft(profile)
     return {
@@ -128,8 +128,8 @@ def draft_verify(body: dict) -> dict:
     profile = store._get_profile(body["profile_name"])
     if not profile.wikitext_en:
         raise HTTPException(400, "No draft has been generated yet.")
-    from wiki.draft_qa import qa_draft
-    from wiki.draft_verifier import extract_draft_links, check_draft_links
+    from adapters.wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_verifier import extract_draft_links, check_draft_links
 
     qa = qa_draft(profile)
     links = extract_draft_links(profile.wikitext_en)

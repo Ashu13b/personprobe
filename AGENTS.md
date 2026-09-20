@@ -46,9 +46,9 @@ research dossier.
 - No database. Sessions are JSON files in `sessions/` (gitignored); in-memory
   dicts mirror loaded work. The draft regression test uses a frozen fixture at
   `tests/fixtures/Prem_Singh_Yadav.json`, not the live session.
-- Drafting is deterministic and server-owned: `wiki/draft.py` `render_draft` /
+- Drafting is deterministic and server-owned: `adapters/wiki/draft.py` `render_draft` /
   `audit_profile` produce all wikitext. No code path may emit LLM-invented
-  prose (the old `wiki/wikitext.py` LLM draft path was deleted for this reason).
+  prose (the old `adapters/wiki/wikitext.py` LLM draft path was deleted for this reason).
 - LLM: `engine/llm.py` `get_provider()` falls back real LLM API → coding agent
   (JSON jobs in `agent_jobs/`, answered by this agent via `pending_jobs()` /
   `answer_job()` in `engine/agent_llm.py`) → stub (only with
@@ -65,7 +65,7 @@ research dossier.
   — don't run it against a server you want to keep alive.
 - Frontend dev/build/typecheck: `cd frontend && npm run dev` / `npm run build` /
   `npm run typecheck` (`tsc --noEmit`).
-- Tests: `pytest` from the repo root (imports resolve `backend/engine/wiki` as
+- Tests: `pytest` from the repo root (imports resolve `backend/engine/adapters` as
   top-level packages from root). Single file: `pytest tests/test_draft.py`.
   `tests/conftest.py` auto-isolates every test with a tmp `SESSIONS_DIR` — the
   real `sessions/` is never touched by tests.

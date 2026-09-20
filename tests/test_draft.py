@@ -7,8 +7,8 @@ from fastapi import HTTPException
 from backend import main as backend_main
 from backend import store
 from engine.models import Claim, PersonProfile, Source, SourceReliability, VerificationState
-from wiki.draft import audit_profile, render_draft, _citation
-from wiki.draft_verifier import extract_draft_links, check_draft_links
+from adapters.wiki.draft import audit_profile, render_draft, _citation
+from adapters.wiki.draft_verifier import extract_draft_links, check_draft_links
 
 
 def _source(url: str, *, independent: bool = True) -> Source:
@@ -629,7 +629,7 @@ def test_resume_never_repopulates_claims_from_stub_provider(tmp_path, monkeypatc
     monkeypatch.setattr(store, "_sessions", {})
     monkeypatch.setattr(store, "_wiki_statuses", {})
     monkeypatch.setattr("engine.llm.has_real_llm", lambda: False)
-    monkeypatch.setattr("wiki.wiki_check.check_existing_page", lambda title: type("S", (), {"model_dump": lambda self: {"status": "clear", "url": None, "note": None}})())
+    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: type("S", (), {"model_dump": lambda self: {"status": "clear", "url": None, "note": None}})())
 
     result = backend_main.resume_session({"file": "Example_Person.json"})
 
@@ -751,7 +751,7 @@ def test_citation_keeps_original_url_and_adds_archive_fields():
 
 
 def test_title_clean_strips_truncation_before_publisher_suffix():
-    from wiki.draft import _title_clean
+    from adapters.wiki.draft import _title_clean
 
     assert _title_clean("Telomerase Structure and Function, Activity and Its... | IntechOpen") == (
         "Telomerase Structure and Function, Activity and Its"
@@ -1053,7 +1053,7 @@ def _qa_profile() -> PersonProfile:
 
 
 def test_qa_flags_missing_structural_bits():
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     report = qa_draft(_qa_profile())
     ids = [f.id for f in report.findings]
@@ -1064,7 +1064,7 @@ def test_qa_flags_missing_structural_bits():
 
 
 def test_qa_passes_well_formed_draft():
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _qa_profile()
     cites = "\n".join(
@@ -1086,7 +1086,7 @@ def test_qa_passes_well_formed_draft():
 
 
 def test_qa_flags_dirty_titles_iso_dates_and_weak_sources():
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _qa_profile()
     profile.wikitext_en = (
@@ -1105,7 +1105,7 @@ def test_qa_flags_dirty_titles_iso_dates_and_weak_sources():
 
 
 def test_qa_no_draft_is_an_error():
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _ready_profile()
     profile.wikitext_en = None
@@ -1115,7 +1115,7 @@ def test_qa_no_draft_is_an_error():
 
 
 def test_qa_flags_attribution_chains():
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _qa_profile()
     profile.wikitext_en = (
@@ -1158,7 +1158,7 @@ def test_draft_qa_endpoint_requires_draft(tmp_path, monkeypatch):
 
 def test_qa_flags_duplicate_approved_claims():
     from engine.models import Claim
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _qa_profile()
     profile.claims = [
@@ -1183,7 +1183,7 @@ def test_qa_flags_duplicate_approved_claims():
 
 def test_qa_flags_institutional_achievement_sources():
     from engine.models import Claim, Source, SourceReliability
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _qa_profile()
     profile.sources = [
@@ -1212,8 +1212,8 @@ def test_qa_flags_institutional_achievement_sources():
 
 
 def test_wikilink_extraction_and_canonicalization():
-    from wiki.draft import _canonicalize_wikilinks
-    from wiki.draft_verifier import extract_draft_wikilinks
+    from adapters.wiki.draft import _canonicalize_wikilinks
+    from adapters.wiki.draft_verifier import extract_draft_wikilinks
 
     sample = "He joined [[CIRB]] in 1993 and later visited [[NDRI]]. He also studied [[DNA]]. [[Category:Scientists]]"
     canonical = _canonicalize_wikilinks(sample)
@@ -1230,7 +1230,7 @@ def test_wikilink_extraction_and_canonicalization():
 
 
 def test_qa_flags_ambiguous_wikilinks():
-    from wiki.draft_qa import qa_draft
+    from adapters.wiki.draft_qa import qa_draft
 
     profile = _qa_profile()
     profile.wikitext_en = (

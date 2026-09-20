@@ -2,11 +2,11 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from engine.identifier import fetch_wikidata_photo_by_id
-from wiki.wiki_check import check_existing_page, draft_generation_allowed
+from adapters.wiki.wiki_check import check_existing_page, draft_generation_allowed
 
 
 class IdentifyPreviewTests(TestCase):
-    @patch("wiki.wiki_check.check_existing_page")
+    @patch("adapters.wiki.wiki_check.check_existing_page")
     @patch("engine.researcher._duckduckgo_html", return_value=None)
     @patch("engine.researcher._google_cse")
     @patch("engine.identifier.find_candidates")
@@ -74,8 +74,8 @@ class ResearchStartRoutingTests(TestCase):
 
 
 class WikiStatusRoutingTests(TestCase):
-    @patch("wiki.wiki_check._deletion_note")
-    @patch("wiki.wiki_check._page_exists")
+    @patch("adapters.wiki.wiki_check._deletion_note")
+    @patch("adapters.wiki.wiki_check._page_exists")
     def test_existing_article_takes_precedence(self, page_exists, deletion_note):
         page_exists.side_effect = lambda title: title == "Ada Example"
 
@@ -85,8 +85,8 @@ class WikiStatusRoutingTests(TestCase):
         self.assertEqual(status.url, "https://en.wikipedia.org/wiki/Ada_Example")
         deletion_note.assert_not_called()
 
-    @patch("wiki.wiki_check._deletion_note")
-    @patch("wiki.wiki_check._page_exists")
+    @patch("adapters.wiki.wiki_check._deletion_note")
+    @patch("adapters.wiki.wiki_check._page_exists")
     def test_existing_draft_routes_to_improvement(self, page_exists, deletion_note):
         page_exists.side_effect = lambda title: title == "Draft:Ada Example"
 
@@ -96,8 +96,8 @@ class WikiStatusRoutingTests(TestCase):
         self.assertEqual(status.url, "https://en.wikipedia.org/wiki/Draft:Ada_Example")
         deletion_note.assert_not_called()
 
-    @patch("wiki.wiki_check._deletion_note", return_value="delete on 2025-01-02")
-    @patch("wiki.wiki_check._page_exists", return_value=False)
+    @patch("adapters.wiki.wiki_check._deletion_note", return_value="delete on 2025-01-02")
+    @patch("adapters.wiki.wiki_check._page_exists", return_value=False)
     def test_prior_deletion_routes_to_review(self, _page_exists, _deletion_note):
         status = check_existing_page("Ada Example")
         self.assertEqual(status.status, "deleted")

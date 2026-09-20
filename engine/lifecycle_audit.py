@@ -15,7 +15,6 @@ from urllib.parse import urlparse
 
 from .mobile_bridge import is_mobile_bridge_available
 from .models import PersonProfile
-from wiki.draft import audit_profile
 
 
 @dataclass
@@ -224,6 +223,7 @@ def audit_claims_stage(profile: PersonProfile) -> StageAuditItem:
 
 def audit_draft_stage(profile: PersonProfile) -> StageAuditItem:
     """Audit Stage 4: AfC compliance, wikitext generation, and blocker analysis."""
+    from adapters.wiki.draft import audit_profile  # late import: engine must not depend on draft adapters at module scope
     draft_audit = audit_profile(profile)
     ready = draft_audit.ready
     blockers = [b.model_dump() for b in draft_audit.blockers]

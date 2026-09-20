@@ -1,7 +1,7 @@
 """Unit tests for deterministic Hindi draft generator."""
 from engine.models import PersonProfile, Source, Claim, VerificationState, SourceReliability
-from wiki.draft_hi import render_hindi_draft
-from wiki.draft import audit_profile
+from adapters.wiki.draft_hi import render_hindi_draft
+from adapters.wiki.draft import audit_profile
 
 
 def _sample_profile() -> PersonProfile:

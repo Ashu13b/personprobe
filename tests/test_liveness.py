@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from engine.fetcher import check_liveness, get_wayback_url
 from engine.models import Source, SourceReliability, VerificationState, PersonProfile, Claim
-from wiki.draft import audit_profile, render_draft
+from adapters.wiki.draft import audit_profile, render_draft
 
 
 def test_check_liveness_live():

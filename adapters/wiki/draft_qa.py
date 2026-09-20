@@ -69,7 +69,7 @@ def qa_draft(profile: PersonProfile) -> QaReport:
 
 
 def _check_wikilinks(wikitext: str, report: QaReport) -> None:
-    from wiki.draft_verifier import extract_draft_wikilinks, KNOWN_ACRONYM_CANONICAL
+    from adapters.wiki.draft_verifier import extract_draft_wikilinks, KNOWN_ACRONYM_CANONICAL
 
     wikilinks = extract_draft_wikilinks(wikitext)
     if not wikilinks:

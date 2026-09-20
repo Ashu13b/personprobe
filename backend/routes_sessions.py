@@ -44,7 +44,7 @@ def resume_session(body: dict) -> dict:
     # instead of trusting a stale stored status. Keep the stored value if the
     # check fails (e.g. offline).
     try:
-        from wiki.wiki_check import check_existing_page, check_title_for
+        from adapters.wiki.wiki_check import check_existing_page, check_title_for
         wiki_status = check_existing_page(
             check_title_for(profile.name, profile.wikipedia_url)).model_dump()
     except Exception:

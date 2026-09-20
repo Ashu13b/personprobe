@@ -91,7 +91,7 @@ def test_resume_migrates_legacy_file_to_id_file(tmp_path, monkeypatch):
         def model_dump(self):
             return {"status": "clear", "url": None, "note": None}
 
-    monkeypatch.setattr("wiki.wiki_check.check_existing_page", lambda title: _Clear())
+    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: _Clear())
 
     from backend.routes_sessions import resume_session
     result = resume_session({"file": "Legacy_Person.json"})
@@ -120,7 +120,7 @@ def test_resume_refreshes_wiki_status_instead_of_trusting_stored(monkeypatch, tm
         def model_dump(self):
             return {"status": "exists", "url": "https://en.wikipedia.org/wiki/Legacy_Person", "note": "A Wikipedia article already exists for this person."}
 
-    monkeypatch.setattr("wiki.wiki_check.check_existing_page", lambda title: _Exists())
+    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: _Exists())
 
     from backend.routes_sessions import resume_session
     result = resume_session({"file": "Legacy_Person.json"})
@@ -228,7 +228,7 @@ def test_legacy_filename_with_id_keyed_content_migrates_keeping_session_id(tmp_p
         def model_dump(self):
             return {"status": "clear", "url": None, "note": None}
 
-    monkeypatch.setattr("wiki.wiki_check.check_existing_page", lambda title: _Clear())
+    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: _Clear())
 
     from backend.routes_sessions import resume_session
     result = resume_session({"file": "Legacy_Person.json"})

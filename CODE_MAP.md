@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-14 11:44 UTC · sha a790914 · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-20 15:17 UTC · sha 9455818 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 95 files · 868 symbols
+- Python — 96 files · 868 symbols
 - TypeScript — 36 files · 288 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 136 files · 1159 symbols across 6 languages._
+_Total: 137 files · 1159 symbols across 6 languages._
 
 
 ## Compartments
@@ -22,6 +22,13 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### ./
 - `browser_home.html` — #status, #open-desktop
 - `browser_server.py` — PROFILE_DIR, XVFB_DISPLAY, PORT, _UA, def looks_like_wall, class _Cmd, _q, _headed, _running, _xvfb, def _dispatch, def browser_link_status, def _page_link_status, def _try_start_xvfb, def _browser_thread, def lifespan, app, def screenshot, class NavReq, def navigate, def info, class ViewportReq, def set_viewport, class ClickReq, def click, class TypeReq, def type_text, class KeyReq, def press_key, class ScrollReq, def scroll, def go_back, def go_forward, def reload, def get_content, def status, def index, def start_browser, def stop_browser
+### adapters/
+- `adapters/wiki/article_compare.py` — WIKI_API, HEADERS, STOPWORDS, _COVERAGE_THRESHOLD, class ClaimCoverage, class ArticleProposal, def title_from_url, def fetch_article_text, def _tokens, def claim_coverage, def build_article_proposal
+- `adapters/wiki/draft.py` — class DraftIssue, class DraftEvidence, class DraftAudit, _NOISE_PATTERNS, _ROLE_WORDS, _CAREER_ACTIVITY_WORDS, _INSTITUTION_WORDS, _PUBLICATION_WORDS, _BIRTH_SUBJECT_NOISE, _RESEARCH_ACTIONS, def _host, def _is_independent_secondary, def _source_rank, def _claim_exclusion, def audit_profile, def _clean, def _title_clean, _MONTHS, _MONTH_NUM, def _format_date, def _format_birth_date, def _display_name, def _short_description, def _cite_value, def _ref_name, def _archive_date, def _citation, def _items_for, def _canonicalize_wikilinks, def _claim_text, def _item_year, def _render_items, def _infobox, def _defaultsort, def render_draft
+- `adapters/wiki/draft_hi.py` — def _hindi_infobox, def _render_hindi_items, def render_hindi_draft
+- `adapters/wiki/draft_qa.py` — Severity, class Finding, class QaReport(passed, counts), _WEAK_RELIABILITIES, _LEAD_END, _ATTRIBUTION, _REF_SNIPPET, _CITE_URL, _CITE_TITLE, _CITE_DATE, _ISO_DATE, def _lead, def qa_draft, def _check_wikilinks, def _check_duplicate_claims, def _check_institutional_achievements, def _check_structure, def _check_citations, def _check_sources
+- `adapters/wiki/draft_verifier.py` — class DraftLink, _REF_OPEN, _REF_CLOSE, _CITE_FIELD, _EXTERNAL_LINK, def extract_draft_links, def check_draft_links, def _check_links_via_requests, def render_preview, class DraftWikilink, _WIKILINK_RE, KNOWN_ACRONYM_CANONICAL, def extract_draft_wikilinks, def check_draft_wikilinks
+- `adapters/wiki/wiki_check.py` — HEADERS, WIKI_API, class WikiStatus, def draft_generation_allowed, def check_title_for, def check_existing_page, def _page_exists, def _deletion_note
 ### backend/
 - `backend/main.py` — api_app, def lifespan, app, FRONTEND_DIST
 - `backend/pipelines.py` — def _add_sd_article, def _add_sd_author_profile
@@ -146,10 +153,3 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_subject_routing.py` — class IdentifyPreviewTests(test_identify_merges_identity_matches_and_web_clues), class ResearchStartRoutingTests(test_confirmed_wikipedia_url_routes_by_article_title), class WikiStatusRoutingTests(test_existing_article_takes_precedence, test_existing_draft_routes_to_improvement, test_prior_deletion_routes_to_review, test_only_new_and_existing_draft_modes_can_generate_wikitext), class WikidataEnrichmentTests(test_invalid_qid_never_triggers_enrichment, test_confirmed_qid_can_supply_photo)
 - `tests/test_suggester.py` — def test_multiyear_sweep_never_fabricates_dois_or_publisher_urls, def test_multiyear_sweep_still_covers_institutional_report_series, def test_report_guesses_are_bounded_and_real_searches_still_rank, def test_generic_social_and_author_links_are_not_person_profiles, def test_profile_link_suggestions_drop_generic_links
 - `tests/test_verification_levels.py` — def test_verification_log_entry_models, def test_claim_verification_logging, def test_verify_source_level_endpoints
-### wiki/
-- `wiki/article_compare.py` — WIKI_API, HEADERS, STOPWORDS, _COVERAGE_THRESHOLD, class ClaimCoverage, class ArticleProposal, def title_from_url, def fetch_article_text, def _tokens, def claim_coverage, def build_article_proposal
-- `wiki/draft.py` — class DraftIssue, class DraftEvidence, class DraftAudit, _NOISE_PATTERNS, _ROLE_WORDS, _CAREER_ACTIVITY_WORDS, _INSTITUTION_WORDS, _PUBLICATION_WORDS, _BIRTH_SUBJECT_NOISE, _RESEARCH_ACTIONS, def _host, def _is_independent_secondary, def _source_rank, def _claim_exclusion, def audit_profile, def _clean, def _title_clean, _MONTHS, _MONTH_NUM, def _format_date, def _format_birth_date, def _display_name, def _short_description, def _cite_value, def _ref_name, def _archive_date, def _citation, def _items_for, def _canonicalize_wikilinks, def _claim_text, def _item_year, def _render_items, def _infobox, def _defaultsort, def render_draft
-- `wiki/draft_hi.py` — def _hindi_infobox, def _render_hindi_items, def render_hindi_draft
-- `wiki/draft_qa.py` — Severity, class Finding, class QaReport(passed, counts), _WEAK_RELIABILITIES, _LEAD_END, _ATTRIBUTION, _REF_SNIPPET, _CITE_URL, _CITE_TITLE, _CITE_DATE, _ISO_DATE, def _lead, def qa_draft, def _check_wikilinks, def _check_duplicate_claims, def _check_institutional_achievements, def _check_structure, def _check_citations, def _check_sources
-- `wiki/draft_verifier.py` — class DraftLink, _REF_OPEN, _REF_CLOSE, _CITE_FIELD, _EXTERNAL_LINK, def extract_draft_links, def check_draft_links, def _check_links_via_requests, def render_preview, class DraftWikilink, _WIKILINK_RE, KNOWN_ACRONYM_CANONICAL, def extract_draft_wikilinks, def check_draft_wikilinks
-- `wiki/wiki_check.py` — HEADERS, WIKI_API, class WikiStatus, def draft_generation_allowed, def check_title_for, def check_existing_page, def _page_exists, def _deletion_note

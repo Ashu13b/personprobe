@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from backend import main as backend_main
 from backend import store
 from engine.models import PersonProfile, Source, SourceReliability, Claim, VerificationState
-from wiki.article_compare import build_article_proposal, claim_coverage, title_from_url
+from adapters.wiki.article_compare import build_article_proposal, claim_coverage, title_from_url
 
 
 def _profile() -> PersonProfile:
@@ -87,7 +87,7 @@ def test_article_proposal_route_returns_proposal(tmp_path, monkeypatch):
         {profile.name: {"status": "exists", "url": "https://en.wikipedia.org/wiki/Example_Person", "note": None}},
     )
 
-    import wiki.article_compare as ac
+    import adapters.wiki.article_compare as ac
     monkeypatch.setattr(ac, "fetch_article_text", lambda title: "Yadav won the Nanaji Deshmukh award for buffalo cloning.")
 
     result = backend_main.article_proposal({"profile_name": profile.name})

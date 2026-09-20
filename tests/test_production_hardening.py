@@ -3,7 +3,7 @@ import json
 
 from engine.fetcher import is_safe_public_url, _direct_fetch, check_liveness
 from engine.models import PersonProfile, Source, SourceReliability
-from wiki.draft import _cite_value, _citation
+from adapters.wiki.draft import _cite_value, _citation
 import backend.store as store
 
 

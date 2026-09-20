@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.join(root_dir, "backend"))
 sys.path.insert(0, root_dir)
 
 from engine.models import PersonProfile  # noqa: E402
-from wiki.draft import audit_profile, render_draft  # noqa: E402
+from adapters.wiki.draft import audit_profile, render_draft  # noqa: E402
 
 session_file = sys.argv[1] if len(sys.argv) > 1 else "prem_yadav_session.json"
 

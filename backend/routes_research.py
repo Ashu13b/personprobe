@@ -40,7 +40,7 @@ from engine.discarded_registry import (
     recover_discarded,
 )
 from engine.name_verifier import verify_name_in_content
-from wiki.wiki_check import check_existing_page
+from adapters.wiki.wiki_check import check_existing_page
 
 research_router = APIRouter()
 
@@ -94,7 +94,7 @@ def identify(req: IdentifyRequest) -> dict:
     # Prefer the confirmed identity match's article title when one is offered.
     wiki_status = None
     try:
-        from wiki.wiki_check import check_existing_page, check_title_for
+        from adapters.wiki.wiki_check import check_existing_page, check_title_for
         title = check_title_for(req.name, identity[0].wikipedia_url) if identity and identity[0].wikipedia_url else req.name
         wiki_status = check_existing_page(title).model_dump()
     except Exception:
@@ -178,7 +178,7 @@ def research_start(req: ResearchRequest) -> dict:
             "resumed": True,
         }
 
-    from wiki.wiki_check import check_title_for
+    from adapters.wiki.wiki_check import check_title_for
     wiki_status = check_existing_page(check_title_for(req.name, req.wikipedia_url))
 
     photo_url = req.photo_url
@@ -723,7 +723,7 @@ def auto_enrich_endpoint(body: dict) -> dict:
 def article_proposal(body: dict) -> dict:
     """Existing-article mode: compare confirmed claims against the live article
     and emit a structured edit proposal (covered vs candidate additions)."""
-    from wiki.article_compare import build_article_proposal, fetch_article_text, title_from_url
+    from adapters.wiki.article_compare import build_article_proposal, fetch_article_text, title_from_url
 
     profile = store._get_profile(body["profile_name"])
     sid = store._ensure_session_id(profile)

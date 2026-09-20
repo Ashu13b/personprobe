@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-12 14:28 UTC · sha a790914 · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-20 15:17 UTC · sha 9455818 · host instance-20260819-0844 -->
 
 # DOCS_MAP
 

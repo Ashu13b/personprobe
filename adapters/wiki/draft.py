@@ -382,7 +382,7 @@ def _items_for(audit: DraftAudit, fields: Iterable[str]) -> list[DraftEvidence]:
 
 
 def _canonicalize_wikilinks(text: str) -> str:
-    from wiki.draft_verifier import KNOWN_ACRONYM_CANONICAL
+    from adapters.wiki.draft_verifier import KNOWN_ACRONYM_CANONICAL
     def _sub(m: re.Match) -> str:
         target = m.group(1).strip()
         label = (m.group(2) or "").strip()

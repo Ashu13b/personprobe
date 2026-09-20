@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from engine.models import PersonProfile
-from wiki.draft import (
+from adapters.wiki.draft import (
     DraftAudit,
     DraftEvidence,
     audit_profile,

@@ -712,9 +712,9 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
             domain="civic_electoral",
             deductive_question=f"If {s_name} is a long-term registered voter in {district} (Haryana), which Assembly Constituency and Polling Station voter roll lists their family household?",
             expected_paper_trails=[
-                f"Election Commission of India (ECI) / CEO Haryana Assembly Constituency Electoral Roll (PDF)",
-                f"Electoral Photo Identity Card (EPIC) Central Database Registration Record",
-                f"Form 6 New Voter Enrollment Verification / Booth Level Officer (BLO) Inspection Report",
+                "Election Commission of India (ECI) / CEO Haryana Assembly Constituency Electoral Roll (PDF)",
+                "Electoral Photo Identity Card (EPIC) Central Database Registration Record",
+                "Form 6 New Voter Enrollment Verification / Booth Level Officer (BLO) Inspection Report",
             ],
             probe_queries=[
                 f'site:ceoharyana.gov.in "{district}" "{s_name}"',
@@ -772,7 +772,7 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
             probe_queries=[
                 f'site:egazette.gov.in "{s_name}" "ICAR" filetype:pdf',
                 f'site:egazette.gov.in "{s_name}" "Buffalo" OR "CIRB"',
-                f'"Gazette of India" "Prem Singh Yadav" "ICAR"',
+                '"Gazette of India" "Prem Singh Yadav" "ICAR"',
             ],
             status="open",
             actor_logged="system",

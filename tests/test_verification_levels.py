@@ -1,27 +1,19 @@
 """Unit tests for Multi-Level Verification (L1-L5) & Dual-Client (Agent/Human) Logging."""
-import pytest
 from engine.models import (
     Source,
     Claim,
-    VerificationState,
-    VerificationActor,
-    VerificationLevel,
-    VerificationLogEntry,
     log_source_verification,
     log_claim_verification,
     PersonProfile,
 )
 from backend import store
 from backend.routes_research import (
-    verify_source,
     verify_source_level,
     verify_claim,
-    batch_verify_claims,
     get_verification_summary,
 )
 from backend.schemas import (
     VerifyClaimRequest,
-    BatchVerifyClaimsRequest,
     VerifySourceLevelRequest,
 )
 

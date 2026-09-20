@@ -1,10 +1,8 @@
 """Tests for the Forensic Investigation Engine: Pivots, Auxiliary Leads, and Sweeps."""
-import pytest
 from engine.models import PersonProfile, InvestigationPivot, AuxiliaryLead
 from engine.forensics import (
     seed_default_pivots,
     generate_forensic_queries_for_pivot,
-    build_forensic_sweep_leads,
     generate_deductive_inquiries,
 )
 from backend import store

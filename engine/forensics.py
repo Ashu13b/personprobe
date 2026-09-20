@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, Any
 from engine.models import PersonProfile, InvestigationPivot, AuxiliaryLead, ForensicInquiry
 
 
@@ -344,9 +343,9 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 ],
                 probe_queries=[
                     f'site:krishikosh.egranth.ac.in "HAU" OR "Hisar" "{s_name}" OR "P.S. {last_name}"',
-                    f'"CCSHAU" OR "Haryana Agricultural University" "1985" convocation OR "alumni" OR "graduates"',
+                    '"CCSHAU" OR "Haryana Agricultural University" "1985" convocation OR "alumni" OR "graduates"',
                     f'"College of Agriculture" Hisar "1985" "{last_name}" OR "Silver Jubilee"',
-                    f'"Haryana Government Gazette" "Haryana Agricultural University" "1985" OR "1987"',
+                    '"Haryana Government Gazette" "Haryana Agricultural University" "1985" OR "1987"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -372,7 +371,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 ],
                 probe_queries=[
                     f'site:krishikosh.egranth.ac.in "Animal Production Physiology" "{s_name}" OR "P.S. {last_name}"',
-                    f'"Nehru Library" "CCSHAU" "thesis" "Animal Production Physiology" 1991',
+                    '"Nehru Library" "CCSHAU" "thesis" "Animal Production Physiology" 1991',
                     f'site:shodhganga.inflibnet.ac.in "CCS Haryana Agricultural University" "cloning" OR "physiology" "{last_name}"',
                 ],
                 status="open",
@@ -415,7 +414,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 inquiry_id=generate_inquiry_id(),
                 fact_anchor=anchor,
                 domain="research_grant",
-                deductive_question=f"If an ICAR Principal Scientist was sanctioned a ₹89 Lakhs national grant (2022-2025), where are the audited public disclosures and personnel records?",
+                deductive_question="If an ICAR Principal Scientist was sanctioned a ₹89 Lakhs national grant (2022-2025), where are the audited public disclosures and personnel records?",
                 expected_paper_trails=[
                     "National Agricultural Science Fund (NASF) Sanction Letter & Audited Utilization Certificate",
                     "CIRB Walk-In-Interview Public Advertisements for SRF / RA recruitment",
@@ -424,8 +423,8 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 ],
                 probe_queries=[
                     f'site:nasf.icar.gov.in "{s_name}" OR "P.S. {last_name}" "cloned"',
-                    f'"Evaluation of Semen Characteristics and Fertility Parameters of Cloned Bulls" sanction',
-                    f'site:dbtindia.gov.in "cloned buffalo" "CIRB"',
+                    '"Evaluation of Semen Characteristics and Fertility Parameters of Cloned Bulls" sanction',
+                    'site:dbtindia.gov.in "cloned buffalo" "CIRB"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -448,8 +447,8 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                     "Hisar Municipal Corporation Water Supply / Civic Utility Works",
                 ],
                 probe_queries=[
-                    f'site:ceoharyana.gov.in "CIRB" OR "Sirsa Road" "Hisar"',
-                    f'"Central Institute for Research on Buffaloes" "quarters" OR "allotment" filetype:pdf',
+                    'site:ceoharyana.gov.in "CIRB" OR "Sirsa Road" "Hisar"',
+                    '"Central Institute for Research on Buffaloes" "quarters" OR "allotment" filetype:pdf',
                 ],
                 status="open",
                 actor_logged="system",
@@ -465,7 +464,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 inquiry_id=generate_inquiry_id(),
                 fact_anchor=anchor,
                 domain="superannuation",
-                deductive_question=f"If a Principal Scientist superannuated on 30.04.2025, what official retirement orders and pension notifications exist?",
+                deductive_question="If a Principal Scientist superannuated on 30.04.2025, what official retirement orders and pension notifications exist?",
                 expected_paper_trails=[
                     "ICAR-CIRB Office Order: Relinquishment of Charge & Superannuation (30.04.2025)",
                     "Central Pension Accounting Office (CPAO) / ICAR Pension Sanction Order",
@@ -473,7 +472,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 ],
                 probe_queries=[
                     f'site:cirb.res.in "30.04.2025" "{last_name}" OR "retired"',
-                    f'"Dr. P S Yadav" "retired on 30.04.2025" OR "superannuation"',
+                    '"Dr. P S Yadav" "retired on 30.04.2025" OR "superannuation"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -526,7 +525,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 probe_queries=[
                     f'site:icar.org.in "Nanaji Deshmukh" "{s_name}" OR "P.S. {last_name}" filetype:pdf',
                     f'"India Book of Records" "CIRB" OR "{s_name}" "cloned"',
-                    f'"Nanaji Deshmukh" "ICAR Award" "2019" "Prem Singh Yadav"',
+                    '"Nanaji Deshmukh" "ICAR Award" "2019" "Prem Singh Yadav"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -552,7 +551,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 probe_queries=[
                     f'"Village Nimoth" "Rewari" "{last_name}"',
                     f'site:ceoharyana.gov.in "Nimoth" OR "Rewari" "{s_name}"',
-                    f'"BSEH" "Matriculation" "Haryana" "1979" OR "1980"',
+                    '"BSEH" "Matriculation" "Haryana" "1979" OR "1980"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -568,7 +567,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 inquiry_id=generate_inquiry_id(),
                 fact_anchor=anchor,
                 domain="general",
-                deductive_question=f"If ICAR-CIRB conducted field trials of cloned bull semen and embryo transfer in adopted villages (Bado Patti & Nuh), what grassroots administrative and veterinary logs must exist?",
+                deductive_question="If ICAR-CIRB conducted field trials of cloned bull semen and embryo transfer in adopted villages (Bado Patti & Nuh), what grassroots administrative and veterinary logs must exist?",
                 expected_paper_trails=[
                     "Village Bado Patti Gram Panchayat Meeting Resolutions on Livestock Adoption & Camp Hosting",
                     "CIRB Division of Physiology & Reproduction Field Demonstration Camp Registers & A.I. Logbooks",
@@ -577,8 +576,8 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 ],
                 probe_queries=[
                     f'"Bado Patti" "CIRB" OR "{s_name}" OR "cloning"',
-                    f'"Hisar Gaurav" "semen doses" "Nuh" OR "Bado Patti" "farmers"',
-                    f'site:pashudhanharyana.gov.in "CIRB" "cloned" "AI"',
+                    '"Hisar Gaurav" "semen doses" "Nuh" OR "Bado Patti" "farmers"',
+                    'site:pashudhanharyana.gov.in "CIRB" "cloned" "AI"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -594,7 +593,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 inquiry_id=generate_inquiry_id(),
                 fact_anchor=anchor,
                 domain="research_grant",
-                deductive_question=f"If CIRB Division of Physiology developed novel cryopreservation protocols and field microscopes commercialized via AgrInnovate India, what licensing agreements and ITMC minutes exist?",
+                deductive_question="If CIRB Division of Physiology developed novel cryopreservation protocols and field microscopes commercialized via AgrInnovate India, what licensing agreements and ITMC minutes exist?",
                 expected_paper_trails=[
                     "AgrInnovate India Technology Transfer & Non-Exclusive Licensing Agreement",
                     "CIRB Institute Technology Management Committee (ITMC) Sanction Minutes",
@@ -630,7 +629,7 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 probe_queries=[
                     f'site:krishikosh.egranth.ac.in "Major Advisor" OR "Advisory Committee" "{s_name}" OR "P.S. {last_name}"',
                     f'site:luvas.edu.in "{s_name}" OR "P.S. {last_name}"',
-                    f'site:cirb.res.in "guided" OR "supervised" "Ph.D." OR "M.V.Sc."',
+                    'site:cirb.res.in "guided" OR "supervised" "Ph.D." OR "M.V.Sc."',
                 ],
                 status="open",
                 actor_logged="system",

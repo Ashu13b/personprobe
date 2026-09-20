@@ -74,9 +74,7 @@ research dossier.
   `--fast` runs typecheck+lint only, skipping the test suite.
 - Rebuild maps: `.context-kit/ck build` — Check staleness: `.context-kit/ck check`.
   The pre-commit hook rebuilds and stages maps automatically.
-- Phone companion UI: the Android phone can browse this app via a reverse SSH
-  tunnel — setup, notifications (`phone_ctl.sh toast/say`), and gotchas in
-  `PHONE_WORKFLOW.md`. Direct phone→VM access is tailnet-blocked.
+- Phone companion UI & Scraping Bridge: the Android phone is directly connected via Tailscale (`100.72.202.86`). The OpenScrape `AgentServer` runs on port **`38765`** directly on the phone. All communication between VM agents and the mobile browser occurs directly over Tailscale WireGuard (`http://100.72.202.86:38765`). Zero background SSH tunnels, zero port orchestration (8888, 6901, 3890 reverse tunnels are completely removed).
 - Web Scraping & Bot Walls (CRITICAL RULE FOR AGENTS):
   - **DO NOT curl `http://localhost:3890/browser/navigate`** for external web scraping. Port 3890 runs Playwright on the VM's Google Cloud datacenter IP (`130.210.59.249`), which is immediately blocked by Cloudflare (Ray ID), ResearchGate, and bot mitigation systems.
   - **NEVER tell the user "write links in scrap browser".**

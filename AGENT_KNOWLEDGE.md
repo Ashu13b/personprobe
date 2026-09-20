@@ -3,6 +3,20 @@
 Hand-written, agent-maintained. The maps say *what exists*; this says *why*.
 None of it is auto-derivable — keep it current as you learn.
 
+## Agent-tooling lessons
+- Server holds sessions in memory: direct `sessions/*.json` file edits are
+  overwritten by the next API call (server saves its stale in-memory copy).
+  Rule: file edit → `POST /api/sessions/resume` → then API calls. The symptom
+  is dropped sources "resurrecting" and liveness fixes reverting.
+- Phone browser (`../android-browser` `MobileBrowserClient`, port 8765) beats
+  VM Playwright for gated links: carrier IP passes Cloudflare/RG walls the
+  datacenter IP never clears. One page at a time with settle waits;
+  rapid-fire navigates race and the bridge drops (re-wake via START_BRIDGE
+  broadcast or foregrounding the app). VM Playwright itself can crash (EPIPE)
+  and is not needed when the phone path works.
+- ScienceDirect (Elsevier CPE00001) hard-blocks VM and phone alike with no
+  solvable challenge — route around via PubMed/PMID instead.
+
 ## Intent
 Wikimaker researches a person, resolves identity from multiple sources, checks
 Wikimedia status, and builds the output appropriate to that status. A person
@@ -768,3 +782,94 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   (verified first-hand) documents the Rs 25,000 + medal + citation and 45+
   stature — dossier-only; the 9th Asian Buffalo Congress (CIRB Hisar, Feb
   2018) names no Yadav role anywhere, so no link.
+  Phone-browser gated walk (Sep 2026): 4 Wiley/SAGE/Bentham DOIs (1 solved
+  Turnstile, rest rode the cookie), 6 ResearchGate pages, OpenAlex record,
+  NDTV+India.com confirmed dead (404). Identity adjudications: Vidwan 249583
+  = Bharadwaj (out); LUVAS clinician, CDRI Prem Prakash, Delhi professor,
+  Pankaj Yadav, Sarvajeet Yadav, Taruna Anand, Chauhan, Palta/Selokar-only
+  papers all rejected. OpenAlex 31-work cross-check added 11 DOIs (incl.
+  2000 Trends Genetics plea, 2026 RDA LPS paper); S2/volumeattribution traps
+  removed (PMID 37041339, Frontiers MSTN 2026, RS-523872 — Selokar/NDRI teams,
+  no Yadav). Hindi press: NBT (Yadav quoted as PI), 2 Jagran (M-29
+  pregnancies; Gaurav 2.0 Nov 2025 naming Yadav on team), Krishak Jagat,
+  epashupalan (Tomar announcement), Amar Ujala retirement. New award:
+  2017 ISSRF Best Poster (CIRB awards page). User's collection rule for this
+  pass: breadth first, same-info mirrors kept, draft later.
+  Yadav disambiguation rule (Sep 2026): CIRB has TWO Yadavs — Prem S. Yadav
+  (retd May 2025) and Pankaj Yadav (active post-2023). ResearchGate's
+  Prem-Yadav-7 profile mixes both. Post-2023 CIRB papers with "Yadav" are
+  usually Pankaj's (SRY 2024, MSTN-pregnancy 2024, Mito-Q 2023, MitoQ 2023,
+  novel-paradigm 2025 all Pankaj). Never ingest a Yadav paper without
+  authorship confirmation: OpenAlex authorships (preferred), PubMed esummary,
+  or page text. "PS Yadav"/"Prem" = ours; bare "Yadav" on RG = suspect.
+  Yadav-vs-Yadav hard case (Sep 2026): Springer chapter 10.1007/978-981-16-
+  7531-7_12 prints "P. S. Yadav" (Crossref agrees; RG Prem-profile lists it)
+  but OpenAlex attaches distinct author A5011846714 "Pankaj Yadav" — likely
+  "Pankaj S. Yadav", which also prints as P. S. SKIPPED: bare "P./P.S. Yadav"
+  on 2021+ CIRB co-authored works is unresolvable without a first name or
+  ORCID. Only "Prem/Prem Singh" spell-outs count as confirmed.
+
+- Multi-Level Verification & Dual-Client Architecture (Sep 2026):
+  Verification is structured as a 5-level progressive hierarchy rather than a binary checkbox:
+  L1 (Liveness): Is this link live and accessible? Solved by automated HTTP/Playwright or human Wayback fallback.
+  L2 (Identity): Is this the exact subject or an unrelated namesake/homonym? Solved by author affiliation/co-author Crossref matching or human manual confirmation.
+  L3 (Provenance): Is this independent secondary coverage vs primary institutional/authored work?
+  L4 (Claim Settlement): Does the source text explicitly substantiate the claim? Verified with verbatim quotes.
+  L5 (Draft Approval): Does this meet Wikipedia AfC standards (NPOV, BLP, encyclopedic tone)?
+  Both Human and Autonomous Agent are first-class clients. Every verification action records immutable VerificationLogEntry
+  objects tagged with actor ("agent" | "human" | "system"), timestamp, action, and rationale. Enables seamless autonomous
+  overnight research by agents with clear morning review trails for human editors.
+
+- Forensic Investigation Graph & Auxiliary Leads (Sep 2026):
+  Distinguishes surface-level Wikipedia drafting from deep forensic-level biographical intelligence.
+  Direct name queries on search engines miss 90% of biographical truth because government budgets,
+  court orders, and student theses rarely have the subject's name in the web page title or snippet.
+  The architecture implements the "Rings of Proximate Evidence":
+  1. Ring 0: Subject Direct Name (Profiles, direct news interviews).
+  2. Ring 1: Institutional & Landmark Project Anchors (CIRB Hisar, Project Hisar Gaurav, NDRI Karnal).
+  3. Ring 2: Administrative, Financial & Co-Actor Footprint (ICAR-NASF/DBT grant sanction orders, equipment
+     procurement tenders, recruited Senior/Junior Research Fellows and Research Associates).
+  4. Ring 3: Spatial, Domestic & Educational Footprint (Sirsa Road campus staff quarters, CPWD maintenance
+     lists, municipal ward voter lists, campus schools like Campus School CCS HAU Hisar).
+  5. Ring 4: Public Record Repositories:
+     - Shodhganga (National doctoral theses: acknowledgments disclose lab supervisors, daily experiment dates,
+       and night-shift fellows that papers omit).
+     - IndianKanoon & Central Administrative Tribunal (CAT: seniority lists, promotion orders, appointment gazettes).
+     - ICAR/Ministry Annual Reports (table of division staff and sanctioned research schemes).
+     - Walk-in-interview notifications (identifies junior staff working under the PI).
+  Data Model: `InvestigationPivot` represents entity anchors; `AuxiliaryLead` represents helping records
+  and reproducible OSINT queries. Auxiliary leads never pollute the Wikipedia draft, preserving clean wikitext
+  while giving researchers a 360-degree forensic dossier.
+
+- Civic & Institutional Public Records Atlas & Digitization Horizons (Sep 2026):
+  Generalizes investigative research beyond scientist-specific academic milestones into universal civic,
+  utility, municipal, and revenue public administration records. This creates a permanent, reusable knowledge
+  base across India (National, State, and District jurisdictions) so that researching person #1 or person #100
+  is instantaneous because the engine already knows the exact historical digitization boundary:
+  1. Digitization Horizons (What is online and till which year?):
+     - Electoral Rolls: CEO Haryana (ceoharyana.gov.in) / ECI online from 2009–present. Pre-2009 rolls (1952–2008)
+       are strictly physical paper records in District Election Offices.
+     - Discom / Electricity Utilities: DHBVN / UHBVN online billing portals from ~2015–present (ID-gated by
+       10-digit Consumer Account / CA Number & Meter No.). Pre-2015 consumer records in SDO physical ledgers (खाता बही).
+     - Land & Revenue (Jamabandi): Computerized Record of Rights on jamabandi.nic.in from 2000–present. Pre-2000
+       Jamabandis, Misal Bandobast, and ancestral Shajra Nasab (वंशावली pedigree tree) in Tehsil Record Room (सदर मालखाना).
+     - Municipal Property Tax: ULB Haryana NDC portal from 2018–present. Pre-2018 in Municipal Corporation assessment ledgers.
+     - Official Gazettes: The Gazette of India on egazette.gov.in from 2008–present. 1950–2007 physical in the National
+       Archives of India (Janpath, New Delhi). Haryana State Gazette from 2014–present (pre-2014 in Chandigarh press archives).
+     - Judicial Dockets: e-Courts Services from 2013–present. Pre-2013 in District Court Copying Agencies (Bastajat).
+     - Academic Theses: KrishiKosh and Shodhganga retrospectively scanned (heavy coverage post-2000). Pre-2000 hardbound
+       deposits in University Central Library (Nehru Library Stack Room II).
+     - Central Pension: CPAO & Bhavishya portal online PPOs from 2017–present. Pre-2017 in physical CPAO / DDO files.
+  2. Dual-Track Operational Model:
+     Every milestone automatically flags both its digital search query template and its statutory physical custodian
+     and legal access route (RTI Act 2005 Sec 6(1), Certified Copy application / नकल दरख्वास्त with court fee stamp,
+     Form 1 extract under Registration of Births and Deaths Act 1969).
+  3. Subject-Specific Record Matrix:
+     `engine.public_records_atlas.derive_subject_record_matrix` dynamically reads the subject's birth year,
+     active geography (state & districts), and institutional footprints to separate:
+     - Online Reachable Portals
+     - Pre-Digitization Offline Stacks
+     - Identifier-Gated Portals (EPIC, Meter No., CA No., Khewat/Khasra No.)
+     Accessible in the UI via the "🗺️ Public Records Atlas" panel and "🏛️ Expand Civic Touchpoints" button.
+
+

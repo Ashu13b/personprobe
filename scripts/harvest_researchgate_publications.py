@@ -13,7 +13,7 @@ from openscrape_client import MobileBrowserClient
 
 API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
-SESSION_FILE = Path("/home/ubuntu/Expeei/wikimaker/sessions") / f"{SESSION_ID}.json"
+SESSION_FILE = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
 
 def api_post(path: str, payload: dict) -> dict:
     req = urllib.request.Request(

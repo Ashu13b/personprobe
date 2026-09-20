@@ -11,7 +11,7 @@ sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
 from openscrape_client import MobileBrowserClient
 
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
-SESSION_FILE = Path(f"/home/ubuntu/Expeei/wikimaker/sessions/{SESSION_ID}.json")
+SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 
 QUERIES = [
     "site:tribuneindia.com CIRB Hisar buffalo",

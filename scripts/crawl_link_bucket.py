@@ -4,7 +4,7 @@
 Walks listing pages, publication pages, and institutional hubs via the
 OpenScrape mobile browser bridge. Extracts outbound links, verifies author
 identity against strict disambiguation rules, ingests new sources into
-the active Wikimaker session, and extracts further links to complete the bucket.
+the active PersonProbe session, and extracts further links to complete the bucket.
 
 Usage:
     python3 scripts/crawl_link_bucket.py [--max-pages 15] [--wait 8]
@@ -20,13 +20,13 @@ from collections import deque
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
+sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
 
 from openscrape_client import MobileBrowserClient
 
 API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
-SESSION_FILE = Path("/home/ubuntu/Expeei/wikimaker/sessions") / f"{SESSION_ID}.json"
+SESSION_FILE = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
 
 # Seed hubs known to contain rich clusters of Dr. Yadav works
 SEEDS = [

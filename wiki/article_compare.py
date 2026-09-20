@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from engine.models import PersonProfile, Claim
 
 WIKI_API = "https://en.wikipedia.org/w/api.php"
-HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"}
+HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"}
 
 STOPWORDS = {
     "the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with", "at",

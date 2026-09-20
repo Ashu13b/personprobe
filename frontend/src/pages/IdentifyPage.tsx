@@ -122,7 +122,7 @@ export default function IdentifyPage({ onConfirmed, onResume }: Props) {
   return (
     <main className="subject-start-page">
       <div style={{ textAlign: "center", marginBottom: 36 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>Wikimaker</h1>
+        <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>PersonProbe</h1>
         <p style={{ color: "var(--muted)", fontSize: 15 }}>
           Research a person, check their Wikimedia status, and build the right output.
         </p>

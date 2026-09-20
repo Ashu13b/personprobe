@@ -5,7 +5,7 @@ import re
 import requests
 from .models import Source, SourceReliability
 
-HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"}
+HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"}
 S2_API = "https://api.semanticscholar.org/graph/v1"
 GOOGLE_CSE_URL = "https://www.googleapis.com/customsearch/v1"
 

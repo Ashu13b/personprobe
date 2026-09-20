@@ -542,7 +542,7 @@ export default function HubPage({
                 <div>
                   <h3 style={{ fontSize: 17, fontWeight: 800, margin: 0 }}>Browser Bridge &amp; Anti-Bot Infrastructure</h3>
                   <p style={{ fontSize: 12, color: "var(--muted)", margin: "2px 0 0" }}>
-                    How Wikimaker safely scrapes web evidence without getting IP-blocked
+                    How PersonProbe safely scrapes web evidence without getting IP-blocked
                   </p>
                 </div>
               </div>

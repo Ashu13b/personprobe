@@ -1,7 +1,7 @@
-# wikimaker — AI Handover Document
+# personprobe — AI Handover Document
 
 **Last updated:** 2026-05-29  
-**Repo:** github.com/Ashu13b/wikimaker  
+**Repo:** github.com/Ashu13b/personprobe  
 **Owner:** ay.yadav53@gmail.com
 
 ---
@@ -140,15 +140,15 @@ rule: omit entirely if no year appears verbatim. Used by the Timeline tab.
 
 ```bash
 # Default — uses Claude (requires ANTHROPIC_API_KEY)
-WIKIMAKER_LLM=claude  # or unset
+PERSONPROBE_LLM=claude  # or unset
 
 # Gemini (fast + cheap for extraction)
-WIKIMAKER_LLM=gemini
+PERSONPROBE_LLM=gemini
 GEMINI_API_KEY=your-key
 GEMINI_MODEL=gemini-1.5-flash  # optional override
 
 # Offline stub (rule-based, no API needed)
-WIKIMAKER_LLM=stub
+PERSONPROBE_LLM=stub
 ```
 
 Falls back to `StubProvider` (rule-based) if the chosen provider's key is missing.

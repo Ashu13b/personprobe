@@ -1,4 +1,4 @@
-"""Comprehensive research lifecycle audit engine for Wikimaker.
+"""Comprehensive research lifecycle audit engine for PersonProbe.
 
 Audits a subject profile across all 4 development lifecycle stages:
 Stage 1: Discovery & Acquisition Health (liveness, name matching, discarded registry, mobile bridge)

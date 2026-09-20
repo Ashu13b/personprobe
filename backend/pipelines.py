@@ -126,7 +126,7 @@ def _add_sd_author_profile(profile, url: str) -> dict:
         resp = rq.get(
             "https://api.openalex.org/authors",
             params={"search": profile.name, "per-page": 5},
-            headers={"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"},
+            headers={"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"},
             timeout=10,
         )
         if resp.status_code == 200:

@@ -1,4 +1,4 @@
-"""Canonical URL normalization and deduplication for Wikimaker.
+"""Canonical URL normalization and deduplication for PersonProbe.
 
 Handles:
 - Domain aliases (e.g. icar.gov.in <-> icar.org.in, timesofindia.com <-> timesofindia.indiatimes.com)

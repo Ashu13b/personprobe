@@ -18,7 +18,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Half-done / known-broken
     - Aug 2026 frontend hardening & redesign
 - `PHONE_WORKFLOW.md`
-  - PHONE_WORKFLOW — driving Wikimaker's UI from the Android phone
+  - PHONE_WORKFLOW — driving PersonProbe's UI from the Android phone
     - Topology (what works and why)
     - Setup cycle
   - 1. Server up (skip if already running; kills ports 3890/8001/7070 first)
@@ -33,9 +33,9 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - What the phone is good for here
     - Gotchas
     - Native Companion App Workflow (`../android-browser/`)
-      - Integration Points with Wikimaker:
+      - Integration Points with PersonProbe:
       - Operational Step-by-Step:
-  - 1. Start Wikimaker on VM
+  - 1. Start PersonProbe on VM
   - 2. Establish reverse tunnels to the phone
   - 3. Open OpenScrape Browser on the phone
   - - Browse gated sources natively
@@ -43,7 +43,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
   - - Tap 📥 (Import) to add the source to the active session
   - - Highlight facts & tap 📋 (Capture) to add confirmed claims
 - `README.md`
-  - Wikimaker
+  - PersonProbe
     - Key Features
     - System Architecture
       - Seams & Boundaries
@@ -54,7 +54,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
       - 4. Draft & Verification
     - Quickstart
       - Prerequisites
-      - Starting Wikimaker
+      - Starting PersonProbe
     - Development & Testing
       - Running Tests
   - Run complete test suite

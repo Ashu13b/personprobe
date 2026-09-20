@@ -25,7 +25,7 @@ def test_answered_prompt_returns_agent_response(tmp_path, monkeypatch):
 
 
 def test_get_provider_selects_agent_via_env(monkeypatch):
-    monkeypatch.setenv("WIKIMAKER_LLM", "agent")
+    monkeypatch.setenv("PERSONPROBE_LLM", "agent")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     from engine.llm import get_provider as gp
     from engine.agent_llm import AgentProvider

@@ -113,7 +113,7 @@ def main():
         except Exception as e:
             print(f"  [!] Exception: {e}")
 
-    out_file = Path("/home/ubuntu/Expeei/wikimaker/forensic_hunt_results.json")
+    out_file = Path("/home/ubuntu/Expeei/personprobe/forensic_hunt_results.json")
     out_file.write_text(json.dumps(results, indent=2))
     print(f"\n[✓] Finished! Saved detailed forensic findings to {out_file}")
 

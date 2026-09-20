@@ -289,7 +289,7 @@ class PublicRecordRepository(BaseModel):
 
 
 class PersonProfile(BaseModel):
-    """Central data model. wikimaker fills this; future research hub extends it."""
+    """Central data model. personprobe fills this; future research hub extends it."""
     name: str
     session_id: Optional[str] = None  # stable identity; name is just a mutable label
     wikidata_id: Optional[str] = None

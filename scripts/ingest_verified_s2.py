@@ -18,7 +18,7 @@ def api_post(path: str, payload: dict) -> dict:
     return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
 
 def main():
-    session_file = Path("/home/ubuntu/Expeei/wikimaker/sessions") / f"{SESSION_ID}.json"
+    session_file = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
     session_data = json.loads(session_file.read_text())
     existing_urls = {s.get("url", "").lower().rstrip("/") for s in session_data["profile"]["sources"]}
 

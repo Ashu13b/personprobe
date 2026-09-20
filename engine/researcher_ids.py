@@ -4,8 +4,8 @@ import re
 import requests
 from .models import Source, SourceReliability
 
-HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)", "Accept": "application/json"}
-OA_HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)", "Accept": "application/json"}
+HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)", "Accept": "application/json"}
+OA_HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)", "Accept": "application/json"}
 
 # URL patterns to extract IDs from
 _ORCID_RE = re.compile(r"orcid\.org/(\d{4}-\d{4}-\d{4}-\d{3}[\dX])")
@@ -244,7 +244,7 @@ def resolve_sd_article(url: str) -> dict | None:
         cr = requests.get(
             "https://api.crossref.org/works",
             params={"filter": f"alternative-id:{pii}", "rows": 1},
-            headers={"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"},
+            headers={"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"},
             timeout=12,
         )
         cr.raise_for_status()

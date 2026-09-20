@@ -155,7 +155,7 @@ export default function SummaryTab({ profile, wikiStatus, audit, auditError, dra
       <div className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, background: "rgba(37, 99, 235, 0.04)", border: "1px solid rgba(37, 99, 235, 0.18)", padding: "14px 18px", flexWrap: "wrap" }}>
         <div>
           <span style={{ fontSize: 13, fontWeight: 700, color: "var(--primary)", display: "block" }}>
-            📖 How Wikimaker Works & Button Guide
+            📖 How PersonProbe Works & Button Guide
           </span>
           <p style={{ fontSize: 12, color: "var(--muted)", margin: "2px 0 0" }}>
             Confused about what "+ Draft", "✓ Dossier", or "Verify Source" do? Read the interactive visual guide.
@@ -197,7 +197,7 @@ function buildResearchDossier(profile: PersonProfile): string {
   });
   return [
     `# Research dossier: ${profile.name}`, "",
-    `Generated from the saved Wikimaker session. ${profile.sources.length} sources; ${profile.claims.length} claims; ${draftClaims.length} selected for drafting.`, "",
+    `Generated from the saved PersonProbe session. ${profile.sources.length} sources; ${profile.claims.length} claims; ${draftClaims.length} selected for drafting.`, "",
     ...section("Draft-selected evidence", draftClaims),
     ...section("Confirmed research-only evidence", researchOnly),
     ...section("Unverified leads", leads),

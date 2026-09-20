@@ -1,10 +1,10 @@
-# PHONE_WORKFLOW — driving Wikimaker's UI from the Android phone
+# PHONE_WORKFLOW — driving PersonProbe's UI from the Android phone
 
 Validated 2026-08-22. The phone (Termux, tailnet `100.72.202.86`, sshd :8022,
 user `u0_a509`) is the human companion screen for UI-driven research sessions.
 The controller lives in the sibling repo `../termux/` (`phone_ctl.sh`,
 `nx` at `/home/ubuntu/nexus/bin/nx`) — that setup was built for APK projects;
-this is how it is used for a browser-UI project like Wikimaker.
+this is how it is used for a browser-UI project like PersonProbe.
 
 ## Topology (what works and why)
 
@@ -15,13 +15,13 @@ this is how it is used for a browser-UI project like Wikimaker.
 - **VM → phone works**: `nx phone:` / `ssh -p 8022 u0_a509@100.72.202.86`
   with `~/.ssh/id_ed25519` (BatchMode, no config entry needed).
 - Therefore UI access = **reverse SSH tunnel from VM to phone**, binding
-  Wikimaker on the *phone's own loopback*.
+  PersonProbe on the *phone's own loopback*.
 
 ## Setup cycle
 
 ```bash
 # 1. Server up (skip if already running; kills ports 3890/8001/7070 first)
-nohup bash start.sh > /tmp/opencode/wikimaker_start.log 2>&1 &
+nohup bash start.sh > /tmp/opencode/personprobe_start.log 2>&1 &
 
 # 2. Keep the phone awake
 /home/ubuntu/nexus/bin/nx phone: termux-wake-lock
@@ -103,7 +103,7 @@ From the `../termux/` directory:
 
 ```bash
 ./phone_ctl.sh toast "Draft ready for claim review"
-./phone_ctl.sh say   "Wikimaker needs your approval"
+./phone_ctl.sh say   "PersonProbe needs your approval"
 ```
 
 Use for human-gated moments: claims awaiting review, CAPTCHA in the companion
@@ -122,7 +122,7 @@ browser, draft QA finished.
 
 - The tunnel dies when the phone changes network or Termux restarts.
   Re-establish with step 3 above; check first with the step-4 one-liner.
-- Restarting Wikimaker (`bash start.sh`) does NOT require re-tunneling — the
+- Restarting PersonProbe (`bash start.sh`) does NOT require re-tunneling — the
   forward targets the VM port, not a process.
 - If `ExitOnForwardFailure` fires, phone port 3890 is already taken; kill the
   stale listener first (`./phone_ctl.sh kill 3890` from `../termux/`).
@@ -133,10 +133,10 @@ browser, draft QA finished.
 
 In addition to the live noVNC desktop stream (:6901), a dedicated native Android browser (`../android-browser/app`, package `org.openscrape.browser`) provides a first-class mobile research and CAPTCHA bypass client.
 
-### Integration Points with Wikimaker:
+### Integration Points with PersonProbe:
 1. **One-Tap Page Import (`POST /api/research/add-source`)**:
    - Tapping the **📥 Import FAB** extracts the page URL, title, and rendered text via the native JavaScript bridge (`OpenScrapeBridge.getContent()`).
-   - The payload sends `url`, `title`, and `text` directly to Wikimaker. Because text is pre-rendered on the phone past bot walls/Cloudflare, Wikimaker ingests it via `fetch_url_source_with_paste` without triggering server-side bot blocks.
+   - The payload sends `url`, `title`, and `text` directly to PersonProbe. Because text is pre-rendered on the phone past bot walls/Cloudflare, PersonProbe ingests it via `fetch_url_source_with_paste` without triggering server-side bot blocks.
 2. **Sourced Claim Capture (`POST /api/research/add-sourced-claim`)**:
    - Highlight any sentence or paragraph in the mobile WebView.
    - Tapping the **📋 Capture FAB** extracts the selected text (`OpenScrapeBridge.getSelection()`) and posts it directly to `/api/research/add-sourced-claim`, creating an instantly confirmed claim linked to the active session.
@@ -147,8 +147,8 @@ In addition to the live noVNC desktop stream (:6901), a dedicated native Android
 
 ### Operational Step-by-Step:
 ```bash
-# 1. Start Wikimaker on VM
-nohup bash start.sh > /tmp/opencode/wikimaker_start.log 2>&1 &
+# 1. Start PersonProbe on VM
+nohup bash start.sh > /tmp/opencode/personprobe_start.log 2>&1 &
 
 # 2. Establish reverse tunnels to the phone
 nohup ssh -p 8022 -o BatchMode=yes -o ExitOnForwardFailure=yes \

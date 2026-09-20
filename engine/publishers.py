@@ -1,4 +1,4 @@
-"""Central publisher and domain classification registry for Wikimaker.
+"""Central publisher and domain classification registry for PersonProbe.
 
 Consolidates independent news outlets, academic publishers, institutional/primary
 sites, self-published platforms, and unreliable mirrors into a single source of truth.

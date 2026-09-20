@@ -1,4 +1,4 @@
-<!-- context-kit DEPS_MAP · v0.1.0 · generated 2026-08-06 20:04 UTC · sha eb96e64 · host vnic-trading -->
+<!-- context-kit DEPS_MAP · v0.2.0 · generated 2026-09-20 15:03 UTC · sha f13c792 · host instance-20260819-0844 -->
 
 # DEPS_MAP
 
@@ -51,6 +51,6 @@ External packages and required env keys (names only — no values).
 - `GEMINI_MODEL`
 - `GOOGLE_CSE_CX`
 - `GOOGLE_CSE_KEY`
+- `PERSONPROBE_HEADLESS`
+- `PERSONPROBE_LLM`
 - `VERTEX_CLAUDE_MODEL`
-- `WIKIMAKER_HEADLESS`
-- `WIKIMAKER_LLM`

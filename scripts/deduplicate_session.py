@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Canonical URL deduplication for Wikimaker research session.
+"""Canonical URL deduplication for PersonProbe research session.
 
 Ensures that no exact same duplicate links exist in the session due to:
 - Trailing slashes (/ vs non-/)
@@ -19,7 +19,7 @@ from pathlib import Path
 
 API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
-SESSION_FILE = Path(f"/home/ubuntu/Expeei/wikimaker/sessions/{SESSION_ID}.json")
+SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 
 DOMAIN_ALIAS_MAP = {
     "icar.gov.in": "icar.org.in",

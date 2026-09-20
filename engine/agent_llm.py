@@ -4,7 +4,7 @@ The provider turns every extraction/classification prompt into a deterministic j
 file in `agent_jobs/` (keyed by a hash of the prompt). A human or coding agent reads
 the job, reads the source themselves, and writes back a `.response.json` containing
 the JSON the caller expected. Re-running the same prompt then returns the answer.
-Set WIKIMAKER_LLM=agent to select this provider.
+Set PERSONPROBE_LLM=agent to select this provider.
 
 Unlike the stub, this never fabricates: an unanswered job simply yields `{}` (no
 claims, no classification), and the agent's answer is applied only when written.

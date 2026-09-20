@@ -1,6 +1,6 @@
-# Wikimaker
+# PersonProbe
 
-**Wikimaker** is a local research workspace and deterministic drafting engine for biographical Wikipedia articles. It automates identity resolution, multi-outlet source discovery, provenance classification, and claim verification, producing audit-ready Wikipedia **Articles for Creation (AfC)** drafts and comprehensive research dossiers.
+**PersonProbe** is a local research workspace and deterministic drafting engine for biographical Wikipedia articles. It automates identity resolution, multi-outlet source discovery, provenance classification, and claim verification, producing audit-ready Wikipedia **Articles for Creation (AfC)** drafts and comprehensive research dossiers.
 
 ---
 
@@ -19,11 +19,11 @@
 
 ## System Architecture
 
-Wikimaker runs as a unified single-service architecture on port `3890`:
+PersonProbe runs as a unified single-service architecture on port `3890`:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      Wikimaker (Port 3890)                  │
+│                      PersonProbe (Port 3890)                  │
 ├──────────────────────────────┬──────────────────────────────┤
 │ FastAPI Backend (/api)       │ React Frontend (dist/)       │
 │ • Identity & Search APIs     │ • Summary & Milestones       │
@@ -92,7 +92,7 @@ The deterministic engine audits evidence requirements:
 - Node.js 18+ and npm
 - Linux / macOS / WSL
 
-### Starting Wikimaker
+### Starting PersonProbe
 Run the unified start script (builds the frontend and starts the server on port `3890`):
 
 ```bash
@@ -125,7 +125,7 @@ npm run build      # Production frontend build
 ```
 
 ### Quality Gate
-Wikimaker uses context-kit for continuous quality auditing:
+PersonProbe uses context-kit for continuous quality auditing:
 
 ```bash
 # Full quality gate (pyright, ruff, pytest, tsc, eslint, boundaries)
@@ -142,7 +142,7 @@ sh .context-kit/ck build
 
 ## Wikipedia Policy Grounding
 
-Wikimaker is built from the ground up to uphold Wikipedia's core content policies:
+PersonProbe is built from the ground up to uphold Wikipedia's core content policies:
 - **[WP:V](https://en.wikipedia.org/wiki/Wikipedia:Verifiability)** (Verifiability): No assertion exists without an accessible, verified source.
 - **[WP:NPOV](https://en.wikipedia.org/wiki/Wikipedia:Neutral_point_of_view)** (Neutral Point of View): Facts are stated neutrally without editorializing.
 - **[WP:GNG](https://en.wikipedia.org/wiki/Wikipedia:Notability)** & **[WP:ACADEMIC](https://en.wikipedia.org/wiki/Wikipedia:Notability_(academics))**: Strict separation between primary authored works and independent secondary coverage.

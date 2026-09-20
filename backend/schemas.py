@@ -1,4 +1,4 @@
-"""Pydantic request/response models for the wikimaker API."""
+"""Pydantic request/response models for the personprobe API."""
 from __future__ import annotations
 
 from pydantic import BaseModel

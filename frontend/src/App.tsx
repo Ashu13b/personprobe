@@ -25,7 +25,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Wikimaker UI Error:", error, errorInfo);
+    console.error("PersonProbe UI Error:", error, errorInfo);
   }
 
   render() {
@@ -80,10 +80,10 @@ function MainApp() {
     }
   }, []);
 
-  // Listen for WIKIMAKER_RELAY messages from the embedded browser iframe
+  // Listen for PERSONPROBE_RELAY messages from the embedded browser iframe
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
-      if (event.data && event.data.type === "WIKIMAKER_RELAY") {
+      if (event.data && event.data.type === "PERSONPROBE_RELAY") {
         setRelayPending({ url: event.data.url, text: event.data.text });
       }
     }

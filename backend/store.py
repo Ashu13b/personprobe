@@ -1,4 +1,4 @@
-"""In-memory + disk session store and shared helpers for the wikimaker API."""
+"""In-memory + disk session store and shared helpers for the personprobe API."""
 from __future__ import annotations
 
 import json

@@ -1,12 +1,12 @@
 # Wikipedia AfC Review & Draft Hardening Protocol
 
-This document establishes the comprehensive pre-submission review framework, quality assurance heuristics, and evidence-hardening strategies implemented in Wikimaker to guarantee acceptance under Wikipedia's Articles for Creation (AfC) review process.
+This document establishes the comprehensive pre-submission review framework, quality assurance heuristics, and evidence-hardening strategies implemented in PersonProbe to guarantee acceptance under Wikipedia's Articles for Creation (AfC) review process.
 
 ---
 
 ## 1. The 5 Core AfC Decline Vectors & Built-in Defenses
 
-| Decline Vector | Reviewer Skepticism | Wikimaker Preemptive Defense |
+| Decline Vector | Reviewer Skepticism | PersonProbe Preemptive Defense |
 | :--- | :--- | :--- |
 | **1. Team / Institutional Credit**<br>([WP:NOTINHERITED](https://en.wikipedia.org/wiki/Wikipedia:Notability_is_not_inherited)) | *"Breakthroughs belong to the research institute or team, not automatically to the individual scientist."* | • Pinpoint **Principal Investigator (PI)** or Project Lead appointments in citations.<br>• Anchor awards that specifically name the subject (e.g. *Nanaji Deshmukh Interdisciplinary Team Award* citation).<br>• Cite first-author and corresponding-author peer-reviewed publications (*Nature Scientific Reports*, *Theriogenology*). |
 | **2. Syndicated Press Wires**<br>([WP:ORIGINAL](https://en.wikipedia.org/wiki/Wikipedia:Identifying_reliable_sources#News_organizations)) | *"Multiple news links are just wire reprints (PTI/IANS) of the same institutional press release."* | • Prioritize **distinct, original investigative journalism** (*The Hindu*, *The Tribune*, *Amar Ujala*, *Dainik Bhaskar*, *Moneycontrol*).<br>• Treat duplicate wire reprints as a single editorial origin. |
@@ -18,7 +18,7 @@ This document establishes the comprehensive pre-submission review framework, qua
 
 ## 2. Multi-Sourcing Strategy (1 vs 2–3 Sources per Claim)
 
-Wikimaker enforces a balanced citation density to satisfy [WP:EXTRAORDINARY](https://en.wikipedia.org/wiki/Wikipedia:Verifiability#Exceptional_claims_require_exceptional_sources) while avoiding [WP:OVERCITE](https://en.wikipedia.org/wiki/Wikipedia:Citation_overkill):
+PersonProbe enforces a balanced citation density to satisfy [WP:EXTRAORDINARY](https://en.wikipedia.org/wiki/Wikipedia:Verifiability#Exceptional_claims_require_exceptional_sources) while avoiding [WP:OVERCITE](https://en.wikipedia.org/wiki/Wikipedia:Citation_overkill):
 
 1. **Exceptional / Breakthrough Claims (2–3 Sources)**:
    - Major scientific firsts (e.g. *Hisar Gaurav* cloning, *Sach-Gaurav* field birth) → cite **1 independent national news outlet + 1 regional investigative report + 1 peer-reviewed journal DOI**.

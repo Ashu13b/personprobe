@@ -126,9 +126,9 @@ export default function GuideTab() {
     <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
       {/* Hero Banner */}
       <div className="card" style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", color: "#fff", border: "none" }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>How Wikimaker Works &amp; Verification Architecture</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>How PersonProbe Works &amp; Verification Architecture</h2>
         <p style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.6, maxWidth: 740, margin: 0 }}>
-          Wikimaker is a dual-client biographical research workbench. Both <strong>Autonomous AI Agents</strong> and <strong>Human Editors</strong> operate as first-class clients. Evidence is verified across five progressive levels, and every decision is stamped into an immutable audit trail.
+          PersonProbe is a dual-client biographical research workbench. Both <strong>Autonomous AI Agents</strong> and <strong>Human Editors</strong> operate as first-class clients. Evidence is verified across five progressive levels, and every decision is stamped into an immutable audit trail.
         </p>
       </div>
 
@@ -184,7 +184,7 @@ export default function GuideTab() {
           👥 Dual-Client Architecture: Humans and AI Agents
         </h3>
         <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>
-          In Wikimaker, human review is <strong>not mandatory</strong> for research to progress. An autonomous agent can run overnight, identify sources, confirm entity identity, extract claims, and settle them. Every operation permanently records who authorized it:
+          In PersonProbe, human review is <strong>not mandatory</strong> for research to progress. An autonomous agent can run overnight, identify sources, confirm entity identity, extract claims, and settle them. Every operation permanently records who authorized it:
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div style={{ padding: 12, background: "#fff", borderRadius: 8, border: "1px solid var(--border)" }}>

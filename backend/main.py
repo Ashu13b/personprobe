@@ -1,4 +1,4 @@
-"""FastAPI backend for wikimaker — app wiring.
+"""FastAPI backend for personprobe — app wiring.
 
 Route handlers live in backend/routes_research.py, backend/routes_draft.py, and
 backend/routes_sessions.py; request models in backend/schemas.py; the session
@@ -43,7 +43,7 @@ from .routes_browser import (  # noqa: F401
 )
 from .routes_forensics import forensics_router  # noqa: F401
 
-api_app = FastAPI(title="wikimaker")
+api_app = FastAPI(title="personprobe")
 api_app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3890", "http://localhost:5173"],
@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI):
 
 
 # Create unified top-level app
-app = FastAPI(title="wikimaker-unified", lifespan=lifespan)
+app = FastAPI(title="personprobe-unified", lifespan=lifespan)
 
 # Add global CORS middleware to support local Vite dev server proxies
 app.add_middleware(

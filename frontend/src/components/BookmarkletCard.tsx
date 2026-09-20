@@ -40,14 +40,14 @@ export default function BookmarkletCard() {
           <li>Tap the copy button above to copy the bookmarklet code.</li>
           <li>Bookmark this page (tap Chrome menu ⋮ → star icon ★).</li>
           <li>Edit the bookmark (tap "Edit" or menu ⋮ → Bookmarks → find this bookmark → ⋮ → Edit).</li>
-          <li>Change the Name to: <strong style={{ color: "var(--text)" }}>Import to Wikimaker</strong>.</li>
+          <li>Change the Name to: <strong style={{ color: "var(--text)" }}>Import to PersonProbe</strong>.</li>
           <li>Paste the copied code into the <strong>URL</strong> field, and save.</li>
         </ol>
         <p style={{ fontWeight: 600, color: "var(--text)", marginTop: 8, marginBottom: 4 }}>How to run on other websites:</p>
         <ol style={{ paddingLeft: 16, color: "var(--muted)", lineHeight: 1.4, marginBottom: 0 }}>
           <li>Go to any webpage (e.g. your candidate's biography, paper page).</li>
           <li>Tap Chrome's address bar.</li>
-          <li>Type <strong style={{ color: "var(--text)" }}>Import to Wikimaker</strong>.</li>
+          <li>Type <strong style={{ color: "var(--text)" }}>Import to PersonProbe</strong>.</li>
           <li>Tap the autocomplete bookmark suggestion that appears with the star icon.</li>
           <li>Chrome will run the script, read the page, and redirect you back here with the source loaded!</li>
         </ol>

@@ -8,7 +8,7 @@ from urllib.parse import quote_plus, urlparse
 from .mobile_bridge import is_mobile_bridge_available, fetch_via_mobile_bridge
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
-BOT_HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"}  # for APIs that want bot UA
+BOT_HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"}  # for APIs that want bot UA
 TIMEOUT = 10
 MAX_FETCH_BYTES = 5 * 1024 * 1024  # 5 MB maximum response body
 

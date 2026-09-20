@@ -78,7 +78,7 @@ class VertexClaudeProvider:
 
 class LocalProvider:
     def complete(self, system: str, user: str) -> str:
-        raise NotImplementedError("Local provider not yet wired — set WIKIMAKER_LLM=claude")
+        raise NotImplementedError("Local provider not yet wired — set PERSONPROBE_LLM=claude")
 
 
 class NullProvider:
@@ -89,7 +89,7 @@ class NullProvider:
 
 class StubProvider:
     """Rule-based stub — produces plausible output for all call types without an LLM.
-    Replace with a real provider by setting ANTHROPIC_API_KEY + WIKIMAKER_LLM=claude."""
+    Replace with a real provider by setting ANTHROPIC_API_KEY + PERSONPROBE_LLM=claude."""
 
     def complete(self, system: str, user: str) -> str:
         if "wikipedia editor" in system.lower() or "draft" in system.lower():
@@ -211,9 +211,9 @@ def _warn_agent_mode() -> None:
     if not _agent_warned:
         _agent_warned = True
         print(
-            "WIKIMAKER: no LLM API key, routing intelligence to the coding agent. "
+            "PERSONPROBE: no LLM API key, routing intelligence to the coding agent. "
             "Extraction/classification prompts are queued in agent_jobs/ — answer them "
-            "and re-run to apply. (WIKIMAKER_LLM=agent to force; =stub to disable.)",
+            "and re-run to apply. (PERSONPROBE_LLM=agent to force; =stub to disable.)",
             file=sys.stderr,
         )
 
@@ -230,14 +230,14 @@ def _stub_provider() -> StubProvider:
         print(
             "WARNING: No LLM API key configured; falling back to rule-based StubProvider. "
             "Research classification/extraction will be low quality and article drafting is "
-            "unavailable. Set ANTHROPIC_API_KEY (WIKIMAKER_LLM=claude) or GEMINI_API_KEY.",
+            "unavailable. Set ANTHROPIC_API_KEY (PERSONPROBE_LLM=claude) or GEMINI_API_KEY.",
             file=sys.stderr,
         )
     return StubProvider()
 
 
 def get_provider() -> LLMProvider:
-    backend = os.environ.get("WIKIMAKER_LLM", "claude")
+    backend = os.environ.get("PERSONPROBE_LLM", "claude")
     if backend == "claude":
         key = os.environ.get("ANTHROPIC_API_KEY", "")
         if not key:
@@ -275,4 +275,4 @@ def get_provider() -> LLMProvider:
         return _agent_provider()
     if backend == "stub":
         return _stub_provider()
-    raise ValueError(f"Unknown WIKIMAKER_LLM value: {backend}")
+    raise ValueError(f"Unknown PERSONPROBE_LLM value: {backend}")

@@ -18,7 +18,7 @@ None of it is auto-derivable — keep it current as you learn.
   solvable challenge — route around via PubMed/PMID instead.
 
 ## Intent
-Wikimaker researches a person, resolves identity from multiple sources, checks
+PersonProbe researches a person, resolves identity from multiple sources, checks
 Wikimedia status, and builds the output appropriate to that status. A person
 does not need an existing Wikipedia article or Wikidata item to start research.
 The intended outputs are a new AfC draft, improvements to an existing draft or
@@ -472,7 +472,7 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
 - Agent-as-LLM fallback is the default when no API key exists. `get_provider()`
   fallback order is now: real LLM API (Claude/Gemini, or Vertex) → **coding agent**
   (`AgentProvider`) → deterministic code. The stub is only used with the explicit
-  `WIKIMAKER_LLM=stub`. `engine/agent_llm.py` queues each extraction/classification
+  `PERSONPROBE_LLM=stub`. `engine/agent_llm.py` queues each extraction/classification
   prompt as a deterministic JSON job in `agent_jobs/` (keyed by prompt hash); an
   unanswered job returns `{}` (never fabricated), and the coding agent answers it by
   reading the source and writing a `.response.json`, after which a re-run returns
@@ -590,7 +590,7 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   uncommitted work mid-session; untracked component files survived. Restored
   byte-exact from the dangling commit with `git restore --source=d35344ff`.
   Lesson: commit early and often; don't run resets while an agent is working.
-- Agent-as-LLM research loop (2026-08-07): with WIKIMAKER_LLM unset, add-source
+- Agent-as-LLM research loop (2026-08-07): with PERSONPROBE_LLM unset, add-source
   routes queue classifier+extraction jobs in agent_jobs/ and the agent answers
   them (answer_job) then re-runs extraction to merge claims. Lessons: (1) the
   classifier JSON key is `reliability`, NOT `category` — a wrong key is silently
@@ -708,9 +708,9 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   Business Standard's 2021 opinion piece mislabels Yadav "CIRB Director" —
   IRINS lists T.K. Datta as Director and Yadav as Principal Scientist, so the
   director title must never enter the draft. Ops lesson (Sep 2026): the shell
-  session can leak WIKIMAKER_HEADLESS=1 into uvicorn, silently flipping the
+  session can leak PERSONPROBE_HEADLESS=1 into uvicorn, silently flipping the
   browser headless — NDTV then serves "Access Denied" (headless UA + no
-  stealth on request contexts). Always start with WIKIMAKER_HEADLESS=0
+  stealth on request contexts). Always start with PERSONPROBE_HEADLESS=0
   explicit and confirm headed:true via /browser/status after any restart.
   Unreachable verdicts (Sep 2026):
   IRINS is doubly dead — vapt6 host DNS-unresolvable (staging, decommissioned)

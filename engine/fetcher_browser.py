@@ -7,14 +7,14 @@ Works for sites that block plain requests but not real browsers:
 Does NOT bypass Cloudflare challenges (ResearchGate, some publishers).
 For academic publishers use the API pipeline (researcher_ids.py).
 
-Session cookies are persisted across runs in ~/.wikimaker/browser_session/
+Session cookies are persisted across runs in ~/.personprobe/browser_session/
 so the user only needs to pass any one-time checks once.
 """
 from __future__ import annotations
 from pathlib import Path
 from .fetcher import FetchResult, _extract_text, BOT_WALL_RE
 
-_SESSION_DIR = Path.home() / ".wikimaker" / "browser_session"
+_SESSION_DIR = Path.home() / ".personprobe" / "browser_session"
 
 _LAUNCH_ARGS = [
     "--disable-blink-features=AutomationControlled",

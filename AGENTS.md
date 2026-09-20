@@ -32,7 +32,7 @@ etc. just point here.
 - If the SessionStart banner says maps are stale, run `.context-kit/ck build`.
 
 ## 2. What this project is
-Wikimaker is a local research workspace for resolving a person's identity,
+PersonProbe is a local research workspace for resolving a person's identity,
 collecting and verifying sources, checking Wikimedia status, and producing the
 appropriate output: a new AfC draft, improvements to existing content, or a
 research dossier.
@@ -52,7 +52,7 @@ research dossier.
 - LLM: `engine/llm.py` `get_provider()` falls back real LLM API → coding agent
   (JSON jobs in `agent_jobs/`, answered by this agent via `pending_jobs()` /
   `answer_job()` in `engine/agent_llm.py`) → stub (only with
-  `WIKIMAKER_LLM=stub`). Under stub,
+  `PERSONPROBE_LLM=stub`). Under stub,
   `extract_claims()` is a no-op — never fabricated; humans add facts via
   add-document-fact / add-sourced-claim. Details in `AGENT_KNOWLEDGE.md`.
 - Claim workflow: source verified → claims suggested → human approves. Only
@@ -61,7 +61,7 @@ research dossier.
 
 ## 3. Commands
 - Run the app: `bash start.sh` (builds frontend, serves unified app on :3890).
-  It kills any process on 3890/8001/7070 first and sets `WIKIMAKER_HEADLESS=1`
+  It kills any process on 3890/8001/7070 first and sets `PERSONPROBE_HEADLESS=1`
   — don't run it against a server you want to keep alive.
 - Frontend dev/build/typecheck: `cd frontend && npm run dev` / `npm run build` /
   `npm run typecheck` (`tsc --noEmit`).

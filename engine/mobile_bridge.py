@@ -1,6 +1,6 @@
 """Integration with the OpenScrape Mobile Browser Bridge (100.72.202.86:38765).
 
-Enables Wikimaker to route web scraping through a physical mobile carrier IP via Tailscale,
+Enables PersonProbe to route web scraping through a physical mobile carrier IP via Tailscale,
 bypassing Cloudflare, ResearchGate, Elsevier, and anti-bot mitigation that blocks
 cloud datacenter IPs. Zero SSH tunnels or port forwarding needed.
 """

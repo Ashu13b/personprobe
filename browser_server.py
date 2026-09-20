@@ -32,7 +32,7 @@ from pydantic import BaseModel
 # fetcher (engine.fetcher.BOT_WALL_RE) so the two can't drift.
 from engine.fetcher import BOT_WALL_RE as _WALL_SIGNALS, is_safe_public_url
 
-PROFILE_DIR = Path.home() / ".wikimaker" / "browser_profile"
+PROFILE_DIR = Path.home() / ".personprobe" / "browser_profile"
 PROFILE_DIR.mkdir(parents=True, exist_ok=True)
 XVFB_DISPLAY = ":99"
 PORT = 7070
@@ -145,7 +145,7 @@ def _browser_thread():
     """Owner of the Playwright context. Processes _q commands sequentially."""
     global _headed, _running
     print("[DEBUG] _browser_thread starting", flush=True)
-    force_headless = os.environ.get("WIKIMAKER_HEADLESS", "0") == "1"
+    force_headless = os.environ.get("PERSONPROBE_HEADLESS", "0") == "1"
     print(f"[DEBUG] force_headless={force_headless}", flush=True)
     _headed = _try_start_xvfb() if not force_headless else False
     print(f"[DEBUG] _headed={_headed}", flush=True)
@@ -438,7 +438,7 @@ def reload():
 
 @app.get("/content")
 def get_content():
-    """Return visible page text — used by the wikimaker 'Wiki+' relay."""
+    """Return visible page text — used by the personprobe 'Wiki+' relay."""
     return _dispatch("content")
 
 

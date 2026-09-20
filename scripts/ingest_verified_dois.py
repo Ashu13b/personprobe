@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ingest verified research publications by DOI via Crossref metadata into Wikimaker session."""
+"""Ingest verified research publications by DOI via Crossref metadata into PersonProbe session."""
 
 import json
 import time
@@ -36,7 +36,7 @@ def api_post(path: str, payload: dict) -> dict:
 
 def fetch_doi_metadata(doi: str) -> dict | None:
     url = f"https://api.crossref.org/works/{urllib.parse.quote(doi)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "wikimaker/1.0 (mailto:agent@wikimaker.local)"})
+    req = urllib.request.Request(url, headers={"User-Agent": "personprobe/1.0 (mailto:agent@personprobe.local)"})
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode())
@@ -64,7 +64,7 @@ def fetch_doi_metadata(doi: str) -> dict | None:
         return None
 
 def main():
-    session_file = Path("/home/ubuntu/Expeei/wikimaker/sessions") / f"{SESSION_ID}.json"
+    session_file = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
     existing_urls = set()
     if session_file.exists():
         sdata = json.loads(session_file.read_text())

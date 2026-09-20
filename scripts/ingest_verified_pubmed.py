@@ -27,7 +27,7 @@ def api_post(path: str, payload: dict) -> dict:
 
 def fetch_pubmed_details(pmids: list[str]) -> list[dict]:
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={','.join(pmids)}&retmode=xml"
-    req = urllib.request.Request(url, headers={"User-Agent": "wikimaker/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "personprobe/1.0"})
     root = ET.fromstring(urllib.request.urlopen(req, timeout=30).read())
 
     results = []
@@ -86,7 +86,7 @@ def main():
     details = fetch_pubmed_details(CONFIRMED_PMIDS)
     print(f"[*] Retrieved {len(details)} articles from NCBI.")
 
-    session_file = Path("/home/ubuntu/Expeei/wikimaker/sessions") / f"{SESSION_ID}.json"
+    session_file = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
     existing_urls = set()
     if session_file.exists():
         sdata = json.loads(session_file.read_text())

@@ -4,7 +4,7 @@ import re
 import requests
 from .models import PersonCandidate
 
-HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"}
+HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"}
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 

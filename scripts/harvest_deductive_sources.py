@@ -9,12 +9,12 @@ import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
+sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
 from openscrape_client import MobileBrowserClient
 from scripts.deduplicate_session import canonical_url
 
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
-SESSION_FILE = Path(f"/home/ubuntu/Expeei/wikimaker/sessions/{SESSION_ID}.json")
+SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 
 DEDUCTIVE_QUERIES = [
     {

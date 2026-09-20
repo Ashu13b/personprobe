@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phone-browser harvest loop for wikimaker research.
+"""Phone-browser harvest loop for personprobe research.
 
 Uses the Android OpenScrape bridge (MobileBrowserClient) to open URLs the
 VM cannot fetch (Cloudflare/login walls), then ingests page text into the
@@ -20,7 +20,7 @@ import time
 import urllib.request
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
+sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
 
 API = "http://127.0.0.1:3890/api"
 
@@ -84,7 +84,7 @@ def session_id() -> str:
 
 
 def cmd_session() -> None:
-    sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
+    sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
     from backend.store import _load_session_file, SESSIONS_DIR
     from engine.models import PersonProfile
     from collections import Counter
@@ -95,7 +95,7 @@ def cmd_session() -> None:
 
 
 def cmd_cleanup() -> None:
-    sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
+    sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
     from backend.store import _load_session_file, _save_session, SESSIONS_DIR
     from engine.models import PersonProfile
     from collections import Counter

@@ -1209,3 +1209,38 @@ def test_qa_flags_institutional_achievement_sources():
     assert finding is not None
     assert finding.severity == "warning"
     assert "Institute Internal" in finding.message
+
+
+def test_wikilink_extraction_and_canonicalization():
+    from wiki.draft import _canonicalize_wikilinks
+    from wiki.draft_verifier import extract_draft_wikilinks
+
+    sample = "He joined [[CIRB]] in 1993 and later visited [[NDRI]]. He also studied [[DNA]]. [[Category:Scientists]]"
+    canonical = _canonicalize_wikilinks(sample)
+    assert "[[Central Institute for Research on Buffaloes|CIRB]]" in canonical
+    assert "[[National Dairy Research Institute|NDRI]]" in canonical
+    assert "[[DNA]]" in canonical
+
+    wls = extract_draft_wikilinks(sample)
+    targets = {w.target: w.label for w in wls}
+    assert "CIRB" in targets
+    assert "NDRI" in targets
+    assert "DNA" in targets
+    assert "Category:Scientists" not in targets
+
+
+def test_qa_flags_ambiguous_wikilinks():
+    from wiki.draft_qa import qa_draft
+
+    profile = _qa_profile()
+    profile.wikitext_en = (
+        "{{Short description|Scientist}}\n"
+        "{{Infobox scientist|name = Example}}\n"
+        "'''Example''' is a researcher at [[CIRB]] and [[ICAR-CIRB]].\n"
+        "==References==\n{{reflist}}\n"
+    )
+    report = qa_draft(profile)
+    ambig_findings = [f for f in report.findings if f.id == "ambiguous_wikilink"]
+    assert len(ambig_findings) >= 1
+    assert any("Central Institute for Research on Buffaloes" in f.message for f in ambig_findings)
+

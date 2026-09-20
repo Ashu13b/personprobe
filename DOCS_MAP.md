@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-11 17:25 UTC · sha ff3031a · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-12 14:28 UTC · sha a790914 · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -10,6 +10,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Inspect
 - `AGENT_KNOWLEDGE.md`
   - AGENT_KNOWLEDGE
+    - Agent-tooling lessons
     - Intent
     - Execution context
     - State

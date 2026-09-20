@@ -62,7 +62,11 @@ _NOISE_PATTERNS = (
 _ROLE_WORDS = ("scientist", "director", "head", "professor", "researcher", "fellow", "joined", "promoted", "investigator")
 _CAREER_ACTIVITY_WORDS = ("research stay", "research support", "associateship")
 _INSTITUTION_WORDS = ("institute", "university", "college", "centre", "center", "division", "department", "icar", "cirb")
-_PUBLICATION_WORDS = ("authored", "co-authored", "coauthored", "co-editor", "coeditor", "published", "publication", "first author", "paper", "study")
+_PUBLICATION_WORDS = (
+    "authored", "co-authored", "coauthored", "co-editor", "coeditor",
+    "published", "publication", "first author", "paper", "study",
+    "isbn", "doi", "issn", "press", "publisher", "journal", "monograph", "book",
+)
 _BIRTH_SUBJECT_NOISE = ("calf", "buffalo", "bull", "cow", "animal", "clone", "kg", "delivery")
 
 # Action verbs that signal a substantive research/achievement statement rather
@@ -74,6 +78,7 @@ _RESEARCH_ACTIONS = (
     "co-discover", "research", "achievement", "project",
     "found", "described", "demonstrated", "showed", "noted", "studied",
     "assessed", "evaluated", "examined", "weighed", "identified", "compared",
+    "authored", "published",
 )
 
 
@@ -119,8 +124,10 @@ def _claim_exclusion(claim: Claim, source: Source | None) -> str | None:
     if source.liveness == "dead" and not source.archive_url:
         return "source_url_dead"
     if claim.field in {"known_for", "award"} and _host(source.url) == "satishserial.com":
-        return "exceptional_claim_uses_commercial_profile"
-    if not source.human_verified:
+        # Human editorial approval overrides this commercial-profile heuristic
+        if getattr(claim, "draft_approved_by", None) != "human":
+            return "exceptional_claim_uses_commercial_profile"
+    if not (source.human_verified or getattr(source, "identity_status", "") == "confirmed"):
         return "source_not_human_verified"
     if source.reliability.value == "unreliable":
         return "source_marked_unreliable"
@@ -374,8 +381,22 @@ def _items_for(audit: DraftAudit, fields: Iterable[str]) -> list[DraftEvidence]:
     return [item for item in audit.evidence if item.claim.field in wanted]
 
 
+def _canonicalize_wikilinks(text: str) -> str:
+    from wiki.draft_verifier import KNOWN_ACRONYM_CANONICAL
+    def _sub(m: re.Match) -> str:
+        target = m.group(1).strip()
+        label = (m.group(2) or "").strip()
+        if target in KNOWN_ACRONYM_CANONICAL:
+            canonical = KNOWN_ACRONYM_CANONICAL[target]
+            display = label or target
+            return f"[[{canonical}|{display}]]"
+        return m.group(0)
+    return re.sub(r"\[\[([^\[\]|\n]+)(?:\|([^\[\]\n]+))?\]\]", _sub, text)
+
+
 def _claim_text(item: DraftEvidence) -> str:
-    return _clean(item.claim.draft_text or item.claim.text).rstrip(".")
+    raw = item.claim.draft_text or item.claim.text
+    return _canonicalize_wikilinks(_clean(raw)).rstrip(".")
 
 
 def _item_year(item: DraftEvidence) -> int | None:

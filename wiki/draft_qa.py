@@ -64,7 +64,27 @@ def qa_draft(profile: PersonProfile) -> QaReport:
     _check_sources(wikitext, profile, report)
     _check_duplicate_claims(profile, report)
     _check_institutional_achievements(profile, report)
+    _check_wikilinks(wikitext, report)
     return report
+
+
+def _check_wikilinks(wikitext: str, report: QaReport) -> None:
+    from wiki.draft_verifier import extract_draft_wikilinks, KNOWN_ACRONYM_CANONICAL
+
+    wikilinks = extract_draft_wikilinks(wikitext)
+    if not wikilinks:
+        return
+
+    for wl in wikilinks:
+        if wl.target in KNOWN_ACRONYM_CANONICAL:
+            canonical = KNOWN_ACRONYM_CANONICAL[wl.target]
+            # Flag if unpiped or pointing to redlink acronym
+            if wl.target == wl.label or wl.target.startswith("ICAR-"):
+                report.findings.append(Finding(
+                    id="ambiguous_wikilink",
+                    severity="warning",
+                    message=f"Wikilink '[[{wl.target}]]' leads to a disambiguation page or redlink on Wikipedia. Use [[{canonical}|{wl.label}]] instead.",
+                ))
 
 
 def _check_duplicate_claims(profile: PersonProfile, report: QaReport) -> None:

@@ -11,6 +11,8 @@ import json
 import re
 from datetime import datetime
 from urllib.parse import urlparse
+from .canonical_url import canonical_url
+from .discarded_registry import get_known_and_discarded_canonical_urls
 from .models import PersonProfile
 
 # ── Slot priority weights ──────────────────────────────────────────────────────
@@ -199,20 +201,7 @@ Return JSON only: {"queries": [{"query": "...", "seeking": "slot_name", "reason"
 
 
 def _normalize_url(url: str) -> str:
-    url = url.strip().lower()
-    if url.startswith("https://"):
-        url = url[8:]
-    elif url.startswith("http://"):
-        url = url[7:]
-    if url.startswith("www."):
-        url = url[4:]
-    if "#" in url:
-        url = url.split("#", 1)[0]
-    if "?" in url:
-        url = url.split("?", 1)[0]
-    if url.endswith("/"):
-        url = url[:-1]
-    return url
+    return canonical_url(url)
 
 
 def _generate_multiyear_report_urls(url: str) -> list[str]:
@@ -428,10 +417,7 @@ def _run_search_queries(queries: list[dict], profile: PersonProfile, affil: str,
 def suggest_next_urls(profile: PersonProfile, max_results: int = 8) -> list[dict]:
     """Return ranked URL suggestions — profile links & multi-year reports first, then web searches."""
 
-    existing_urls = {s.url for s in profile.sources}
-    skipped_urls = set(getattr(profile, "skipped_sources", []) or [])
-    rejected_urls = set(getattr(profile, "rejected_sources", []) or [])
-    seen_normalized = {_normalize_url(u) for u in (existing_urls | skipped_urls | rejected_urls)}
+    seen_normalized = get_known_and_discarded_canonical_urls(profile)
     affil = profile.affiliation or ""
     field = profile.field or ""
     missing = profile.missing_slots

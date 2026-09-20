@@ -5,6 +5,7 @@ import re
 import socket
 import requests
 from urllib.parse import quote_plus, urlparse
+from .mobile_bridge import is_mobile_bridge_available, fetch_via_mobile_bridge
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
 BOT_HEADERS = {"User-Agent": "wikimaker/0.1 (ay.yadav53@gmail.com)"}  # for APIs that want bot UA
@@ -73,6 +74,14 @@ def check_liveness(url: str) -> tuple[str, str | None]:
     if code in (404, 410):
         return "dead", get_wayback_url(url)
     if code in (401, 403, 429):
+        # Cloudflare or datacenter IP bot mitigation: check via mobile browser bridge
+        if is_mobile_bridge_available():
+            try:
+                res = fetch_via_mobile_bridge(url, wait_seconds=3)
+                if res and not res.get("has_captcha") and len(res.get("text", "")) > 100:
+                    return "alive", None
+            except Exception:
+                pass
         return "blocked", None
     if 200 <= code < 400:
         return "alive", None
@@ -134,31 +143,52 @@ def _try_browser_server(url: str) -> FetchResult | None:
 
 
 def fetch_url(url: str) -> FetchResult:
-    """Try all strategies in order, return best result."""
+    """Try all strategies in order, return best result.
+
+    Fallback hierarchy:
+    1. Direct fetch (fast, handles open sites and PDFs without browser overhead)
+    2. OpenScrape Mobile Browser Bridge (physical device on mobile carrier IP,
+       bypasses Cloudflare, ResearchGate, and Indian news bot mitigation)
+    3. Human browser_server (/browser on port 3890 or 7070)
+    4. ORCID API fetch
+    5. Headless stealth browser (Playwright local fallback)
+    6. Wayback Machine archive
+    7. Blocked result
+    """
     if not is_safe_public_url(url):
         return FetchResult(url, "", method="blocked", blocked=True)
 
-    # 1. Human browser_server — primary path when running (handles any site, real sessions)
-    result = _try_browser_server(url)
-    if result is not None:
-        return result
-
-    # 2. Direct fetch
+    # 1. Direct fetch
     result = _direct_fetch(url)
     if result:
         text, raw_html, final_url = result
-        return FetchResult(url, text, method="direct", raw_html=raw_html, final_url=final_url)
+        # Check if direct fetch got an empty bot wall
+        if not (BOT_WALL_RE.search(text[:500]) and len(text) < 300):
+            return FetchResult(url, text, method="direct", raw_html=raw_html, final_url=final_url)
 
-    # 3. ORCID — if it looks like a researcher profile
+    # 2. OpenScrape Mobile Browser Bridge fallback (physical mobile IP unblocks bot-walls)
+    if is_mobile_bridge_available():
+        bridge_res = fetch_via_mobile_bridge(url)
+        if bridge_res and not bridge_res.get("has_captcha"):
+            b_text = bridge_res.get("text", "").strip()
+            if len(b_text) >= 150:
+                return FetchResult(
+                    url,
+                    b_text,
+                    method="mobile_browser",
+                    final_url=bridge_res.get("url", url),
+                )
+
+    # 3. Human browser_server fallback
+    result = _try_browser_server(url)
+    if result is not None and not result.blocked:
+        return result
+
+    # 4. ORCID — if it looks like a researcher profile
     if "orcid.org" in url:
         result = _orcid_fetch(url)
         if result:
             return FetchResult(url, result, method="orcid")
-
-    # 4. Wayback Machine
-    result = _wayback_fetch(url)
-    if result:
-        return FetchResult(url, result, method="wayback")
 
     # 5. Headless stealth browser
     from .fetcher_browser import fetch_with_browser
@@ -166,7 +196,12 @@ def fetch_url(url: str) -> FetchResult:
     if not browser_result.blocked:
         return browser_result
 
-    # 6. All strategies failed — needs user action
+    # 6. Wayback Machine
+    result = _wayback_fetch(url)
+    if result:
+        return FetchResult(url, result, method="wayback")
+
+    # 7. All strategies failed — needs user action
     return FetchResult(url, "", method="blocked", blocked=True)
 
 

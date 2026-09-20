@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-20 15:17 UTC · sha 9455818 · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-20 16:03 UTC · sha e4f9d0f · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -8,15 +8,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
 - `AGENT_CAPABILITIES.md`
   - Agent Capability Negotiation
     - Inspect
-- `AGENT_KNOWLEDGE.md`
-  - AGENT_KNOWLEDGE
-    - Agent-tooling lessons
-    - Intent
-    - Execution context
-    - State
-    - Decisions & rejected approaches
-    - Half-done / known-broken
-    - Aug 2026 frontend hardening & redesign
+- `AGENT_KNOWLEDGE.md` — _cold (65kB); load on demand_
 - `PHONE_WORKFLOW.md`
   - PHONE_WORKFLOW — driving PersonProbe's UI from the Android phone
     - Topology (what works and why)

@@ -873,3 +873,16 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
      Accessible in the UI via the "🗺️ Public Records Atlas" panel and "🏛️ Expand Civic Touchpoints" button.
 
 
+
+- Dual-role delegated verification (Sep 2026): the user authorizes the agent to
+  act as a human verifier proxy (coverage_depth, identity confirm, claim
+  approval). Every such action MUST log actor="human" plus the delegation note
+  ("Delegated human-proxy verification (user authorization Sep 2026)") so the
+  VerificationLogEntry trail stays truthful about remote proxy execution.
+- Triage rubric fixed for the Yadav session (Sep 2026): L1 liveness → 501/502
+  alive (only SciDirect author profile blocked; IA global outage made archive
+  links transiently "unknown"); L2 identity → 247 subject-named vs 255 aux;
+  L3 categories watched 311/92/57/34/7/1; coverage set on the 51 claim-bearing
+  independent sources → notability rs_count 15, label "Strong coverage".
+  Engine guard: get_wayback_url never returns wildcard */timestamp snapshots
+  (they break cite archive-url).

@@ -94,7 +94,10 @@ def get_wayback_url(url: str) -> str | None:
         resp = requests.get("https://archive.org/wayback/available",
                             params={"url": url}, headers=HEADERS, timeout=10)
         snapshot = resp.json().get("archived_snapshots", {}).get("closest", {})
-        return snapshot.get("url") or None
+        snap_url = snapshot.get("url") or None
+        if snap_url and "/*/" in snap_url:
+            return None  # wildcard form (*/timestamp) is not a real snapshot and breaks citations
+        return snap_url
     except Exception:
         return None
 

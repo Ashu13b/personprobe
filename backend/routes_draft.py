@@ -55,11 +55,16 @@ def generate_draft(req: DraftRequest) -> dict:
 
 @draft_router.post("/draft/links")
 def draft_links(body: dict) -> dict:
-    """List every external URL the draft cites, live-checked."""
+    """List every external URL and in-text Wikipedia link the draft cites, live-checked."""
     profile = store._get_profile(body["profile_name"])
     if not profile.wikitext_en:
         raise HTTPException(400, "No draft has been generated yet.")
-    from wiki.draft_verifier import extract_draft_links, check_draft_links
+    from wiki.draft_verifier import (
+        extract_draft_links,
+        check_draft_links,
+        extract_draft_wikilinks,
+        check_draft_wikilinks,
+    )
 
     links = extract_draft_links(profile.wikitext_en)
     if links:
@@ -69,7 +74,20 @@ def draft_links(body: dict) -> dict:
             link.status = result.get("status", "unknown")
             link.status_code = result.get("status_code")
             link.final_url = result.get("final_url")
-    return {"links": [link.model_dump() for link in links]}
+
+    wiki_links = extract_draft_wikilinks(profile.wikitext_en)
+    if wiki_links:
+        checked_w = check_draft_wikilinks([wl.target for wl in wiki_links])
+        for wl in wiki_links:
+            res = checked_w.get(wl.target, {})
+            wl.status = res.get("status", "unknown")
+            wl.canonical_target = res.get("canonical_target")
+            wl.description = res.get("description")
+
+    return {
+        "links": [link.model_dump() for link in links],
+        "wiki_links": [wl.model_dump() for wl in wiki_links],
+    }
 
 
 @draft_router.post("/draft/preview")

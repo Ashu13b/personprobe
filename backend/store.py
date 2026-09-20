@@ -64,6 +64,21 @@ def _resolve_profile(name_or_id: str) -> PersonProfile | None:
             return _sessions[name_or_id]
         matches = [p for p in _sessions.values() if p.name == name_or_id]
         if not matches:
+            # Fallback to session file on disk if available
+            path = _session_path(name_or_id)
+            if not path.exists() and not name_or_id.endswith(".json"):
+                matches_disk = list(SESSIONS_DIR.glob(f"*{name_or_id}*.json"))
+                if len(matches_disk) == 1:
+                    path = matches_disk[0]
+            if path.exists():
+                data = _load_session_file(path)
+                if data and "profile" in data:
+                    profile = PersonProfile(**data["profile"])
+                    wiki_status = data.get("wiki_status", {"status": "clear", "url": None, "note": None})
+                    sid = _ensure_session_id(profile)
+                    _sessions[sid] = profile
+                    _wiki_statuses[sid] = wiki_status
+                    return profile
             return None
         if len(matches) > 1:
             raise HTTPException(

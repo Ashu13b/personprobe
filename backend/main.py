@@ -21,11 +21,12 @@ from .schemas import (  # noqa: F401  (public request models)
     IdentifyRequest, ResearchRequest, AddSourceRequest, AddDocumentFact,
     AddSourcedClaimRequest, VerifyClaimRequest, BatchVerifyClaimsRequest, AddSourcePaste, CrawlRequest,
     TargetedSearchRequest, DraftRequest, FindIdsRequest, RefreshPapersRequest, AssessSourceRequest,
+    VerifySourceLevelRequest,
 )
 from .routes_research import (  # noqa: F401  (public route handlers)
     identify, research_start, add_source, add_document_fact, add_sourced_claim,
     verify_claim, batch_verify_claims, add_source_paste, deep_crawl, targeted_search_endpoint,
-    auto_enrich_endpoint, article_proposal, get_session, verify_source,
+    auto_enrich_endpoint, article_proposal, get_session, verify_source, verify_source_level,
     assess_source, reject_source, skip_suggestion, find_researcher_ids_endpoint,
     refresh_papers_endpoint, fetch_from_browser, fetch_blocked, suggest_urls,
     research_router,
@@ -37,6 +38,10 @@ from .routes_draft import (  # noqa: F401
 from .routes_sessions import (  # noqa: F401
     resume_session, list_sessions, delete_session, sessions_router,
 )
+from .routes_browser import (  # noqa: F401
+    captcha_solved, last_captcha_solved, browser_router,
+)
+from .routes_forensics import forensics_router  # noqa: F401
 
 api_app = FastAPI(title="wikimaker")
 api_app.add_middleware(
@@ -48,6 +53,8 @@ api_app.add_middleware(
 api_app.include_router(research_router)
 api_app.include_router(draft_router)
 api_app.include_router(sessions_router)
+api_app.include_router(browser_router)
+api_app.include_router(forensics_router)
 
 
 # ── Unified App setup ───────────────────────────────────────────────────────

@@ -47,6 +47,19 @@ async function apiDelete<T>(path: string): Promise<T> {
   return res.json();
 }
 
+async function apiPatch<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 export interface IdentifyResult {
   kind: "identity" | "web";
   title: string;
@@ -144,10 +157,18 @@ export async function verifyClaim(
   claimIndex: number,
   action: "confirm" | "edit" | "skip" | "approve_draft" | "remove_draft" | "edit_draft_text",
   editedText?: string,
+  actor: "human" | "agent" = "human",
+  settledQuote?: string,
 ): Promise<{ claim: import("./types").Claim }> {
   return apiPost(
     "/research/verify-claim",
-    { claim_index: claimIndex, action, edited_text: editedText ?? null },
+    {
+      claim_index: claimIndex,
+      action,
+      edited_text: editedText ?? null,
+      actor,
+      settled_quote: settledQuote ?? null,
+    },
     { name: profileName },
   );
 }
@@ -155,10 +176,11 @@ export async function verifyClaim(
 export async function batchVerifyClaims(
   profileName: string,
   action: "approve_all_usable" | "confirm_all" | "skip_unverified",
+  actor: "human" | "agent" = "human",
 ): Promise<{ profile: PersonProfile; updated_count: number }> {
   return apiPost(
     "/research/batch-verify-claims",
-    { action },
+    { action, actor },
     { name: profileName },
   );
 }
@@ -167,8 +189,37 @@ export async function verifySource(
   profileName: string,
   url: string,
   verified: boolean,
+  actor: "human" | "agent" = "human",
 ): Promise<{ ok: boolean; source?: import("./types").Source; new_claims: import("./types").Claim[]; missing_slots: string[]; notability: import("./types").NotabilityResult | null }> {
-  return apiPost("/research/source/verify", { profile_name: profileName, url, verified });
+  return apiPost("/research/source/verify", { profile_name: profileName, url, verified, actor });
+}
+
+export async function verifySourceLevel(
+  profileName: string,
+  url: string,
+  level: "liveness" | "identity" | "provenance" | "all",
+  options?: {
+    actor?: "human" | "agent";
+    status?: string;
+    note?: string;
+    coverage_depth?: "unassessed" | "passing_mention" | "significant";
+    editorial_origin?: string;
+  },
+): Promise<{ ok: boolean; source: import("./types").Source; notability?: import("./types").NotabilityResult | null }> {
+  return apiPost("/research/source/verify-level", {
+    profile_name: profileName,
+    url,
+    level,
+    actor: options?.actor ?? "human",
+    status: options?.status,
+    note: options?.note,
+    coverage_depth: options?.coverage_depth,
+    editorial_origin: options?.editorial_origin,
+  });
+}
+
+export async function getVerificationSummary(profileName: string): Promise<import("./types").VerificationSummaryResponse> {
+  return apiGet<import("./types").VerificationSummaryResponse>(`/research/verification-summary?profile_name=${encodeURIComponent(profileName)}`);
 }
 
 export async function assessSource(
@@ -177,12 +228,15 @@ export async function assessSource(
   coverageDepth: import("./types").Source["coverage_depth"],
   editorialOrigin: string,
   researchNotes: string,
+  actor: "human" | "agent" = "human",
 ): Promise<{ source: import("./types").Source; notability: NotabilityResult | null }> {
   return apiPost("/research/source/assess", {
     profile_name: profileName,
-    url, coverage_depth: coverageDepth,
+    url,
+    coverage_depth: coverageDepth,
     editorial_origin: editorialOrigin || null,
     research_notes: researchNotes,
+    actor,
   });
 }
 export async function rejectSource(
@@ -198,9 +252,12 @@ export async function getDraftAudit(profileName: string): Promise<DraftAudit> {
   return data.audit;
 }
 
-export async function getDraftLinks(profileName: string): Promise<import("./types").DraftLink[]> {
-  const data = await apiPost<{ links: import("./types").DraftLink[] }>("/draft/links", { profile_name: profileName });
-  return data.links;
+export async function getDraftLinks(profileName: string): Promise<import("./types").DraftLinksResult> {
+  const data = await apiPost<{ links: import("./types").DraftLink[]; wiki_links?: import("./types").DraftWikilink[] }>("/draft/links", { profile_name: profileName });
+  return {
+    links: data.links || [],
+    wiki_links: data.wiki_links || [],
+  };
 }
 
 export async function getDraftPreview(profileName: string): Promise<string> {
@@ -349,3 +406,212 @@ export interface AutoEnrichResponse {
 export async function autoEnrich(profileName: string): Promise<AutoEnrichResponse> {
   return apiPost("/research/auto-enrich", { profile_name: profileName });
 }
+
+export async function getLifecycleAudit(profileName: string): Promise<import("./types").FullLifecycleAudit> {
+  return apiGet(`/research/lifecycle-audit?profile_name=${encodeURIComponent(profileName)}`);
+}
+
+export async function getDiscardedSources(
+  profileName: string,
+  reason?: string,
+): Promise<{ count: number; discarded: import("./types").DiscardedSource[] }> {
+  const query = reason ? `&reason=${encodeURIComponent(reason)}` : "";
+  return apiGet(`/research/discarded-sources?profile_name=${encodeURIComponent(profileName)}${query}`);
+}
+
+export async function recoverDiscardedSource(
+  profileName: string,
+  url: string,
+): Promise<{ ok: boolean; recovered: import("./types").DiscardedSource | null }> {
+  return apiPost("/research/source/recover-discarded", { profile_name: profileName, url });
+}
+
+export async function getMobileBridgeStatus(): Promise<import("./types").MobileBridgeStatus> {
+  return apiGet("/research/mobile-bridge-status");
+}
+
+export async function getForensicsSummary(profileName: string): Promise<import("./types").ForensicsSummaryResponse> {
+  return apiGet(`/forensics/summary?profile_name=${encodeURIComponent(profileName)}`);
+}
+
+export async function addInvestigationPivot(
+  profileName: string,
+  pivot: {
+    pivot_type: string;
+    title: string;
+    description?: string;
+    time_period?: string | null;
+    location?: string | null;
+    associated_entities?: string[];
+    actor?: "human" | "agent";
+  }
+): Promise<{ ok: boolean; pivot: import("./types").InvestigationPivot; pivots: import("./types").InvestigationPivot[] }> {
+  return apiPost("/forensics/pivots", { profile_name: profileName, ...pivot });
+}
+
+export async function deleteInvestigationPivot(
+  profileName: string,
+  pivotId: string
+): Promise<{ ok: boolean; pivots: import("./types").InvestigationPivot[] }> {
+  return apiDelete(`/forensics/pivots/${encodeURIComponent(pivotId)}?profile_name=${encodeURIComponent(profileName)}`);
+}
+
+export async function addAuxiliaryLead(
+  profileName: string,
+  lead: {
+    pivot_id?: string | null;
+    title: string;
+    url?: string | null;
+    category?: string;
+    lead_notes?: string;
+    source_snippet?: string | null;
+    automated_query?: string | null;
+    actor?: "human" | "agent";
+  }
+): Promise<{ ok: boolean; lead: import("./types").AuxiliaryLead; leads: import("./types").AuxiliaryLead[] }> {
+  return apiPost("/forensics/leads", { profile_name: profileName, ...lead });
+}
+
+export async function updateAuxiliaryLead(
+  profileName: string,
+  leadId: string,
+  updates: {
+    status?: "lead" | "inspected" | "corroborated" | "dead_end";
+    lead_notes?: string;
+    source_snippet?: string;
+    url?: string;
+    actor?: "human" | "agent";
+  }
+): Promise<{ ok: boolean; lead: import("./types").AuxiliaryLead; leads: import("./types").AuxiliaryLead[] }> {
+  return apiPatch(`/forensics/leads/${encodeURIComponent(leadId)}`, { profile_name: profileName, lead_id: leadId, ...updates });
+}
+
+export async function deleteAuxiliaryLead(
+  profileName: string,
+  leadId: string
+): Promise<{ ok: boolean; leads: import("./types").AuxiliaryLead[] }> {
+  return apiDelete(`/forensics/leads/${encodeURIComponent(leadId)}?profile_name=${encodeURIComponent(profileName)}`);
+}
+
+export async function runForensicSweep(
+  profileName: string,
+  pivotId?: string | null,
+  actor?: "human" | "agent"
+): Promise<{ ok: boolean; new_leads_count: number; leads: import("./types").AuxiliaryLead[] }> {
+  return apiPost("/forensics/sweep", { profile_name: profileName, pivot_id: pivotId, actor });
+}
+
+export async function promoteLeadToSource(
+  profileName: string,
+  leadId: string,
+  actor: "human" | "agent" = "human"
+): Promise<{ ok: boolean; promoted_source: import("./types").Source; lead: import("./types").AuxiliaryLead; already_existed?: boolean }> {
+  return apiPost(`/forensics/leads/${encodeURIComponent(leadId)}/promote-to-source`, {
+    profile_name: profileName,
+    lead_id: leadId,
+    actor,
+  });
+}
+
+export async function generateForensicInquiries(
+  profileName: string
+): Promise<{ ok: boolean; new_inquiries_count: number; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPost("/forensics/inquiries/generate", { profile_name: profileName });
+}
+
+export async function addForensicInquiry(
+  profileName: string,
+  inquiry: {
+    fact_anchor: string;
+    domain?: string;
+    deductive_question: string;
+    expected_paper_trails?: string[];
+    probe_queries?: string[];
+    actor?: "human" | "agent";
+  }
+): Promise<{ ok: boolean; inquiry: import("./types").ForensicInquiry; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPost("/forensics/inquiries", { profile_name: profileName, ...inquiry });
+}
+
+export async function updateForensicInquiry(
+  profileName: string,
+  inquiryId: string,
+  updates: {
+    status?: "open" | "probed" | "confirmed" | "unarchived_offline";
+    findings_summary?: string;
+    corroborating_links?: string[];
+    actor?: "human" | "agent";
+  }
+): Promise<{ ok: boolean; inquiry: import("./types").ForensicInquiry; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPatch(`/forensics/inquiries/${encodeURIComponent(inquiryId)}`, { profile_name: profileName, inquiry_id: inquiryId, ...updates });
+}
+
+export async function deleteForensicInquiry(
+  profileName: string,
+  inquiryId: string
+): Promise<{ ok: boolean; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiDelete(`/forensics/inquiries/${encodeURIComponent(inquiryId)}?profile_name=${encodeURIComponent(profileName)}`);
+}
+
+export async function probeForensicInquiry(
+  profileName: string,
+  inquiryId: string,
+  actor: "human" | "agent" = "human"
+): Promise<{ ok: boolean; inquiry: import("./types").ForensicInquiry; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPost(`/forensics/inquiries/${encodeURIComponent(inquiryId)}/probe`, { profile_name: profileName, inquiry_id: inquiryId, actor });
+}
+
+export async function probeAllForensicInquiries(
+  profileName: string,
+  actor: "human" | "agent" = "human"
+): Promise<{ ok: boolean; probed_count: number; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPost(`/forensics/inquiries/probe-all`, { profile_name: profileName, actor });
+}
+
+export async function getPublicRecordsAtlas(): Promise<import("./types").AtlasResponse> {
+  return apiGet("/forensics/atlas");
+}
+
+export async function getSubjectRecordMatrix(
+  profileName: string
+): Promise<import("./types").AtlasMatrixResponse> {
+  return apiGet(`/forensics/atlas/matrix?profile_name=${encodeURIComponent(profileName)}`);
+}
+
+export async function expandCivicInquiries(
+  profileName: string
+): Promise<{ ok: boolean; added_count: number; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPost("/forensics/inquiries/expand-civic", { profile_name: profileName });
+}
+
+export async function registerPublicRepository(
+  repo: Partial<import("./types").PublicRecordRepository>
+): Promise<{ ok: boolean; repository: import("./types").PublicRecordRepository; total_repositories: number }> {
+  return apiPost("/forensics/atlas/repository", repo);
+}
+
+export async function deletePublicRepository(
+  categoryId: string
+): Promise<{ ok: boolean; deleted_id: string; total_repositories: number }> {
+  return apiDelete(`/forensics/atlas/repository/${encodeURIComponent(categoryId)}`);
+}
+
+export async function logInquiryFailure(
+  profileName: string,
+  inquiryId: string,
+  failureData: {
+    failure_mode: string;
+    failure_reason: string;
+    learned_lesson: string;
+    associated_repository_id?: string;
+    actor?: "human" | "agent";
+  }
+): Promise<{ ok: boolean; inquiry: import("./types").ForensicInquiry; inquiries: import("./types").ForensicInquiry[] }> {
+  return apiPost("/forensics/inquiries/log-failure", {
+    profile_name: profileName,
+    inquiry_id: inquiryId,
+    ...failureData,
+  });
+}
+
+

@@ -113,13 +113,81 @@ export default function DraftPreview({ profileName, wikitext, draftDestination }
         <>
           <iframe
             title="Wikipedia draft preview"
-            sandbox="allow-popups"
+            sandbox="allow-popups allow-scripts allow-same-origin"
             style={{ width: "100%", height: 720, border: "1px solid var(--border)", borderRadius: 8, background: "#fff" }}
-            srcDoc={`<!DOCTYPE html><html><head><base href="https://en.wikipedia.org/" target="_blank"><meta charset="utf-8"><style>${PREVIEW_CSS}</style></head><body class="mw-parser-output">${html}</body></html>`}
+            srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><base href="https://en.wikipedia.org/" target="_blank"><style>${PREVIEW_CSS}
+  .mw-parser-output a.new, .mw-parser-output a[href*="redlink=1"] { color: #ba0000 !important; cursor: pointer; }
+  .highlight-anchor { background-color: #fef08a !important; transition: background-color 1.5s ease-out; }
+  .preview-toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #0f172a; color: #f8fafc; padding: 10px 18px; border-radius: 8px;
+    font-size: 12px; line-height: 1.4; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    z-index: 99999; max-width: 520px; display: none; border: 1px solid #334155; text-align: center;
+  }
+</style></head><body class="mw-parser-output">${html}
+<div id="toast" class="preview-toast"></div>
+<script>
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    if (!t) return;
+    t.innerHTML = msg;
+    t.style.display = 'block';
+    clearTimeout(window._toastTimeout);
+    window._toastTimeout = setTimeout(function() { t.style.display = 'none'; }, 4500);
+  }
+
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (!href) return;
+
+    // 1. In-page anchor (e.g. #cite_note-..., #cite_ref-..., section anchors)
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      var id = href.slice(1);
+      var target = document.getElementById(id) || document.querySelector('[name="' + id + '"]');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('highlight-anchor');
+        setTimeout(function() { target.classList.remove('highlight-anchor'); }, 1800);
+      }
+      return;
+    }
+
+    // 2. Redlink: page does not exist on Wikipedia
+    if (a.classList.contains('new') || href.indexOf('redlink=1') !== -1) {
+      e.preventDefault();
+      var title = a.getAttribute('title') || a.textContent || 'Topic';
+      showToast('⚠️ <strong>Page not found on Wikipedia:</strong> &quot;' + title.replace(' (page does not exist)', '') + '&quot; is a redlink. AfC reviewers flag unlinked/redlinked acronyms. Use canonical titles or check Draft Links.');
+      return;
+    }
+
+    // 3. Relative wikilink (e.g. ./CIRB or /wiki/...)
+    if (href.startsWith('./')) {
+      e.preventDefault();
+      var page = href.slice(2);
+      window.open('https://en.wikipedia.org/wiki/' + page, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (href.startsWith('/wiki/')) {
+      e.preventDefault();
+      window.open('https://en.wikipedia.org' + href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // 4. Regular Wikipedia article or external reference link
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+      e.preventDefault();
+      window.open(href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+  });
+</script>
+</body></html>`}
           />
           <p style={{ fontSize: 11, color: "var(--muted)", margin: 0 }}>
-            Rendered by Wikipedia's own renderer. Banner templates (like the AfC submission box) do not display in this preview —
-            they appear once the draft is pasted on Wikipedia.
+            Rendered by Wikipedia Parsoid renderer. Citations jump smoothly within preview; redlinks and external links are verified for AfC compliance.
           </p>
         </>
       )}

@@ -177,38 +177,50 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .mobile-tabbar { display: none; }
 
 /* Responsive grid layouts */
-.hub-grid {
+.hub-main-layout, .hub-grid {
   display: grid;
   gap: 20px;
   align-items: start;
   transition: grid-template-columns 0.2s;
 }
 
-.companion-browser {
+.hub-main-layout.browser-open {
+  grid-template-columns: 1fr 420px;
+}
+
+.companion-browser-panel, .companion-browser {
   padding: 0 !important;
-  height: 85vh;
+  height: calc(100vh - 160px);
+  min-height: 520px;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 20px;
   overflow: hidden;
+  border-radius: var(--radius);
 }
 
-@media (max-width: 768px) {
-  .hub-grid {
+@media (max-width: 960px) {
+  .hub-main-layout.browser-open {
     grid-template-columns: 1fr !important;
   }
 
-  .companion-browser {
+  .companion-browser-panel, .companion-browser {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 2000 !important;
+    z-index: 2500 !important;
     border-radius: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hub-main-layout, .hub-grid {
+    grid-template-columns: 1fr !important;
   }
 
   /* Make header and buttons touch-friendly and fit on mobile screens */

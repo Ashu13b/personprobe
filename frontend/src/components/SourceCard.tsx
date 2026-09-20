@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Source, Claim, NotabilityResult } from "../types";
-import { verifySource, rejectSource, assessSource } from "../api";
+import { verifySource, verifySourceLevel, rejectSource, assessSource } from "../api";
 import { getHostname, safeHref } from "../url";
 import { SOURCE_TAG_CLASS, SOURCE_TAG_LABEL } from "./slotMeta";
 
@@ -26,6 +26,8 @@ export function SourceCard({ source, sourceNumber, profileName, linkOpened, onLi
   const [researchNotes, setResearchNotes] = useState(source.research_notes ?? "");
   const [assessing, setAssessing] = useState(false);
   const [assessmentError, setAssessmentError] = useState<string | null>(null);
+  const [showTrail, setShowTrail] = useState(false);
+  const [verifyingLevel, setVerifyingLevel] = useState<string | null>(null);
 
   const tagClass = SOURCE_TAG_CLASS;
   const tagLabel = SOURCE_TAG_LABEL;
@@ -70,6 +72,33 @@ export function SourceCard({ source, sourceNumber, profileName, linkOpened, onLi
     }
   }
 
+  async function handleVerifyIdentity(confirmed: boolean, actor: "human" | "agent" = "human") {
+    setVerifyingLevel("identity");
+    setVerifyError(null);
+    try {
+      if (confirmed) {
+        const resp = await verifySource(profileName, source.url, true, actor);
+        if (resp.source) {
+          onAssessed(resp.source, resp.notability ?? null);
+        }
+        onVerified(true, resp.new_claims ?? [], resp.missing_slots ?? []);
+      } else {
+        const resp = await verifySourceLevel(profileName, source.url, "identity", {
+          actor,
+          status: "wrong_person",
+          note: `Rejected as namesake/wrong person by ${actor}`,
+        });
+        if (resp.ok && resp.source) {
+          onAssessed(resp.source, resp.notability ?? null);
+        }
+      }
+    } catch (e: any) {
+      setVerifyError(e?.message || "Failed to update identity verification");
+    } finally {
+      setVerifyingLevel(null);
+    }
+  }
+
   return (
     <div className="card" style={{ marginBottom: 12, padding: "14px 18px" }}>
       {/* Top row: tag + publisher + open link */}
@@ -110,6 +139,168 @@ export function SourceCard({ source, sourceNumber, profileName, linkOpened, onLi
           >
             {source.url.length > 70 ? source.url.slice(0, 70) + "…" : source.url} ↗
           </a>
+
+          {/* Categorized Verification Grid: L1, L2, L3 (AI vs Human vs Empty) */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: 8, margin: "10px 0 6px", padding: "8px 10px", background: "var(--bg)",
+            border: "1px solid var(--border)", borderRadius: 6, fontSize: 11
+          }}>
+            {/* L1: Liveness */}
+            <div>
+              <span style={{ fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", fontSize: 10, display: "block", marginBottom: 2 }}>
+                L1 · Liveness &amp; Access
+              </span>
+              {source.liveness_by === "agent" ? (
+                <span style={{ color: source.liveness === "alive" ? "#059669" : "#dc2626", fontWeight: 600 }}>
+                  🟢 Live [🤖 AI / Agent]
+                </span>
+              ) : source.liveness_by === "human" ? (
+                <span style={{ color: source.liveness === "alive" ? "#059669" : "#dc2626", fontWeight: 600 }}>
+                  🟢 Live [👤 Human]
+                </span>
+              ) : source.liveness === "alive" ? (
+                <span style={{ color: "#059669", fontWeight: 600 }}>
+                  🟢 Live [System Checked]
+                </span>
+              ) : source.liveness === "dead" ? (
+                <span style={{ color: "#dc2626", fontWeight: 600 }}>
+                  🔴 Dead Link
+                </span>
+              ) : source.liveness === "blocked" ? (
+                <span style={{ color: "#d97706", fontWeight: 600 }}>
+                  🟡 Blocked / Wall
+                </span>
+              ) : (
+                <span style={{ color: "var(--muted)" }}>⚪ Unchecked / Empty</span>
+              )}
+            </div>
+
+            {/* L2: Person / Identity */}
+            <div>
+              <span style={{ fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", fontSize: 10, display: "block", marginBottom: 2 }}>
+                L2 · Same Person
+              </span>
+              {source.identity_by === "human" || source.human_verified ? (
+                <span style={{ color: "var(--primary)", fontWeight: 600 }}>
+                  ✅ Confirmed [👤 Human]
+                </span>
+              ) : source.identity_by === "agent" || (source.identity_status === "confirmed" && source.author_match_status === "confirmed") ? (
+                <span style={{ color: "#7c3aed", fontWeight: 600 }}>
+                  ✅ Confirmed [🤖 AI / Agent]
+                </span>
+              ) : source.identity_status === "wrong_person" || source.relevance_flag === "likely_wrong" ? (
+                <span style={{ color: "#dc2626", fontWeight: 600 }}>
+                  ❌ Wrong Person
+                </span>
+              ) : (
+                <span style={{ color: "var(--muted)" }}>⚪ Empty / Unverified</span>
+              )}
+            </div>
+
+            {/* L3: Provenance */}
+            <div>
+              <span style={{ fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", fontSize: 10, display: "block", marginBottom: 2 }}>
+                L3 · Evidence Provenance
+              </span>
+              {source.provenance_by === "human" || (source.coverage_depth && source.coverage_depth !== "unassessed") ? (
+                <span style={{ color: "#059669", fontWeight: 600 }}>
+                  📰 {source.coverage_depth === "significant" ? "Significant" : "Passing"} [👤 Human]
+                </span>
+              ) : source.provenance_category ? (
+                <span style={{ color: "#475569", fontWeight: 600 }}>
+                  {source.provenance_category === "independent_secondary" ? "📰 Indep. Press" : source.provenance_category === "authored_publication" ? "📄 Authored" : "🏛️ Institutional"} [🤖 AI]
+                </span>
+              ) : (
+                <span style={{ color: "var(--muted)" }}>⚪ Empty / Unassessed</span>
+              )}
+            </div>
+          </div>
+
+          {/* Extraction Authorizer Log */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, margin: "4px 0 8px", color: "var(--muted)", flexWrap: "wrap" }}>
+            <span>⚡ <strong>Extraction Status:</strong></span>
+            {source.confirmed_for_extraction_by ? (
+              <span style={{
+                padding: "1px 6px", borderRadius: 4, fontWeight: 700,
+                background: source.confirmed_for_extraction_by === "agent" ? "rgba(124, 58, 237, 0.1)" : "rgba(37, 99, 235, 0.1)",
+                color: source.confirmed_for_extraction_by === "agent" ? "#7c3aed" : "var(--primary)",
+              }}>
+                Authorized by {source.confirmed_for_extraction_by === "agent" ? "🤖 AI (Agent)" : "👤 Human"}
+                {sourceClaims.length > 0 ? ` · ${sourceClaims.length} claims in session` : ""}
+              </span>
+            ) : sourceClaims.length > 0 ? (
+              <span style={{ color: "var(--text)" }}>{sourceClaims.length} claims in session</span>
+            ) : (
+              <span style={{ fontStyle: "italic" }}>Not yet confirmed for extraction</span>
+            )}
+
+            {source.verification_trail && source.verification_trail.length > 0 && (
+              <button
+                onClick={() => setShowTrail(!showTrail)}
+                style={{
+                  fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 4,
+                  background: "transparent", border: "1px solid var(--border)", color: "var(--muted)",
+                  cursor: "pointer", marginLeft: "auto",
+                }}
+                title="View verification audit trail and actor history"
+              >
+                📜 Audit Trail ({source.verification_trail.length}) {showTrail ? "▲" : "▼"}
+              </button>
+            )}
+          </div>
+
+          {/* Quick L2 Question resolution if not yet confirmed */}
+          {!source.human_verified && source.identity_status !== "confirmed" && (
+            <div style={{ display: "flex", gap: 6, margin: "6px 0", alignItems: "center", flexWrap: "wrap", background: "rgba(0,0,0,0.02)", padding: "4px 8px", borderRadius: 4 }}>
+              <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 500 }}>Confirm person to extract claims:</span>
+              <button
+                onClick={() => handleVerifyIdentity(true, "human")}
+                disabled={verifyingLevel === "identity"}
+                style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "rgba(37, 99, 235, 0.1)", color: "var(--primary)", border: "1px solid var(--primary)", cursor: "pointer" }}
+              >
+                {verifyingLevel === "identity" ? "Saving…" : "👤 Confirm as Human"}
+              </button>
+              <button
+                onClick={() => handleVerifyIdentity(true, "agent")}
+                disabled={verifyingLevel === "identity"}
+                style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "rgba(124, 58, 237, 0.08)", color: "#7c3aed", border: "1px solid #7c3aed", cursor: "pointer" }}
+              >
+                {verifyingLevel === "identity" ? "Saving…" : "🤖 Confirm as AI"}
+              </button>
+              <button
+                onClick={() => handleVerifyIdentity(false, "human")}
+                disabled={verifyingLevel === "identity"}
+                style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 4, background: "rgba(220, 38, 38, 0.1)", color: "var(--danger)", border: "1px solid var(--danger)", cursor: "pointer" }}
+              >
+                ✗ Wrong Person
+              </button>
+            </div>
+          )}
+
+          {/* Collapsible Verification Trail & Actor Log */}
+          {showTrail && source.verification_trail && source.verification_trail.length > 0 && (
+            <div style={{
+              margin: "8px 0", padding: "8px 10px", background: "rgba(0, 0, 0, 0.03)",
+              borderRadius: 6, border: "1px solid var(--border)", fontSize: 11
+            }}>
+              <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase", fontSize: 10 }}>
+                Audit Trail & Actor Log
+              </div>
+              {source.verification_trail.map((entry, idx) => (
+                <div key={idx} style={{ display: "flex", gap: 6, alignItems: "center", padding: "2px 0", color: "var(--text)" }}>
+                  <span style={{ fontWeight: 700, color: entry.actor === "agent" ? "#7c3aed" : "var(--primary)" }}>
+                    {entry.actor === "agent" ? "🤖 Agent" : "👤 Human"}
+                  </span>
+                  <span style={{ color: "var(--muted)" }}>[{entry.level.toUpperCase()}]</span>
+                  <span>{entry.summary}</span>
+                  <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--muted)" }}>
+                    {entry.timestamp.slice(11, 19)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

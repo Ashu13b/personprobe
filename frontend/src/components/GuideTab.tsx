@@ -5,11 +5,75 @@ export default function GuideTab() {
 
   const buttonItems = [
     {
+      group: "Source Verification (L1–L3)",
+      badge: "👤 Confirm as Human",
+      badgeStyle: { background: "rgba(37, 99, 235, 0.12)", color: "var(--primary)", border: "1px solid rgba(37, 99, 235, 0.3)" },
+      title: "L2 Identity Confirmation (Human)",
+      meaning: "Confirms that you reviewed this link and confirmed it is about this exact subject (not an unrelated namesake). Automatically unlocks claim extraction.",
+      whenToUse: "When you inspect a link and confirm the person matches.",
+    },
+    {
+      group: "Source Verification (L1–L3)",
+      badge: "🤖 Confirm as AI",
+      badgeStyle: { background: "rgba(16, 185, 129, 0.12)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.3)" },
+      title: "L2 Identity Confirmation (AI / Agent)",
+      meaning: "Confirms identity as an autonomous AI agent. Extracts claims into the workspace and stamps 'agent' in the audit trail.",
+      whenToUse: "When running autonomous research runs or automated cross-reference checks.",
+    },
+    {
+      group: "Source Verification (L1–L3)",
+      badge: "✗ Wrong Person",
+      badgeStyle: { background: "rgba(220, 38, 38, 0.12)", color: "var(--danger)", border: "1px solid rgba(220, 38, 38, 0.3)" },
+      title: "Reject Namesake / Irrelevant",
+      meaning: "Marks this source as rejected for identity reasons (different person of the same name or unrelated topic). Excludes it from claims and draft.",
+      whenToUse: "When a search result returns another person with the same name.",
+    },
+    {
+      group: "Source Ingestion",
+      badge: "🔍 Auto-Search Missing Slots",
+      badgeStyle: { background: "#f0f9ff", color: "#0369a1", border: "1px solid #7dd3fc" },
+      title: "Targeted Biographical Slot Sweep",
+      meaning: "Runs targeted DuckDuckGo/Google search queries specifically designed to locate missing biography slots (birth date, education, career milestones, awards).",
+      whenToUse: "When your subject has empty biographical slots and needs more targeted secondary sources.",
+    },
+    {
+      group: "Forensic & Auxiliary Leads",
+      badge: "⚡ Run Public Records Sweep",
+      badgeStyle: { background: "#eff6ff", color: "#1d4ed8", border: "1px solid #bfdbfe" },
+      title: "Public Records & Theses Sweep",
+      meaning: "Launches specialized multi-hop queries across Shodhganga doctoral dissertations, ICAR/Ministry sanction orders, CAT tribunal filings, and fellow recruitment notices.",
+      whenToUse: "When you want to dig up buried institutional, financial, and co-worker records beyond direct name matches.",
+    },
+    {
+      group: "Forensic & Auxiliary Leads",
+      badge: "+ Add Pivot Anchor",
+      badgeStyle: { background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" },
+      title: "Register Investigation Anchor",
+      meaning: "Registers a landmark project, workplace institution, campus housing quarter, or recruited fellow network to explore.",
+      whenToUse: "When uncovering new institutions or major schemes (e.g. Project Hisar Gaurav).",
+    },
+    {
+      group: "Forensic & Auxiliary Leads",
+      badge: "✓ Corroborated",
+      badgeStyle: { background: "#dcfce7", color: "#15803d", border: "1px solid #86efac" },
+      title: "Corroborate Auxiliary Evidence",
+      meaning: "Marks that an auxiliary document (e.g. student thesis acknowledgment or grant order) has been inspected and confirms biographical facts.",
+      whenToUse: "When an auxiliary lead provides rock-solid proof for the person's timeline, laboratory tenure, or funding.",
+    },
+    {
+      group: "Source Ingestion",
+      badge: "📱 Browser Bridge",
+      badgeStyle: { background: "#f0fdf4", color: "#166534", border: "1px solid #bbf7d0" },
+      title: "OpenScrape Mobile Carrier Proxy",
+      meaning: "Routes scraping through the physical Android phone on an Indian carrier IP to bypass Cloudflare Ray ID blocks and bot mitigation.",
+      whenToUse: "Active by default. Click to view status or open the local VM Chromium screen fallback.",
+    },
+    {
       group: "Claim Review & Triage",
       badge: "+ Draft",
       badgeStyle: { background: "rgba(22, 163, 74, 0.15)", color: "var(--success)", border: "1px solid rgba(22, 163, 74, 0.3)" },
-      title: "Approve & Include in Draft",
-      meaning: "Adds this exact fact into the Wikipedia wikitext article. Only click this for notable, encyclopedic facts that are supported by a verified source.",
+      title: "L5 Draft Approval",
+      meaning: "Adds this exact fact into the Wikipedia wikitext article. Requires that the backing source has been confirmed (by Human or Agent).",
       whenToUse: "When you want Wikipedia readers to see this fact in the published biography.",
     },
     {
@@ -17,7 +81,7 @@ export default function GuideTab() {
       badge: "✓ Dossier",
       badgeStyle: { background: "rgba(37, 99, 235, 0.12)", color: "var(--primary)", border: "1px solid rgba(37, 99, 235, 0.3)" },
       title: "Confirm for Research Dossier Only",
-      meaning: "Saves this fact into your background research dossier / markdown notes, but keeps it OUT of the Wikipedia draft.",
+      meaning: "Saves this fact into your background research dossier / markdown notes, keeping it OUT of the Wikipedia draft.",
       whenToUse: "For minor details, routine dates, or background facts that are true, but would clutter or weaken a concise Wikipedia article.",
     },
     {
@@ -26,55 +90,15 @@ export default function GuideTab() {
       badgeStyle: { background: "#f1f5f9", color: "var(--text)", border: "1px solid var(--border)" },
       title: "Edit / Draft Wording",
       meaning: "Allows you to edit either the raw claim fact or polish the exact encyclopedic wording (paraphrase) rendered in Wikipedia.",
-      whenToUse: "When an AI-extracted fact needs better phrasing, corrected dates, or a more neutral tone.",
-    },
-    {
-      group: "Claim Review & Triage",
-      badge: "− Draft",
-      badgeStyle: { background: "rgba(220, 38, 38, 0.12)", color: "var(--danger)", border: "1px solid rgba(220, 38, 38, 0.3)" },
-      title: "Remove from Draft",
-      meaning: "Removes the fact from the Wikipedia article, but keeps it safely preserved in your research dossier.",
-      whenToUse: "When you decide a draft sentence is redundant or too detailed for Wikipedia.",
+      whenToUse: "When an extracted fact needs better phrasing, corrected dates, or a more neutral tone.",
     },
     {
       group: "Claim Review & Triage",
       badge: "✗",
       badgeStyle: { background: "rgba(220, 38, 38, 0.12)", color: "var(--danger)", border: "1px solid rgba(220, 38, 38, 0.3)" },
-      title: "Skip / Reject",
+      title: "Skip / Reject Claim",
       meaning: "Completely ignores and excludes this claim from both the draft and dossier.",
-      whenToUse: "When a claim is inaccurate, about the wrong namesake person, or pure noise.",
-    },
-    {
-      group: "Claim Review & Triage",
-      badge: "+ Approve all usable for draft",
-      badgeStyle: { background: "rgba(22, 163, 74, 0.15)", color: "var(--success)", border: "1px solid rgba(22, 163, 74, 0.3)" },
-      title: "Batch Approve Usable",
-      meaning: "In 1 click, approves all unreviewed facts backed by verified sources directly into the draft.",
-      whenToUse: "When you have verified trusted sources and want to rapidly draft all valid findings.",
-    },
-    {
-      group: "Source Management",
-      badge: "Verify Source",
-      badgeStyle: { background: "rgba(37, 99, 235, 0.12)", color: "var(--primary)", border: "1px solid rgba(37, 99, 235, 0.3)" },
-      title: "Human Source Verification",
-      meaning: "Marks that you have reviewed this webpage/link and confirmed it is genuine and genuinely discusses this subject.",
-      whenToUse: "Required before any claims from that source can be added to the Wikipedia draft.",
-    },
-    {
-      group: "Source Management",
-      badge: "Auto-enrich",
-      badgeStyle: { background: "#f1f5f9", color: "var(--text)", border: "1px solid var(--border)" },
-      title: "Automated Search Sweep",
-      meaning: "Launches targeted searches for news reports, academic papers, books, and university directories.",
-      whenToUse: "At the start of research or when you need more independent secondary sources.",
-    },
-    {
-      group: "Source Management",
-      badge: "Check Liveness",
-      badgeStyle: { background: "#f1f5f9", color: "var(--text)", border: "1px solid var(--border)" },
-      title: "Verify URL Health",
-      meaning: "Tests every cited web link to verify it is alive (HTTP 200) and detects dead links or redirect traps.",
-      whenToUse: "Before generating a draft, to ensure Wikipedia reviewers won't find broken references.",
+      whenToUse: "When a claim is inaccurate, about the wrong person, or pure noise.",
     },
     {
       group: "Draft & Submission",
@@ -102,74 +126,81 @@ export default function GuideTab() {
     <div style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
       {/* Hero Banner */}
       <div className="card" style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", color: "#fff", border: "none" }}>
-        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>How Wikimaker Works & Button Guide</h2>
+        <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>How Wikimaker Works &amp; Verification Architecture</h2>
         <p style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.6, maxWidth: 740, margin: 0 }}>
-          Wikimaker helps you research a notable person, collect reliable evidence, and create a Wikipedia-ready draft. 
-          Here is how the entire system works and exactly what every button does.
+          Wikimaker is a dual-client biographical research workbench. Both <strong>Autonomous AI Agents</strong> and <strong>Human Editors</strong> operate as first-class clients. Evidence is verified across five progressive levels, and every decision is stamped into an immutable audit trail.
         </p>
       </div>
 
-      {/* 4-Stage Workflow Cards */}
+      {/* 5-Level Verification Framework */}
       <div>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>The 4-Step Research Journey</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
-          <div className="card" style={{ borderTop: "4px solid #3b82f6" }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: "#3b82f6", textTransform: "uppercase", marginBottom: 6 }}>Step 1: Identify</div>
-            <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px" }}>Disambiguate the Subject</p>
-            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
-              Enter the person's name and affiliation. The system checks Wikipedia and Wikidata so you don't research a namesake or duplicate an existing article.
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>The 5-Level Verification Framework</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+          <div className="card" style={{ borderTop: "4px solid #3b82f6", padding: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#3b82f6", textTransform: "uppercase", marginBottom: 4 }}>Level 1: Liveness</div>
+            <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px" }}>Reachable URL</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4, margin: 0 }}>
+              Checks if the web page is alive (HTTP 200) vs broken (404/dead) or blocked by bot walls.
             </p>
           </div>
 
-          <div className="card" style={{ borderTop: "4px solid #10b981" }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: "#10b981", textTransform: "uppercase", marginBottom: 6 }}>Step 2: Collect Sources</div>
-            <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px" }}>Verify Web & News Links</p>
-            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
-              Review discovered web pages. Click <strong>Verify Source</strong> on valid links. The system automatically tags sources as Independent News, Academic, or Primary.
+          <div className="card" style={{ borderTop: "4px solid #10b981", padding: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#10b981", textTransform: "uppercase", marginBottom: 4 }}>Level 2: Identity</div>
+            <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px" }}>Same Person Check</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4, margin: 0 }}>
+              Confirmed by <strong>Human</strong> or <strong>AI Agent</strong>. Resolves namesakes and unlocks fact extraction.
             </p>
           </div>
 
-          <div className="card" style={{ borderTop: "4px solid #8b5cf6" }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: "#8b5cf6", textTransform: "uppercase", marginBottom: 6 }}>Step 3: Review Claims</div>
-            <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px" }}>Draft vs. Dossier Triage</p>
-            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
-              Choose what goes into the Wikipedia article (<strong>+ Draft</strong>) vs what stays in your background research notes (<strong>✓ Dossier</strong>).
+          <div className="card" style={{ borderTop: "4px solid #8b5cf6", padding: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#8b5cf6", textTransform: "uppercase", marginBottom: 4 }}>Level 3: Provenance</div>
+            <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px" }}>Source Quality</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4, margin: 0 }}>
+              Classifies sources as Independent Secondary (WP:GNG), Academic Journal, or Primary / Self-Published.
             </p>
           </div>
 
-          <div className="card" style={{ borderTop: "4px solid #f59e0b" }}>
-            <div style={{ fontSize: 12, fontWeight: 800, color: "#f59e0b", textTransform: "uppercase", marginBottom: 6 }}>Step 4: Draft & Submit</div>
-            <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 6px" }}>Render & Copy Wikitext</p>
-            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5, margin: 0 }}>
-              The system audits evidence requirements (2+ independent news sources), checks links, formats citations, and generates standard Wikipedia wikitext.
+          <div className="card" style={{ borderTop: "4px solid #f59e0b", padding: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#f59e0b", textTransform: "uppercase", marginBottom: 4 }}>Level 4: Claim Settlement</div>
+            <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px" }}>Verbatim Evidence</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4, margin: 0 }}>
+              Verifies that the extracted claim is backed by exact quotes from the cited source text.
+            </p>
+          </div>
+
+          <div className="card" style={{ borderTop: "4px solid #ec4899", padding: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#ec4899", textTransform: "uppercase", marginBottom: 4 }}>Level 5: Draft Gate</div>
+            <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px" }}>Publication Gate</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4, margin: 0 }}>
+              Triage into <strong>+ Draft</strong> (Wikipedia wikitext) or <strong>✓ Dossier</strong> (background research notes).
             </p>
           </div>
         </div>
       </div>
 
-      {/* Draft vs Dossier Key Concept */}
+      {/* Dual Client Architecture Concept */}
       <div className="card" style={{ background: "rgba(37, 99, 235, 0.04)", border: "1px solid rgba(37, 99, 235, 0.2)" }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--primary)", marginBottom: 8 }}>
-          💡 The Most Important Concept: "In Draft" vs. "Dossier Only"
+          👥 Dual-Client Architecture: Humans and AI Agents
         </h3>
         <p style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>
-          Wikipedia articles get rejected when they contain routine resumes, promotional trivia, or unverified claims. Wikimaker solves this with two distinct destination buckets:
+          In Wikimaker, human review is <strong>not mandatory</strong> for research to progress. An autonomous agent can run overnight, identify sources, confirm entity identity, extract claims, and settle them. Every operation permanently records who authorized it:
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div style={{ padding: 12, background: "#fff", borderRadius: 8, border: "1px solid var(--border)" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--success)", display: "block", marginBottom: 4 }}>
-              📌 In Draft (+ Draft)
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--primary)", display: "block", marginBottom: 4 }}>
+              👤 Human Reviewer
             </span>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
-              For <strong>notable milestones, major awards, breakthrough publications, and verifiable achievements</strong>. These are compiled directly into the Wikipedia wikitext article.
+              Manual editorial decisions: confirming ambiguous sources, resolving edge-case namesakes, polishing wording, and approving final Wikipedia submissions.
             </p>
           </div>
           <div style={{ padding: 12, background: "#fff", borderRadius: 8, border: "1px solid var(--border)" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#475569", display: "block", marginBottom: 4 }}>
-              📁 Dossier Only (✓ Dossier)
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#10b981", display: "block", marginBottom: 4 }}>
+              🤖 Autonomous AI Agent
             </span>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
-              For <strong>background facts, routine employment dates, minor trivia, and research leads</strong>. These are preserved in your exportable research report without bloating the Wikipedia article.
+              Batch sweeps, deep crawls, identity cross-matching against Wikidata/OpenAlex, and claim extraction. All actions are logged with timestamps and quotes.
             </p>
           </div>
         </div>
@@ -183,7 +214,7 @@ export default function GuideTab() {
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0 }}>Click a category filter to see specific button actions.</p>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
-            {["all", "claim", "source", "draft"].map(cat => (
+            {["all", "source", "claim", "draft"].map(cat => (
               <button
                 key={cat}
                 onClick={() => setActiveSection(cat)}
@@ -194,7 +225,7 @@ export default function GuideTab() {
                   border: activeSection === cat ? "none" : "1px solid var(--border)",
                 }}
               >
-                {cat === "all" ? "All Buttons" : cat === "claim" ? "Claims" : cat === "source" ? "Sources" : "Draft"}
+                {cat === "all" ? "All Buttons" : cat === "source" ? "Sources" : cat === "claim" ? "Claims" : "Draft"}
               </button>
             ))}
           </div>
@@ -231,18 +262,18 @@ export default function GuideTab() {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px", color: "var(--primary)" }}>
-              Q: Why is the "+ Draft" button greyed out on some claims?
+              Q: Does a human have to manually verify every single source before an agent can draft?
             </p>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
-              Wikipedia strictly requires that every assertion has a human-verified source. If the source hasn't been verified yet, or if it is flagged as unreliable, the button is disabled until you verify the source in the Sources tab.
+              No. Either a Human or an Autonomous Agent can confirm identity (L2) and settle claims (L4). However, the system logs exactly who confirmed it (<code>human</code> vs <code>agent</code>) so that human editors can inspect agent-approved claims before final submission.
             </p>
           </div>
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10 }}>
             <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px", color: "var(--primary)" }}>
-              Q: What is the difference between an Independent News source and a Primary source?
+              Q: Why is scraping routed through a physical mobile phone?
             </p>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
-              An <strong>Independent Secondary source</strong> (e.g. The Hindu, The Tribune, NDTV) is third-party journalism that proves Wikipedia notability (WP:GNG). A <strong>Primary source</strong> (e.g. the person's university profile or CV) can verify basic employment dates, but cannot prove notability on its own.
+              Cloud virtual machines (like Google Cloud) use datacenter IP addresses that are instantly blocked by Cloudflare (Ray ID), ResearchGate, and major news publishers. Routing requests through the OpenScrape mobile phone bridge on an Indian carrier IP bypasses all datacenter bot walls.
             </p>
           </div>
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10 }}>
@@ -261,15 +292,7 @@ export default function GuideTab() {
               Q: Why do some verified sources have 0 claims extracted?
             </p>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
-              When a source is verified, the system checks for new encyclopedic claims. A source shows 0 claims if: (1) <strong>Already Backed / Redundant:</strong> The article repeats facts already captured in your session (e.g. syndicated wire copies), (2) <strong>Passing Mention:</strong> The page mentions the subject in a committee or co-author list without narrative biographical facts, or (3) <strong>Thin Snippet:</strong> Content was paywalled or too brief. You can always click <em>+ Add Sourced Claim</em> to manually record facts you read on the page.
-            </p>
-          </div>
-          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 4px", color: "var(--primary)" }}>
-              Q: What should I do when I am ready to submit the article to Wikipedia?
-            </p>
-            <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.5 }}>
-              Click <strong>"Generate Draft"</strong>, inspect the Wikipedia preview, then click <strong>"Copy for AfC (with &#123;&#123;subst:submit&#125;&#125;)"</strong>. Paste that directly into the Wikipedia Articles for Creation submission box.
+              When a source is verified, the system checks for new encyclopedic claims. A source shows 0 claims if: (1) <strong>Already Backed / Redundant:</strong> The article repeats facts already captured in your session, (2) <strong>Passing Mention:</strong> The page mentions the subject in a committee list without narrative facts, or (3) <strong>Thin Snippet:</strong> Content was brief. You can always click <em>+ Add Sourced Claim</em> to manually record facts you read on the page.
             </p>
           </div>
         </div>

@@ -1,7 +1,9 @@
 import type { PersonProfile, WikiStatus, DraftAudit } from "../types";
 import { NotabilityCard, ChecklistCard, DraftReadinessCard, SaturationCard } from "./WorkspaceCards";
+import LifecycleAuditCard from "./LifecycleAuditCard";
+import { profileRef } from "../api";
 
-type Tab = "sources" | "profile" | "claims" | "proposal" | "guide";
+type Tab = "sources" | "discarded" | "profile" | "claims" | "proposal" | "guide";
 
 interface Props {
   profile: PersonProfile;
@@ -104,12 +106,16 @@ export default function SummaryTab({ profile, wikiStatus, audit, auditError, dra
       </div>
 
       {/* Stat tiles */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
         <StatTile label="Sources" value={`${verifiedCount}/${totalSources}`} sub="verified" tone={verifiedCount > 0 ? "success" : "muted"} />
+        <StatTile label="Discarded" value={`${(profile.discarded_sources ?? []).length}`} sub="audit & registry" tone="muted" />
         <StatTile label="Claims" value={`${profile.claims.length}`} sub={`${inDraft} in draft`} tone={inDraft > 0 ? "success" : "muted"} />
         <StatTile label="Significant coverage" value={`${rsCount}`} sub={`${profile.notability?.candidate_count ?? 0} independent candidates`} tone={rsCount >= 2 ? "success" : "muted"} />
         <StatTile label="Draft" value={auditReady ? "Ready" : "Waiting"} sub={audit ? (auditReady ? "evidence ok" : "blocked") : "auditing…"} tone={auditReady ? "success" : "muted"} />
       </div>
+
+      {/* Full Lifecycle Audit Card */}
+      <LifecycleAuditCard profileName={profileRef(profile)} onNavigateTab={onNavigate} />
 
       <div className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <div>

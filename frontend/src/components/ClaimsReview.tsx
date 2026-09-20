@@ -19,6 +19,16 @@ export default function ClaimsReview({ claims, allClaims, profile, onProfileUpda
   const [batchLoading, setBatchLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<FilterTab>(() => claims.some(c => c.verification === "unverified") ? "review" : "all");
+  const [expandedTrails, setExpandedTrails] = useState<Set<number>>(new Set());
+
+  function toggleTrail(idx: number) {
+    setExpandedTrails(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }
 
   const draftCount = claims.filter(c => c.draft_approved).length;
   const dossierCount = claims.filter(c => (c.verification === "confirmed" || c.verification === "edited") && !c.draft_approved).length;
@@ -79,13 +89,6 @@ export default function ClaimsReview({ claims, allClaims, profile, onProfileUpda
   }
 
   const claimIndexMap = new Map(allClaims.map((c, i) => [c, i]));
-
-  const verificationColor: Record<string, string> = {
-    unverified: "var(--muted)",
-    confirmed: "var(--success)",
-    edited: "var(--primary)",
-    skipped: "var(--border)",
-  };
 
   return (
     <div>
@@ -233,17 +236,21 @@ export default function ClaimsReview({ claims, allClaims, profile, onProfileUpda
                       · {Math.round(claim.trust_score * 100)}% Trust
                     </span>
                   )}
-                  {claim.verification !== "unverified" && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: verificationColor[claim.verification] }}>
-                      · {claim.verification}
+                  {claim.verification !== "unverified" ? (
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(16, 185, 129, 0.12)", color: "#059669" }} title="Level 4: Claim fact settled">
+                      ✓ L4: Settled ({claim.verified_by === "agent" ? "🤖 Agent" : "👤 Human"})
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(245, 158, 11, 0.12)", color: "#d97706" }} title="Level 4: Unverified fact candidate">
+                      ⚠️ L4: Unverified {claim.verified_by === "agent" ? "(🤖 AI-suggested)" : ""}
                     </span>
                   )}
                   {claim.draft_approved ? (
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(37, 99, 235, 0.12)", color: "var(--primary)" }}>
-                      Included in draft
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(37, 99, 235, 0.12)", color: "var(--primary)" }} title="Level 5: Approved for Wikipedia draft">
+                      📘 L5: Draft ({claim.draft_approved_by === "agent" ? "🤖 Agent" : "👤 Human"})
                     </span>
                   ) : (claim.verification === "confirmed" || claim.verification === "edited") ? (
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(100, 116, 139, 0.12)", color: "#475569" }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(100, 116, 139, 0.12)", color: "#475569" }} title="Dossier only: Not in Wikipedia draft">
                       Dossier only
                     </span>
                   ) : null}
@@ -255,10 +262,18 @@ export default function ClaimsReview({ claims, allClaims, profile, onProfileUpda
                   {claim.user_provided && (
                     <span style={{ fontSize: 11, color: "var(--muted)" }}>· manual entry</span>
                   )}
-                  {!claim.user_provided && claim.verification === "unverified" && (
-                    <span style={{ fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: "rgba(139, 92, 246, 0.12)", color: "#7c3aed" }}>
-                      AI-suggested · review
-                    </span>
+                  {claim.verification_trail && claim.verification_trail.length > 0 && (
+                    <button
+                      onClick={() => toggleTrail(globalIndex)}
+                      style={{
+                        fontSize: 10, fontWeight: 600, padding: "1px 5px", borderRadius: 4,
+                        background: "transparent", border: "1px solid var(--border)", color: "var(--muted)",
+                        cursor: "pointer", marginLeft: "auto",
+                      }}
+                      title="View claim verification audit trail"
+                    >
+                      📜 Trail ({claim.verification_trail.length}) {expandedTrails.has(globalIndex) ? "▲" : "▼"}
+                    </button>
                   )}
                 </div>
 
@@ -286,12 +301,39 @@ export default function ClaimsReview({ claims, allClaims, profile, onProfileUpda
                         </span>
                       )}
                     </div>
+                    {claim.settled_quote && (
+                      <div style={{ marginTop: 5, padding: "4px 8px", background: "rgba(16, 185, 129, 0.06)", borderLeft: "2px solid #10b981", borderRadius: 4, fontSize: 11, color: "#065f46" }}>
+                        <span style={{ fontWeight: 700 }}>Settled Quote: </span>“{claim.settled_quote}”
+                      </div>
+                    )}
                     {claim.draft_text && claim.draft_text !== claim.text && (
                       <div style={{ marginTop: 5, padding: "5px 9px", background: "rgba(37, 99, 235, 0.07)", borderLeft: "3px solid var(--primary)", borderRadius: 4 }}>
                         <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "var(--primary)", display: "block" }}>
                           Custom draft wording:
                         </span>
                         <p style={{ fontSize: 12, margin: "2px 0 0", color: "var(--text)", lineHeight: 1.5 }}>{claim.draft_text}</p>
+                      </div>
+                    )}
+                    {expandedTrails.has(globalIndex) && claim.verification_trail && claim.verification_trail.length > 0 && (
+                      <div style={{
+                        margin: "6px 0", padding: "6px 8px", background: "rgba(0, 0, 0, 0.03)",
+                        borderRadius: 6, border: "1px solid var(--border)", fontSize: 11
+                      }}>
+                        <div style={{ fontWeight: 700, color: "var(--muted)", marginBottom: 4, textTransform: "uppercase", fontSize: 10 }}>
+                          Claim Verification Trail
+                        </div>
+                        {claim.verification_trail.map((entry, idx) => (
+                          <div key={idx} style={{ display: "flex", gap: 6, alignItems: "center", padding: "2px 0", color: "var(--text)" }}>
+                            <span style={{ fontWeight: 700, color: entry.actor === "agent" ? "#7c3aed" : "var(--primary)" }}>
+                              {entry.actor === "agent" ? "🤖 Agent" : "👤 Human"}
+                            </span>
+                            <span style={{ color: "var(--muted)" }}>[{entry.level.toUpperCase()}]</span>
+                            <span>{entry.summary}</span>
+                            <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--muted)" }}>
+                              {entry.timestamp.slice(11, 19)}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>

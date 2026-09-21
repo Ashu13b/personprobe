@@ -121,7 +121,6 @@ def test_coauthor_profile_network_screen():
         display_name = "Other Yadav"
         signature_terms = ["Bharadwaj"]
     nsnap = []
-    import types
     ns = type("NS", (), {"display_name": "Other Yadav", "signature_terms": ["Bharadwaj"]})()
     profile.known_namesakes = [ns]
     got2 = coauthor_source_batch(profile, pages[:0] + [("https://vidwan.example.test/profile/998",

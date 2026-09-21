@@ -10,8 +10,6 @@ subject — no site-specific logic lives here beyond the parser registry.
 from __future__ import annotations
 
 import re
-import uuid
-from datetime import datetime, timezone
 from typing import Iterable, Optional
 
 from .models import PersonProfile, Source, SourceReliability

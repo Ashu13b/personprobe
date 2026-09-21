@@ -8,17 +8,14 @@ hits as sources via /api/research/add-source.
 
 Vidwan-specific; replace the discover* mappers for other registries.
 """
-import re
 import sys
 import time
-import urllib.parse
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
 from openscrape_client import MobileBrowserClient  # noqa: E402
 
 import requests  # noqa: E402
 sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
-import json  # noqa: E402
 from engine.models import PersonProfile  # noqa: E402
 from engine.coauthor_network import coauthor_source_batch  # noqa: E402
 

@@ -904,3 +904,10 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   (some applies not picked up); the eventual successful path: fill the search
   box + have the human tap APPLY (one tap), then scrape paginated links
   (?page=N).
+
+- Tooling gotcha (2026-09-21): editing source files with a python one-liner that
+  does open(p,'w').write(text) truncates the file if an exception fires mid-write
+  (hit once: a surrogate escape in the replacement text raised UnicodeEncodeError
+  after truncation, zeroing ForensicCanvas.tsx; recovered via git checkout).
+  Rule: write to a temp file then os.replace, and avoid \udXXX surrogate escapes
+  in scripts — use real characters or none.

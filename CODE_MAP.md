@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 12:38 UTC · sha ae401de · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 12:40 UTC · sha d6f7a92 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 99 files · 908 symbols
+- Python — 100 files · 912 symbols
 - TypeScript — 36 files · 288 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 140 files · 1199 symbols across 6 languages._
+_Total: 141 files · 1203 symbols across 6 languages._
 
 
 ## Compartments
@@ -130,6 +130,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `scripts/phone_harvest.py` — API, def api_post, def client, def cmd_status, def cmd_scrape, def cmd_ingest, def session_id, def cmd_session, def cmd_cleanup
 - `scripts/prune_generic_sources.py` — SESSION_ID, SESSION_FILE, URLS_TO_PRUNE, def main
 - `scripts/read_last.py` — def main
+- `scripts/throttle_status.py` — rows, lat, throttles, pending
 - `scripts/unblock_verified_sources.py` — SESSION_ID, SESSION_FILE, def main
 ### tests/
 - `tests/conftest.py` — def _isolated_sessions

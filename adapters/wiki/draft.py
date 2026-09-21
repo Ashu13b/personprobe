@@ -355,6 +355,11 @@ def _archive_date(archive_url: str) -> str | None:
 
 
 def _citation(source: Source, used: set[str]) -> str:
+    # A CV is engine input (hypothesis blueprint), not citable evidence; if it ever
+    # leaks into selected evidence, emit no citation so the sentence cannot
+    # carry a self-referencing proof.
+    if getattr(source, "provenance_category", "") == "cv_blueprint":
+        return ""
     name = _ref_name(source.url)
     if name in used:
         return f'<ref name="{name}" />'

@@ -750,6 +750,17 @@ def test_citation_keeps_original_url_and_adds_archive_fields():
     assert "date=5 January 2024" in citation
 
 
+def test_cv_blueprint_never_cited():
+    """A CV is engine input (hypothesis blueprint), never citable evidence."""
+    from engine.models import Source
+    from engine.provenance import classify_source_provenance
+
+    cv = classify_source_provenance(Source(url="file:///home/user/PSYadav-CV_2025.pdf", publisher="Local", title="CV"))
+    assert cv.provenance_category == "cv_blueprint"
+    assert not cv.is_independent
+    assert _citation(cv, set()) == ""
+
+
 def test_title_clean_strips_truncation_before_publisher_suffix():
     from adapters.wiki.draft import _title_clean
 

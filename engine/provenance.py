@@ -84,6 +84,15 @@ def classify_source_provenance(source: Source, subject_name: str = "") -> Source
     url_lower = (source.url or "").lower()
     pub_lower = (source.publisher or "").lower()
 
+    # A CV is engine input — a hypothesis blueprint to verify externally — never
+    # evidence; claims sourced only to it can never satisfy verification alone.
+    if url_lower.startswith("file://"):
+        source.provenance_category = "cv_blueprint"
+        source.is_independent = False
+        source.reliability = SourceReliability.primary
+        return source
+
+
     # Record registries verify that a registry made a recognition, but they are
     # the issuing body rather than independent coverage of the subject.
     try:

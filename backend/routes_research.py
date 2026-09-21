@@ -937,6 +937,18 @@ def verify_source_level(req: VerifySourceLevelRequest) -> dict:
                 summary=f"Subject rejected as wrong person / namesake by {req.actor.title()}" + (f": {req.note}" if req.note else ""),
                 details={"reason": req.note},
             )
+        elif status == "suspect":
+            # suspect keeps human_verified unraised: needs a human re-look before extraction
+            source.relevance_flag = "uncertain" if source.relevance_flag == "likely_wrong" else source.relevance_flag
+            log_source_verification(
+                source,
+                level="identity",
+                actor=req.actor,
+                action="flag_suspect_identity",
+                verdict="warning",
+                summary=f"Identity flagged suspect by {req.actor.title()}" + (f": {req.note}" if req.note else ""),
+                details={"reason": req.note},
+            )
         else:
             from datetime import datetime, timezone
             source.confirmed_for_extraction_by = req.actor

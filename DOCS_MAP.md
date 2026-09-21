@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 11:15 UTC · sha 11a08a1 · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 12:36 UTC · sha 6b8267e · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -178,6 +178,11 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Final cleanup (2026-09-21, second recount)
     - VIDWAN profile fixed (2026-09-21, evening)
     - Co-author network built from the identity-bonded registry (2026-09-21)
+- `research/yadav_archive_hindi_2026.md`
+  - Yadav — Archive & Hindi 2025–26 pass (2026-09-21)
+    - Wayback / Internet Archive — BLOCKED
+    - Hindi / regional press 2025–26 — NEW FIND
+    - Telemetry observations (engine/fetch_telemetry)
 - `research/yadav_archive_news_links.md`
   - Prem Singh Yadav — New Archive / News / Society Links
     - Per-seam results

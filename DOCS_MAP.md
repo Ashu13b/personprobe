@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 04:04 UTC · sha baf3f62 · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 04:35 UTC · sha c46af3b · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -176,3 +176,4 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Identity-candidate rejections (2026-09-21)
     - Body-level name recount (2026-09-21)
     - Final cleanup (2026-09-21, second recount)
+    - VIDWAN profile fixed (2026-09-21, evening)

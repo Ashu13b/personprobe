@@ -897,3 +897,10 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   as identity_status='suspect' and require authorship/affiliation confirmation
   before extraction (identity_strength field on NameVerificationResult).
   Full given-name spell-out alone is 'full' evidence.
+
+- Vidwan navigation (2026-09-21): discovery SPA ignores URL query params; only
+  /profiles?page=N works as filterable list after human-triggered APPLY (SPA
+  POSTs /profiles/apply-filters). Browser-side 'fill' injection is too flaky
+  (some applies not picked up); the eventual successful path: fill the search
+  box + have the human tap APPLY (one tap), then scrape paginated links
+  (?page=N).

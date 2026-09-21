@@ -564,3 +564,16 @@ Confirmed so far: scopus 57225411188, openalex A5111039070, researchgate Prem-Ya
   matrix) · 183 aux, of which ~91 aux-relevant (subject story: ICAR/CIRB, clone
   lineage, ARs, awards, projects) and ~92 aux-other (generic/listy context, not
   story-core). disc registry 77 entries.
+
+## VIDWAN profile fixed (2026-09-21, evening)
+- Correct official Vidwan profile **found and ingested**:
+  https://vidwan.inflibnet.ac.in/profile/249594 — VIDWAN ID 249594, Dr P S Yadav,
+  Principal Scientist (Animal Physiology), ICAR-CIRB Haryana. Scopus ID 57225411188
+  matches session researcher_ids exactly (registry bond).
+- Source added and identity confirmed (agent-verified). Added researcher_ids['vidwan']='249594'.
+- Trap correction: 249583 (A Bharadwaj, close ID neighbor) stayed wrong_person;
+  249590 Sarita Yadav same research-institute cluster; 345748 pagination page.
+  Engine lesson for future runs: number-adjacent ids (±1 digit) of an already-
+  adjudicated wrong-person profile should never be trusted by collision alone —
+  check every profile by discriminator match (affiliation + exact field +
+  scopus/doi overlap), not the id string.

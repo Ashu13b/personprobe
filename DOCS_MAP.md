@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 06:14 UTC · sha 109fa17 · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 07:57 UTC · sha 95a16da · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -178,3 +178,31 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Final cleanup (2026-09-21, second recount)
     - VIDWAN profile fixed (2026-09-21, evening)
     - Co-author network built from the identity-bonded registry (2026-09-21)
+- `research/yadav_archive_news_links.md`
+  - Prem Singh Yadav — New Archive / News / Society Links
+    - Per-seam results
+    - New named links (highest value)
+    - Likely / context (gated or book listings)
+    - Excluded as namesakes (do not use)
+- `research/yadav_icar_pdf_mentions.md`
+  - Yadav ICAR-CIRB PDF/Text Mention Inventory
+    - Per-document counts
+    - Other Yadavs (NOT the subject; kept separate)
+    - 15 most information-dense contexts
+      - 1. Retirement record (2024-25)
+      - 2. NASF Phase-II project code
+      - 3. NASF project budget 450.58 lakh
+      - 4. Nanaji Deshmukh award, Team Leader
+      - 5. Award citation + associates
+      - 6. Award list, date 16.07.2020
+      - 7. India Book of Record 2021
+      - 8. DBT cloned-semen AI project
+      - 9. DBT project sanctioned/expenditure
+      - 10. Seven clones produced (publication)
+      - 11. SAPI Fellow 2015
+      - 12. Role: Principal Scientist & Head
+      - 13. Core cloning project + dates
+      - 14. Course Director, embryology training
+      - 15. Scientific Reports 9:11366
+    - Known-fact cross-check
+    - New factual nuggets (not in the supplied known list)

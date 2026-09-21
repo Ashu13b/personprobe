@@ -103,3 +103,12 @@ def test_fetch_telemetry_cooldown_and_recheck(tmp_path, monkeypatch):
     # an old throttle is out of cooldown
     assert ft.wait_time("https://walled.test/y", cooldown_s=0) == 0.0
     assert ft.pending_rechecks(cooldown_s=0) == []
+
+
+def test_looks_throttled_text_markers():
+    from engine import fetch_telemetry as ft
+    assert ft.looks_throttled("One last step Please solve the challenge below to continue")
+    assert ft.looks_throttled("Your search did not match any documents") is False
+    assert ft.looks_throttled("Temporarily Offline Internet Archive services are temporarily offline")
+    assert ft.looks_throttled("", status=429)
+    assert ft.looks_throttled("normal page text") is False

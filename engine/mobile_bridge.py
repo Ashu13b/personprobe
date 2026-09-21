@@ -58,7 +58,7 @@ def fetch_via_mobile_bridge(url: str, wait_seconds: int = 5) -> Optional[dict[st
     client = get_mobile_client()
     if not client:
         return None
-    from .fetch_telemetry import timed
+    from .fetch_telemetry import timed, looks_throttled
     with timed("phone", url) as t:
         try:
             res = client.navigate(url, wait_seconds=wait_seconds)
@@ -73,8 +73,9 @@ def fetch_via_mobile_bridge(url: str, wait_seconds: int = 5) -> Optional[dict[st
             text = content.get("text", "").strip()
             captcha = bool(dom.get("has_captcha", False))
             t.status = "ok" if text else "empty"
-            t.throttled = captcha
-            t.note = "captcha" if captcha else ("empty render" if not text else "")
+            walled = looks_throttled(text)
+            t.throttled = captcha or walled
+            t.note = "captcha" if captcha else ("throttle text" if walled else ("empty render" if not text else ""))
             return {
                 "title": dom.get("title", ""),
                 "text": text,

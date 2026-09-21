@@ -204,3 +204,28 @@ def pending_rechecks(cooldown_s: int = COOLDOWN_S) -> list[dict]:
     except Exception:
         return []
     return sorted(out.values(), key=lambda r: r["wait_s"])
+
+
+THROTTLE_TEXT_MARKERS = (
+    "solve the challenge",
+    "unusual traffic",
+    "temporarily offline",
+    "too many requests",
+    "one last step",
+    "checking your browser",
+    "verify you are human",
+    "enable javascript and cookies",
+    "access denied",
+)
+
+
+def looks_throttled(text: str, status=None) -> bool:
+    """Heuristic: page/body markers that mean the request was throttled or walled.
+
+    Search engines and archives return challenge/outage pages with HTTP 200, so
+    status alone is not enough; this catches them for telemetry and pacing.
+    """
+    if status == 429:
+        return True
+    low = (text or "").lower()
+    return any(marker in low for marker in THROTTLE_TEXT_MARKERS)

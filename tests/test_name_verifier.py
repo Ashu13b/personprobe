@@ -96,3 +96,34 @@ def test_identity_strength_full_vs_weak():
     )
     assert weak.matched
     assert weak.identity_strength == "weak"
+
+
+def test_coauthor_profile_network_screen():
+    from engine.models import PersonProfile
+    from engine.coauthor_network import coauthor_source_batch
+
+    profile = PersonProfile(name="Prem Singh Yadav", field="Animal Physiology",
+                            affiliation="ICAR-Central Institute for Research on Buffaloes")
+    pages = [
+        ("https://vidwan.example.test/profile/999",
+         "Publications: Fetal Stem Cells in Farm Animals... Authors: P. S. Yadav; R. K. Singh, B. Singh. ICAR-CIRB Hisar"),
+    ]
+    got = coauthor_source_batch(profile, pages)
+    assert len(got) == 1
+    s = got[0]
+    assert s.url == "https://vidwan.example.test/profile/999"
+    assert s.identity_status in ("confirmed", "suspect")
+    assert s.name_hit_in_body is True
+    assert s.name_hit_variant
+
+    # unrelated namesake page must be dropped by the session gate
+    class NS:
+        display_name = "Other Yadav"
+        signature_terms = ["Bharadwaj"]
+    nsnap = []
+    import types
+    ns = type("NS", (), {"display_name": "Other Yadav", "signature_terms": ["Bharadwaj"]})()
+    profile.known_namesakes = [ns]
+    got2 = coauthor_source_batch(profile, pages[:0] + [("https://vidwan.example.test/profile/998",
+        "Dr A Bharadwaj, ICAR-Central Institute for Research on Buffaloes, expertise: Veterinary Sciences")])
+    assert got2 == []

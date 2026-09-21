@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 03:28 UTC · sha 227d006 · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 05:47 UTC · sha 590a034 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 96 files · 881 symbols
+- Python — 97 files · 886 symbols
 - TypeScript — 36 files · 288 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 137 files · 1172 symbols across 6 languages._
+_Total: 138 files · 1177 symbols across 6 languages._
 
 
 ## Compartments
@@ -44,6 +44,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `engine/author_check.py` — CROSSREF_API, TIMEOUT, def name_variants, def _normalise, def _author_matches_variants, def _affiliation_matches, def check_doi_authors, def extract_doi
 - `engine/canonical_url.py` — DOMAIN_ALIAS_MAP, TRACKING_PARAM_PREFIXES, def canonical_url, def is_same_url
 - `engine/classifier.py` — _RS_DOMAINS, _PRIMARY_DOMAINS, _SELF_DOMAINS, _UNRELIABLE_DOMAINS, def _domain_classify, SYSTEM, def classify_sources
+- `engine/coauthor_network.py` — def _coauthor_mention_note, def extract_subject_mentions, def screen_coauthor_page, def coauthor_source_batch
 - `engine/crawler.py` — TIMEOUT, S2_API, class SourceNode, class SourceGraph(to_sources), def crawl, def _extract_meta, def _extract_links, def _extract_dois, def _extract_entities, def _count_mentions, def _is_relevant_link, def _entity_worth_searching, def _search_entity, def _temporal_variants, def _expand_doi
 - `engine/discarded_registry.py` — def record_discarded, def is_discarded, def is_known_or_discarded, def get_known_and_discarded_canonical_urls, def recover_discarded, def get_discarded_by_reason
 - `engine/extractor.py` — WIKI_SLOTS, SLOT_SOURCE_HINTS, def find_missing_slots, SYSTEM, def _validate_and_filter_claims, def filter_person_snippets, def extract_claims, def _deduplicate
@@ -143,7 +144,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_liveness.py` — def test_check_liveness_live, def test_check_liveness_dead_looks_up_wayback, def test_check_liveness_blocked, def test_get_wayback_url_parses_snapshot, def test_audit_excludes_dead_unarchived_source, def test_renderer_cites_wayback_url_for_dead_archived_source
 - `tests/test_llm.py` — def test_extract_claims_is_noop_under_stub, def test_get_provider_uses_vertex_when_available, def test_get_provider_falls_back_to_agent_when_vertex_unavailable
 - `tests/test_multilingual_search.py` — def test_detect_languages, def test_transliterate_name, def test_get_regional_news_outlets, def test_build_bilingual_queries_hindi, def test_build_bilingual_queries_carries_date_and_event_hint_into_hindi, def test_build_bilingual_queries_french, def test_build_bilingual_queries_german
-- `tests/test_name_verifier.py` — def test_generate_name_variants_western, def test_generate_name_variants_indic, def test_verify_name_in_content_exact_and_initials, def test_verify_name_in_content_devanagari, def test_verify_name_no_match, def test_verify_name_homonym_risk, def test_namesake_risk_known_conflict_and_siblings, def test_identity_strength_full_vs_weak
+- `tests/test_name_verifier.py` — def test_generate_name_variants_western, def test_generate_name_variants_indic, def test_verify_name_in_content_exact_and_initials, def test_verify_name_in_content_devanagari, def test_verify_name_no_match, def test_verify_name_homonym_risk, def test_namesake_risk_known_conflict_and_siblings, def test_identity_strength_full_vs_weak, def test_coauthor_profile_network_screen
 - `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls
 - `tests/test_provenance.py` — def test_domain_trust_classification, def test_source_provenance_classification, def test_academic_indexes_never_count_as_independent_news, def test_search_discovery_does_not_make_unknown_site_independent, def test_claim_trust_evaluation, def test_strict_notability_independence, def test_notability_requires_confirmed_claims_and_deduplicates_outlets, def test_notability_keeps_unassessed_candidates_out_of_score, def test_notability_deduplicates_syndicated_editorial_origins, def test_icar_and_cirb_reports_are_institutional_primary_sources, def test_record_registries_are_primary_and_non_independent, def test_meaningful_redirect_detection, def test_fetch_url_source_flags_silent_redirect_trap, def test_fetch_url_source_ignores_normal_redirects, def test_source_assessment_requires_verification_and_persists
 - `tests/test_researcher.py` — def _result, def test_disambiguator_drops_institutional_stopwords, def test_news_sweep_issues_site_restricted_and_hindi_queries, def test_news_sweep_deduplicates_across_queries, def test_news_sweep_respects_limit, def test_targeted_award_search_never_falls_back_to_education_queries, def test_try_browser_server_probes_unified_mount_first, def test_try_browser_server_returns_none_when_no_browser_running, def test_junk_source_url_filter, def test_pick_author_id_returns_none_when_nothing_validates, def test_add_source_with_client_text

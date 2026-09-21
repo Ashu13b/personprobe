@@ -87,3 +87,19 @@ def test_fetch_telemetry_records_and_advises(tmp_path, monkeypatch):
     with ft.timed("http", "https://example.test/slow"):
         pass
     assert len(log.read_text().strip().splitlines()) == 3
+
+
+def test_fetch_telemetry_cooldown_and_recheck(tmp_path, monkeypatch):
+    from engine import fetch_telemetry as ft
+    monkeypatch.setattr(ft, "LOG_PATH", tmp_path / "t.jsonl")
+
+    ft.record("phone", "https://walled.test/x", status="ok", latency_ms=100, throttled=True)
+    assert ft.wait_time("https://walled.test/y") > 0
+    # cooldown delay takes priority over the soft throttle delay
+    assert abs(ft.suggest_delay("https://walled.test/y") - ft.wait_time("https://walled.test/y")) < 2
+    pend = ft.pending_rechecks()
+    assert len(pend) == 1 and pend[0]["host"] == "walled.test" and pend[0]["wait_s"] > 0
+
+    # an old throttle is out of cooldown
+    assert ft.wait_time("https://walled.test/y", cooldown_s=0) == 0.0
+    assert ft.pending_rechecks(cooldown_s=0) == []

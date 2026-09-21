@@ -114,12 +114,93 @@ def recent_throttles(minutes: int = 15, host: str | None = None) -> int:
 def suggest_delay(url_or_host: str, default: float = DEFAULT_DELAY_S) -> float:
     """Advisory gap before the next request to this host.
 
-    Recent throttle events for the host (or globally, as a fallback) raise the
-    delay; a clean recent history keeps the default pace.
+    Priority: an active cooldown from a recent throttle (wait it out), then a
+    soft throttle signal (park briefly), then the default pace.
     """
     host = _host(url_or_host) if "://" in url_or_host else url_or_host
+    cooldown = wait_time(url_or_host)
+    if cooldown > 0:
+        return cooldown
     if host and recent_throttles(host=host) > 0:
         return THROTTLE_DELAY_S
     if recent_throttles() > 2:
         return max(default, THROTTLE_DELAY_S / 2)
     return default
+
+
+COOLDOWN_S = 900  # a throttled host is parked for 15 minutes before any retry
+
+
+def last_throttle_ts(host: str) -> float | None:
+    """Epoch of the most recent throttle event for a host, if any."""
+    if not LOG_PATH.exists():
+        return None
+    latest = None
+    try:
+        for line in LOG_PATH.read_text().splitlines()[-4000:]:
+            try:
+                row = json.loads(line)
+            except Exception:
+                continue
+            if row.get("host") != host or not row.get("throttled"):
+                continue
+            try:
+                epoch = datetime.fromisoformat(row["ts"]).timestamp()
+            except Exception:
+                continue
+            latest = epoch if latest is None else max(latest, epoch)
+    except Exception:
+        return None
+    return latest
+
+
+def wait_time(url_or_host: str, cooldown_s: int = COOLDOWN_S) -> float:
+    """Seconds to wait before this host may be queried again (0 when cleared).
+
+    A throttle parks the host for `cooldown_s`; schedules that respect this
+    simply come back later instead of re-triggering the bot wall.
+    """
+    host = _host(url_or_host) if "://" in url_or_host else url_or_host
+    if not host:
+        return 0.0
+    last = last_throttle_ts(host)
+    if last is None:
+        return 0.0
+    remaining = cooldown_s - (time.time() - last)
+    return max(0.0, remaining)
+
+
+def pending_rechecks(cooldown_s: int = COOLDOWN_S) -> list[dict]:
+    """Hosts currently in cooldown, with when each becomes retryable again.
+
+    A later run (or cron-ish pass) consults this to re-check throttled hosts
+    after the cooldown rather than guessing.
+    """
+    if not LOG_PATH.exists():
+        return []
+    out: dict[str, dict] = {}
+    try:
+        for line in LOG_PATH.read_text().splitlines()[-4000:]:
+            try:
+                row = json.loads(line)
+            except Exception:
+                continue
+            host = row.get("host") or ""
+            if not host or not row.get("throttled"):
+                continue
+            try:
+                epoch = datetime.fromisoformat(row["ts"]).timestamp()
+            except Exception:
+                continue
+            remaining = cooldown_s - (time.time() - epoch)
+            if remaining <= 0:
+                out.pop(host, None)
+                continue
+            out[host] = {
+                "host": host,
+                "recheck_at": datetime.fromtimestamp(epoch + cooldown_s, timezone.utc).isoformat(),
+                "wait_s": round(remaining),
+            }
+    except Exception:
+        return []
+    return sorted(out.values(), key=lambda r: r["wait_s"])

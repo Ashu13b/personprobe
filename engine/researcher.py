@@ -145,6 +145,16 @@ def fetch_url_source(url: str, person_name: str = "") -> tuple[Source, bool]:
         profile_links=profile_links,
     )
 
+    # Name verification on the FULL fetched body, not the truncated snippet —
+    # snippet-only checks undercount pages whose name sits deeper in the text.
+    if person_name:
+        from .name_verifier import verify_name_in_content
+        nv = verify_name_in_content(
+            person_name, result.text[:200_000], title=title,
+        )
+        source.name_hit_in_body = nv.matched
+        source.name_hit_variant = nv.variant
+
     if result.final_url:
         from .relevance import is_meaningful_redirect
         if is_meaningful_redirect(url, result.final_url):

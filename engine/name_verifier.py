@@ -20,6 +20,7 @@ class NameVerificationResult:
     snippet: str = ""
     context_matched: bool = False
     homonym_risk: bool = False
+    identity_strength: str = "weak"  # full: given name spelled out; weak: initials/surname-only
     reason: str = "no_name_match"  # matched | no_name_match | homonym_risk
 
 
@@ -169,21 +170,33 @@ def verify_name_in_content(
     if homonym_risk:
         reason = "homonym_risk"
 
+    # Variant strength: a spelled-out given name is full identity evidence; an
+    # initials/surname-only variant ("P. S. Yadav") is weak — many unrelated
+    # people share the same surname AND institutional context (co-authors at
+    # the same ICAR institutes print identically). Weak matches must be
+    # human adjudicated before extraction.
+    identity_strength = "weak" if _is_initials_only_variant(matched_variant or "") else "full"
+
     return NameVerificationResult(
         matched=True,
         variant=matched_variant,
         snippet=snippet,
         context_matched=context_matched,
         homonym_risk=homonym_risk,
+        identity_strength=identity_strength,
         reason=reason,
     )
 
 
 def _is_initials_only_variant(variant: str) -> bool:
     """True if the matched variant spells the subject by initials, not a full first name."""
+    variant = (variant or "").strip()
+    # Devanagari initials, e.g. "पी. एस. यादव"
+    if re.fullmatch(r"(?:डॉ\.?\s*)?पी\.?\s*ए?स?\.?\s*यादव", variant):
+        return True
     return bool(re.fullmatch(
         r"(?:dr\.?|prof\.?|mr\.?|ms\.?|mrs\.?)?\s*[A-Z]\.?(?:\s*[A-Z]\.)?\s+\S+",
-        (variant or "").strip(),
+        variant,
         re.I,
     ))
 

@@ -68,6 +68,8 @@ class Source(BaseModel):
 
     # Where this source came from
     fetched_by: Optional[str] = None  # semantic_scholar|google_search|duckduckgo|crawl|user
+    name_hit_in_body: Optional[bool] = None   # full-text name verification at fetch time (None = not checked)
+    name_hit_variant: Optional[str] = None    # which name variant matched
 
     # Liveness & archiving (populated by check_liveness at add/verify time)
     liveness: str = "unknown"  # alive | blocked | dead | unknown

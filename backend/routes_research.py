@@ -570,6 +570,9 @@ def deep_crawl(req: CrawlRequest) -> dict:
             record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
             excluded.add(c_url)
         elif graph.relevance_hits.get(s.url, 0) > 0:
+            if v_res.identity_strength == "weak":
+                s.identity_status = "suspect"
+                s.identity_note = "initials/surname-only name match — confirm authorship/affiliation before extraction"
             relevant.append(s)
             excluded.add(c_url)
 
@@ -628,6 +631,9 @@ def targeted_search_endpoint(req: TargetedSearchRequest) -> dict:
             record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
             excluded.add(c_url)
         else:
+            if v_res.identity_strength == "weak":
+                s.identity_status = "suspect"
+                s.identity_note = "initials/surname-only name match — confirm authorship/affiliation before extraction"
             candidate_filtered.append(s)
             excluded.add(c_url)
 
@@ -707,6 +713,9 @@ def auto_enrich_endpoint(body: dict) -> dict:
                 record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
                 excluded.add(c_url)
             else:
+                if v_res.identity_strength == "weak":
+                    s.identity_status = "suspect"
+                    s.identity_note = "initials/surname-only name match — confirm authorship/affiliation before extraction"
                 candidates_to_process.append(s)
                 excluded.add(c_url)
 

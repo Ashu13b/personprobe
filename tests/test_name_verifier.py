@@ -79,3 +79,20 @@ def test_namesake_risk_known_conflict_and_siblings():
     with_authorship = "Novel paradigm paper by Pankaj Yadav and Prem Singh Yadav."
     risk, _ = assess(with_authorship, "Prem Singh Yadav", [], "Prem Singh Yadav")
     assert risk == "possible"  # sibling present regardless — authorship gate applies
+
+
+def test_identity_strength_full_vs_weak():
+    from engine.name_verifier import verify_name_in_content
+
+    full = verify_name_in_content(
+        "Prem Singh Yadav", "Team leader was Dr. Prem Singh Yadav of ICAR-CIRB, Hisar",
+        title="story", affiliation="ICAR-Central Institute for Research on Buffaloes",
+    )
+    assert full.matched and full.identity_strength == "full"
+
+    weak = verify_name_in_content(
+        "Prem Singh Yadav", "authors: Poonam Yadav, Aayush Yadav, P. S. Yadav at ICAR-CIRB",
+        title="article", affiliation="ICAR-Central Institute for Research on Buffaloes",
+    )
+    assert weak.matched
+    assert weak.identity_strength == "weak"

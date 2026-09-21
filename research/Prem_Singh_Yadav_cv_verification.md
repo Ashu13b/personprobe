@@ -538,3 +538,15 @@ citation/publication totals can be re-checked against it.
 - Google Scholar EwoPZhsAAAAJ — "Ravindra Kumar Yadav", University of Delhi (cyanobacteria). NOT our subject.
 - S2 author ids 2238133948 (17 buffalo papers) and 46841787 (57 papers, 30 buffalo) — split S2 disambiguation of our author cluster; do not treat either alone as the canonical profile; OpenAlex A5111039070 remains the canonical id.
 Confirmed so far: scopus 57225411188, openalex A5111039070, researchgate Prem-Yadav-7.
+
+## Body-level name recount (2026-09-21)
+- Snippet/title-level count said ~247 named. Full-body recheck of the 225
+  "aux" sources: +44 actually name him in page HTML, +21 more confirmed by
+  PubMed author-list breakdown ("Yadav PS"/"Yadav, Prem") for pages that are
+  403/203 to plain fetch; ~90 pages remain name-free (clone-lineage,
+  annual-report staff tables, index pages); 11 PDFs still unverified at body
+  level (Sach-Gaurav Current Cheng link etc.).
+- Corrected named-link tally: ~312 of 503. Engine lesson: name presence must
+  be assessed on fetched body text at ingest time, not the stored truncated
+  snippet — `verify_name_in_content` already does exactly that; sessions
+  created before this rule had the snippet-only drift.

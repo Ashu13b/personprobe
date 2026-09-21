@@ -42,6 +42,7 @@ from .routes_browser import (  # noqa: F401
     captcha_solved, last_captcha_solved, browser_router,
 )
 from .routes_forensics import forensics_router  # noqa: F401
+from .routes_ops import ops_router  # noqa: F401
 
 api_app = FastAPI(title="personprobe")
 api_app.add_middleware(
@@ -55,6 +56,7 @@ api_app.include_router(draft_router)
 api_app.include_router(sessions_router)
 api_app.include_router(browser_router)
 api_app.include_router(forensics_router)
+api_app.include_router(ops_router)
 
 
 # ── Unified App setup ───────────────────────────────────────────────────────

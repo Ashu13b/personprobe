@@ -193,6 +193,10 @@ export function SourceCard({ source, sourceNumber, profileName, linkOpened, onLi
                 <span style={{ color: "#dc2626", fontWeight: 600 }}>
                   ❌ Wrong Person
                 </span>
+              ) : source.identity_status === "suspect" ? (
+                <span style={{ color: "#b45309", fontWeight: 600 }} title={source.identity_note || "Initials/surname-only name match — confirm authorship/affiliation before extraction"}>
+                  ⚠️ Suspect — initials-only match, verify author/affiliation
+                </span>
               ) : (
                 <span style={{ color: "var(--muted)" }}>⚪ Empty / Unverified</span>
               )}
@@ -206,6 +210,10 @@ export function SourceCard({ source, sourceNumber, profileName, linkOpened, onLi
               {source.provenance_by === "human" || (source.coverage_depth && source.coverage_depth !== "unassessed") ? (
                 <span style={{ color: "#059669", fontWeight: 600 }}>
                   📰 {source.coverage_depth === "significant" ? "Significant" : "Passing"} [👤 Human]
+                </span>
+              ) : source.provenance_category === "cv_blueprint" ? (
+                <span style={{ color: "#0369a1", fontWeight: 600 }} title="A CV is engine input (hypothesis blueprint to verify externally) — never citable evidence">
+                  📋 Input (CV) — not evidence
                 </span>
               ) : source.provenance_category ? (
                 <span style={{ color: "#475569", fontWeight: 600 }}>

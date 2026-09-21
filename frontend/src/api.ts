@@ -615,3 +615,18 @@ export async function logInquiryFailure(
 }
 
 
+
+export type FetchTelemetry = {
+  rows: number;
+  avg_latency_ms: number;
+  max_latency_ms: number;
+  throttle_events: number;
+  by_transport: Record<string, { count: number; latency_ms: number; throttles: number; avg_latency_ms?: number }>;
+  pending_rechecks: { host: string; recheck_at: string; wait_s: number }[];
+};
+
+export async function getFetchTelemetry(): Promise<FetchTelemetry> {
+  const r = await fetch("/api/ops/fetch-telemetry");
+  if (!r.ok) throw new Error(`telemetry fetch failed: ${r.status}`);
+  return r.json();
+}

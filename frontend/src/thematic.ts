@@ -162,7 +162,7 @@ export function filterSources(
   selectedCategory: ThematicCategory,
   searchQuery: string,
   filterLiveness: "all" | "alive" | "dead" | "blocked" = "all",
-  filterStatus: "all" | "verified" | "has_claims" | "independent" = "all"
+  filterStatus: "all" | "verified" | "has_claims" | "independent" | "suspect" = "all"
 ): { source: Source; index: number; attachedClaims: Claim[]; categories: ThematicCategory[] }[] {
   const claimsByUrl = new Map<string, Claim[]>();
   for (const c of claims) {
@@ -196,6 +196,7 @@ export function filterSources(
       if (filterStatus === "verified" && !source.human_verified) return false;
       if (filterStatus === "has_claims" && attachedClaims.length === 0) return false;
       if (filterStatus === "independent" && !source.is_independent) return false;
+      if (filterStatus === "suspect" && source.identity_status !== "suspect") return false;
 
       // Keyword Search
       if (query) {

@@ -56,6 +56,7 @@ const LEAD_CATEGORY_META: Record<string, { label: string; icon: string; badge: s
   annual_report: { label: "Institute Annual Reports", icon: "📑", badge: "#f1f5f9" },
   electoral_gazette: { label: "Electoral & Housing", icon: "📍", badge: "#fee2e2" },
   legal_tribunal: { label: "CAT & Tribunal Orders", icon: "⚖️", badge: "#f3e8ff" },
+  coauthor_network: { label: "Co-author Network", icon: "🤝", badge: "#e0f2fe" },
   general_lead: { label: "Research Lead", icon: "🔍", badge: "#f8fafc" },
 };
 

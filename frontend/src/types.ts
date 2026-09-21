@@ -41,7 +41,7 @@ export interface Source {
   human_verified: boolean;
   is_independent?: boolean;
   domain_trust?: "high" | "medium" | "low" | "untrusted";
-  provenance_category?: "independent_secondary" | "authored_publication" | "institutional_bio" | "self_published" | "general_web";
+  provenance_category?: "independent_secondary" | "authored_publication" | "institutional_bio" | "self_published" | "general_web" | "cv_blueprint" | "record_registry";
   fetched_by: SourceFetchedBy;
   author_match_status: "confirmed" | "possible" | "wrong_person" | "not_found" | "no_data" | null;
   author_match_name: string | null;

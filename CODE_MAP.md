@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 12:40 UTC · sha d6f7a92 · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 14:15 UTC · sha eaad4d6 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 100 files · 912 symbols
-- TypeScript — 36 files · 288 symbols
+- Python — 101 files · 914 symbols
+- TypeScript — 32 files · 264 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 141 files · 1203 symbols across 6 languages._
+_Total: 138 files · 1181 symbols across 6 languages._
 
 
 ## Compartments
@@ -35,6 +35,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `backend/routes_browser.py` — browser_router, _last_captcha_solved, def captcha_solved, def last_captcha_solved
 - `backend/routes_draft.py` — draft_router, def draft_audit, def generate_draft, def draft_links, def draft_preview, def draft_qa, def draft_verify
 - `backend/routes_forensics.py` — forensics_router, def get_forensics_summary, def add_pivot, def delete_pivot, def add_auxiliary_lead, def update_auxiliary_lead, def promote_lead_to_source, def delete_auxiliary_lead, def run_forensic_sweep, def generate_inquiries, def add_inquiry, def update_inquiry, def log_inquiry_failure, def delete_inquiry, def probe_inquiry, def probe_all_inquiries, def get_atlas, def get_subject_record_matrix, def expand_civic_inquiries, def create_or_update_repository, def remove_custom_repository
+- `backend/routes_ops.py` — ops_router, def get_fetch_telemetry
 - `backend/routes_research.py` — research_router, def _namesake_check, def identify, def _find_resumable_session, def _enrich_and_flag_sources, def _populate_initial_sources, def research_start, def add_source, def add_document_fact, def add_sourced_claim, def verify_claim, def batch_verify_claims, def add_source_paste, def deep_crawl, def targeted_search_endpoint, def auto_enrich_endpoint, def article_proposal, def list_namesakes, def get_session, def verify_source, def verify_source_level, def get_verification_summary, def reject_source, def skip_suggestion, def get_discarded_sources_endpoint, def recover_discarded_endpoint, def get_lifecycle_audit_endpoint, def get_mobile_bridge_status_endpoint, def find_researcher_ids_endpoint, def refresh_papers_endpoint, def fetch_from_browser, def fetch_blocked, def suggest_urls, def assess_source, def add_namesake, def delete_namesake, def list_namesakes
 - `backend/routes_sessions.py` — sessions_router, def resume_session, def list_sessions, def delete_session
 - `backend/schemas.py` — class IdentifyRequest, class ResearchRequest, class AddSourceRequest, class AddNamesakeRequest, class DeleteNamesakeRequest, class AssessSourceRequest, class VerifySourceLevelRequest, class AddDocumentFact, class AddSourcedClaimRequest, class VerifyClaimRequest, class BatchVerifyClaimsRequest, class AddSourcePaste, class CrawlRequest, class TargetedSearchRequest, class DraftRequest, class FindIdsRequest, class RefreshPapersRequest, class AddInvestigationPivotRequest, class AddAuxiliaryLeadRequest, class UpdateAuxiliaryLeadRequest, class RunForensicSweepRequest, class PromoteLeadToSourceRequest, class AddForensicInquiryRequest, class UpdateForensicInquiryRequest, class LogInquiryFailureRequest, class ProbeForensicInquiryRequest
@@ -72,27 +73,23 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### frontend/
 - `frontend/index.html` — #root
 - `frontend/src/App.tsx` — ErrorBoundaryProps, ErrorBoundaryState, ErrorBoundary, constructor, getDerivedStateFromError, componentDidCatch, render, Stage, MainApp, handleMessage, handleConfirmed, handleResearchDone, handleDraft, handleReset, App
-- `frontend/src/api.ts` — apiPost, apiGet, apiDelete, apiPatch, IdentifyResult, identifyPerson, startResearch, getSession, addSource, fetchFromBrowser, fetchBlockedSources, skipSuggestion, addSourcePaste, deepCrawl, verifyClaim, batchVerifyClaims, verifySource, verifySourceLevel, getVerificationSummary, assessSource, rejectSource, getDraftAudit, getDraftLinks, getDraftPreview, getDraftQa, generateDraft, ClaimCoverage, ArticleProposal, getArticleProposal, SessionSummary, profileRef, listSessions, resumeSession, deleteSession, TargetedSearchResponse, addDocumentFact, targetedSearch, ResearcherIdsResponse, findResearcherIds, RefreshPapersResponse, refreshPapers, suggestUrls, AutoEnrichResponse, autoEnrich, getLifecycleAudit, getDiscardedSources, recoverDiscardedSource, getMobileBridgeStatus, getForensicsSummary, addInvestigationPivot, deleteInvestigationPivot, addAuxiliaryLead, updateAuxiliaryLead, deleteAuxiliaryLead, runForensicSweep, promoteLeadToSource, generateForensicInquiries, addForensicInquiry, updateForensicInquiry, deleteForensicInquiry, … +8 more
+- `frontend/src/api.ts` — apiPost, apiGet, apiDelete, apiPatch, IdentifyResult, identifyPerson, startResearch, getSession, addSource, fetchFromBrowser, fetchBlockedSources, skipSuggestion, addSourcePaste, deepCrawl, verifyClaim, batchVerifyClaims, verifySource, verifySourceLevel, getVerificationSummary, assessSource, rejectSource, getDraftAudit, getDraftLinks, getDraftPreview, getDraftQa, generateDraft, ClaimCoverage, ArticleProposal, getArticleProposal, SessionSummary, profileRef, listSessions, resumeSession, deleteSession, TargetedSearchResponse, addDocumentFact, targetedSearch, ResearcherIdsResponse, findResearcherIds, RefreshPapersResponse, refreshPapers, suggestUrls, AutoEnrichResponse, autoEnrich, getLifecycleAudit, getDiscardedSources, recoverDiscardedSource, getMobileBridgeStatus, getForensicsSummary, addInvestigationPivot, deleteInvestigationPivot, addAuxiliaryLead, updateAuxiliaryLead, deleteAuxiliaryLead, runForensicSweep, promoteLeadToSource, generateForensicInquiries, addForensicInquiry, updateForensicInquiry, deleteForensicInquiry, … +10 more
 - `frontend/src/components/ArticleProposal.tsx` — ArticleProposalView
 - `frontend/src/components/BookmarkletCard.tsx` — BookmarkletCard, handleCopy
 - `frontend/src/components/ClaimsReview.tsx` — FilterTab, ClaimsReview, toggleTrail, doVerify, handleBatchAction, ActionBtn
-- `frontend/src/components/ClaimsTab.tsx` — Mode, ClaimsTab
 - `frontend/src/components/DiscardedTab.tsx` — Props, DiscardedTab, loadDiscarded, handleRecover
 - `frontend/src/components/DraftAndOutputs.tsx` — Props, OutputSubTab, DraftAndOutputs, handleCopyWikitext, handleCopyAfc, handleCopyDossier, handleDownloadDossier
 - `frontend/src/components/DraftLinks.tsx` — DraftLinkRow, DraftWikilinkRow, DraftLinks, toggleVerified
 - `frontend/src/components/DraftPreview.tsx` — Props, DraftPreview, copy
 - `frontend/src/components/DraftQa.tsx` — DraftQa
 - `frontend/src/components/EvidenceWorkspace.tsx` — Props, EvidenceWorkspace, handleAddUrl, handleAddPaste, handleCrawl, handleAutoEnrichSlots, refreshProfile
+- `frontend/src/components/FetchOpsPanel.tsx` — FetchOpsPanel, load
 - `frontend/src/components/ForensicCanvas.tsx` — Props, ForensicCanvas, handleGenerateInquiries, handleProbeInquiry, handleProbeAllInquiries, handleExpandCivic, handleToggleAtlas, handleAddRepoSubmit, handleDeleteRepo, handleLogFailureSubmit, handleUpdateInquiryStatus, handleDeleteInquiry, handleAddInquirySubmit, handleAddPivotSubmit, handleDeletePivot, handleAddLeadSubmit, handleUpdateLeadStatus, handleDeleteLead, handlePromoteLead, handleRunSweep
 - `frontend/src/components/GuideTab.tsx` — GuideTab
 - `frontend/src/components/LifecycleAuditCard.tsx` — Props, LifecycleAuditCard, handleStageClick, loadData
 - `frontend/src/components/LivingDossier.tsx` — Props, DossierViewMode, BioChapter, LivingDossier
 - `frontend/src/components/ProfileTab.tsx` — ProfileTab, setMode, handleSearch, handleAddUrl, handleManual, ResearcherIdsStrip
-- `frontend/src/components/ResearchOperationsCard.tsx` — ResearchOperationsCard
 - `frontend/src/components/SourceCard.tsx` — SourceCard, handleVerify, handleReject, handleAssess, handleVerifyIdentity, RelevanceBadge, FetchedByTag, AuthorMatchBadge, PipeStep, PipeConnector
-- `frontend/src/components/SourcesPanel.tsx` — SourceCategory, categorizeSource, SourcesPanel, loadSuggestions, handleApproveSuggestion, handleAddUrl, handleAddPaste, handleCrawl, handleFetchFromBrowser, handleAutoFetchBlocked, handleFindIds, handleRefreshPapers, viewInBrowser
-- `frontend/src/components/StageHeader.tsx` — StageHeaderProps, StepItem, StepIndicator, StageHeader
-- `frontend/src/components/SummaryTab.tsx` — Tab, Props, SummaryTab, buildResearchDossier, claimLine, section, downloadResearchDossier, StatTile
 - `frontend/src/components/TimelineTab.tsx` — parseFirstYear, TimelineTab, TLEvent, GapInfo, EventRow, GapRow, handleFillGap
 - `frontend/src/components/WorkspaceCards.tsx` — Expander, NotabilityBadge, NotabilityCard, SaturationCard, DraftReadinessCard, ChecklistCard, TabBtn
 - `frontend/src/components/WorkspaceStatusBanner.tsx` — WorkspaceStatusBanner

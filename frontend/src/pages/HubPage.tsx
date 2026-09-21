@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { PersonProfile, WikiStatus, DraftAudit } from "../types";
 import { generateDraft, getDraftAudit, profileRef } from "../api";
 import WorkspaceStatusBanner from "../components/WorkspaceStatusBanner";
+import FetchOpsPanel from "../components/FetchOpsPanel";
 import EvidenceWorkspace from "../components/EvidenceWorkspace";
 import LivingDossier from "../components/LivingDossier";
 import ForensicCanvas from "../components/ForensicCanvas";
@@ -230,6 +231,8 @@ export default function HubPage({
 
       {/* Wikipedia Status Alert */}
       <WorkspaceStatusBanner wikiStatus={wikiStatus} />
+
+      <FetchOpsPanel />
 
       {/* Primary 3-Step Guided Workflow Bar */}
       <nav

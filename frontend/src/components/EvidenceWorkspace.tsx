@@ -31,7 +31,7 @@ export default function EvidenceWorkspace({
   const [selectedCategory, setSelectedCategory] = useState<ThematicCategory>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [livenessFilter, setLivenessFilter] = useState<"all" | "alive" | "dead" | "blocked">("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | "verified" | "has_claims" | "independent">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "verified" | "has_claims" | "independent" | "suspect">("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Add source controls
@@ -510,6 +510,7 @@ export default function EvidenceWorkspace({
                 <option value="verified">Verified only</option>
                 <option value="has_claims">Has extracted facts</option>
                 <option value="independent">Independent media only</option>
+                <option value="suspect">⚠️ Suspect identity (needs check)</option>
               </select>
 
               <select

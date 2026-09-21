@@ -1,7 +1,7 @@
 """Pydantic request/response models for the personprobe API."""
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, Optional
 
 
@@ -27,6 +27,23 @@ class AddSourceRequest(BaseModel):
     url: str
     title: Optional[str] = None
     text: Optional[str] = None
+
+
+class AddNamesakeRequest(BaseModel):
+    """Session-scoped same-name-different-person signature (engine input)."""
+    profile_name: str
+    display_name: str
+    signature_terms: list[str] = Field(default_factory=list)
+    distinguishing_traits: list[str] = Field(default_factory=list)
+    notes: Optional[str] = None
+    namesake_id: Optional[str] = None
+    actor: Optional[Literal["human", "agent", "system"]] = "human"
+
+
+class DeleteNamesakeRequest(BaseModel):
+    profile_name: str
+    namesake_id: str
+
 
 
 class AssessSourceRequest(BaseModel):

@@ -10,12 +10,12 @@ from .schemas import (
     IdentifyRequest, ResearchRequest, AddSourceRequest, AddDocumentFact,
     AddSourcedClaimRequest, VerifyClaimRequest, BatchVerifyClaimsRequest, AddSourcePaste, CrawlRequest,
     TargetedSearchRequest, FindIdsRequest, RefreshPapersRequest, AssessSourceRequest,
-    VerifySourceLevelRequest,
+    VerifySourceLevelRequest, AddNamesakeRequest, DeleteNamesakeRequest,
 )
 
 from engine.models import (
     PersonProfile, Claim, VerificationState, SourceReliability,
-    log_source_verification, log_claim_verification,
+    log_source_verification, log_claim_verification, KnownNamesake,
 )
 from engine.researcher import (
     fetch_auto_sources, fetch_url_source, fetch_url_source_with_paste,
@@ -39,10 +39,15 @@ from engine.discarded_registry import (
     get_known_and_discarded_canonical_urls,
     recover_discarded,
 )
-from engine.name_verifier import verify_name_in_content
+from engine.name_verifier import verify_name_in_content, assess_namesake_risk
 from adapters.wiki.wiki_check import check_existing_page
 
 research_router = APIRouter()
+
+
+def _namesake_check(profile, content: str, title: str = "", matched_variant: str | None = None):
+    """Session-scoped namesake screen: known_conflict drops the source, possible flags it."""
+    return assess_namesake_risk(f"{title}\n{content}", profile.name, profile.known_namesakes, matched_variant)
 
 @research_router.post("/identify")
 def identify(req: IdentifyRequest) -> dict:
@@ -245,6 +250,14 @@ def add_source(req: AddSourceRequest) -> dict:
         source, blocked = fetch_url_source(url, profile.name)
     [source] = _enrich_and_flag_sources([source], profile.name, profile.field or "", profile.affiliation or "")
     source.liveness = "blocked" if blocked else "alive"
+
+    risk, risk_note = _namesake_check(profile, source.snippet or "", source.title or "", source.identity_note)
+    if risk == "known_conflict":
+        record_discarded(profile, url, reason="namesake", title=source.title, snippet=source.snippet, name_checked=profile.name)
+        raise HTTPException(409, {"message": "Source text matches a session-known namesake; not attached.", "note": risk_note})
+    if risk == "possible":
+        source.identity_status = "suspect"
+        source.identity_note = risk_note
 
     # Extract researcher IDs from the new URL (e.g. user pastes an ORCID link)
     new_ids = {
@@ -553,6 +566,9 @@ def deep_crawl(req: CrawlRequest) -> dict:
                 name_checked=profile.name,
             )
             excluded.add(c_url)
+        elif _namesake_check(profile, s.snippet or "", s.title or "")[0] == "known_conflict":
+            record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
+            excluded.add(c_url)
         elif graph.relevance_hits.get(s.url, 0) > 0:
             relevant.append(s)
             excluded.add(c_url)
@@ -607,6 +623,9 @@ def targeted_search_endpoint(req: TargetedSearchRequest) -> dict:
                 snippet=s.snippet,
                 name_checked=profile.name,
             )
+            excluded.add(c_url)
+        elif _namesake_check(profile, s.snippet or "", s.title or "")[0] == "known_conflict":
+            record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
             excluded.add(c_url)
         else:
             candidate_filtered.append(s)
@@ -684,6 +703,9 @@ def auto_enrich_endpoint(body: dict) -> dict:
                     name_checked=profile.name,
                 )
                 excluded.add(c_url)
+            elif _namesake_check(profile, s.snippet or "", s.title or "", v_res.variant)[0] == "known_conflict":
+                record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
+                excluded.add(c_url)
             else:
                 candidates_to_process.append(s)
                 excluded.add(c_url)
@@ -742,6 +764,12 @@ def article_proposal(body: dict) -> dict:
 
     proposal = build_article_proposal(profile, title, url, article_text)
     return {"proposal": proposal.model_dump()}
+
+@research_router.get("/session/namesakes")
+def list_namesakes(profile_name: str) -> dict:
+    profile = store._get_profile(profile_name)
+    return {"namesakes": [n.model_dump() for n in profile.known_namesakes]}
+
 
 @research_router.get("/session/{name}")
 def get_session(name: str) -> dict:
@@ -1353,3 +1381,42 @@ def assess_source(req: AssessSourceRequest) -> dict:
         "notability": profile.notability.model_dump() if profile.notability else None,
     }
 
+
+
+@research_router.post("/session/namesakes")
+def add_namesake(req: AddNamesakeRequest) -> dict:
+    """Add a session-scoped namesake signature. Ingest then auto-screens against it."""
+    import uuid as _uuid
+    profile = store._get_profile(req.profile_name)
+    from datetime import datetime, timezone
+    namesake = KnownNamesake(
+        namesake_id=req.namesake_id or f"ns-{_uuid.uuid4().hex[:8]}",
+        display_name=req.display_name.strip(),
+        signature_terms=[t.strip() for t in req.signature_terms if t.strip()],
+        distinguishing_traits=[t.strip() for t in req.distinguishing_traits if t.strip()],
+        notes=req.notes,
+        created_by=req.actor or "human",
+        created_at=datetime.now(timezone.utc).isoformat(),
+    )
+    if any(ns.namesake_id == namesake.namesake_id for ns in profile.known_namesakes):
+        raise HTTPException(409, f"Namesake {namesake.namesake_id} already exists")
+    profile.known_namesakes.append(namesake)
+    store._save_session(profile)
+    return {"ok": True, "namesakes": [n.model_dump() for n in profile.known_namesakes]}
+
+
+@research_router.delete("/session/namesakes/{namesake_id}")
+def delete_namesake(namesake_id: str, profile_name: str) -> dict:
+    profile = store._get_profile(profile_name)
+    before = len(profile.known_namesakes)
+    profile.known_namesakes = [n for n in profile.known_namesakes if n.namesake_id != namesake_id]
+    if len(profile.known_namesakes) == before:
+        raise HTTPException(404, f"Namesake {namesake_id} not found")
+    store._save_session(profile)
+    return {"ok": True, "namesakes": [n.model_dump() for n in profile.known_namesakes]}
+
+
+@research_router.get("/session/namesakes")
+def list_namesakes(profile_name: str) -> dict:
+    profile = store._get_profile(profile_name)
+    return {"namesakes": [n.model_dump() for n in profile.known_namesakes]}

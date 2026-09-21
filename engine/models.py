@@ -118,6 +118,22 @@ class DiscardedSource(BaseModel):
     date_recorded: Optional[str] = None
 
 
+class KnownNamesake(BaseModel):
+    """A documented same-name different person this session must never attach evidence to.
+
+    Namesake adjudications live with the session (per-person), so a fresh
+    subject researches without inheriting another person's traps. The engine
+    reads these signatures mechanically at ingest time.
+    """
+    namesake_id: str
+    display_name: str                     # "Prem Singh Yadav (CBI matter, Delhi)"
+    signature_terms: list[str] = Field(default_factory=list)  # terms that in page text signal this namesake
+    distinguishing_traits: list[str] = Field(default_factory=list)
+    notes: Optional[str] = None
+    created_by: str = "human"             # human | agent | system
+    created_at: Optional[str] = None
+
+
 class Claim(BaseModel):
     text: str
     field: str  # birth_date, affiliation, award, publication, education, position, etc.
@@ -317,6 +333,10 @@ class PersonProfile(BaseModel):
     investigation_pivots: list[InvestigationPivot] = Field(default_factory=list)
     auxiliary_leads: list[AuxiliaryLead] = Field(default_factory=list)
     forensic_inquiries: list[ForensicInquiry] = Field(default_factory=list)
+
+    # Session-scoped namesake signatures: engine screens every incoming source
+    # against these mechanically (person-specific facts live here, not in docs)
+    known_namesakes: list[KnownNamesake] = Field(default_factory=list)
 
     # Notability (informational — never a hard gate)
     notability: Optional[NotabilityResult] = None

@@ -54,3 +54,28 @@ def test_verify_name_homonym_risk():
     assert res.context_matched is False
     assert res.homonym_risk is True
     assert res.reason == "homonym_risk"
+
+
+def test_namesake_risk_known_conflict_and_siblings():
+    from engine.name_verifier import assess_namesake_risk as assess
+
+    class FakeSession:
+        display_name = "P.S. Yadav (CBI matter, Delhi)"
+        signature_terms = ["CBI", "2011 (2) JCC 1059"]
+
+    plain = "Dr. Prem Singh Yadav headed CIRB buffalo cloning at ICAR-CIRB Hisar."
+    assert assess(plain, "Prem Singh Yadav", [], "Prem Singh Yadav") == ("none", None)
+
+    court_page = "S.K. Saini vs C.B.I. ... 'Prem Singh Yadav Vs. CBI, 2011 (2) JCC 1059' - High Court judgement"
+    risk, note = assess(court_page, "Prem Singh Yadav", [FakeSession()], "")
+    assert risk == "known_conflict"
+    assert "CBI" in (note or "")
+
+    sibling = "A novel paradigm paper by Pankaj Yadav (CIRB) reports cloned buffalo performance."
+    risk, note = assess(sibling, "Prem Singh Yadav", [], "")
+    assert risk == "possible"
+    assert "Pankaj" in (note or "")
+
+    with_authorship = "Novel paradigm paper by Pankaj Yadav and Prem Singh Yadav."
+    risk, _ = assess(with_authorship, "Prem Singh Yadav", [], "Prem Singh Yadav")
+    assert risk == "possible"  # sibling present regardless — authorship gate applies

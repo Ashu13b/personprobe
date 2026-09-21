@@ -886,3 +886,5 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   independent sources → notability rs_count 15, label "Strong coverage".
   Engine guard: get_wayback_url never returns wildcard */timestamp snapshots
   (they break cite archive-url).
+
+- Namesake adjudications for the Yadav session moved to session data (profile.known_namesakes, seeded via POST /api/session/namesakes) and research/Prem_Singh_Yadav_cv_verification.md — the engine screens every ingest against these signatures automatically (engine/name_verifier.assess_namesake_risk).

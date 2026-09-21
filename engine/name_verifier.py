@@ -177,3 +177,58 @@ def verify_name_in_content(
         homonym_risk=homonym_risk,
         reason=reason,
     )
+
+
+def _is_initials_only_variant(variant: str) -> bool:
+    """True if the matched variant spells the subject by initials, not a full first name."""
+    return bool(re.fullmatch(
+        r"(?:dr\.?|prof\.?|mr\.?|ms\.?|mrs\.?)?\s*[A-Z]\.?(?:\s*[A-Z]\.)?\s+\S+",
+        (variant or "").strip(),
+        re.I,
+    ))
+
+
+def assess_namesake_risk(
+    text: str,
+    subject_name: str,
+    known_namesakes,
+    matched_variant: Optional[str] = None,
+) -> tuple[str, Optional[str]]:
+    """Classify namesake-collision risk for a candidate source.
+
+    Returns (risk, note). risk:
+      - "known_conflict": page text matches a session namesake signature — do not attach.
+      - "possible": subject reached only by initials-with-shared-surname, or a
+        spelled-out same-surname sibling appears in the same text (authorship-level
+        confirmation needed before extraction).
+      - "none": full-name (or honorific + full first name) evidence.
+    """
+    content = (text or "").strip()
+    if not content:
+        return "none", None
+
+    for ns in known_namesakes:
+        hit = next((t for t in ns.signature_terms if t and t.lower() in content.lower()), None)
+        if hit:
+            return "known_conflict", f"{ns.display_name}: matched signature term '{hit}'"
+
+    # A spelled-out same-surname sibling (e.g. "Pankaj Yadav" next to "P.S. Yadav")
+    # in the same page is a disambiguation hazard even when the records look right.
+    surname = (subject_name.split()[-1] if subject_name.strip() else "").lower()
+    if surname and _is_initials_only_variant(matched_variant or ""):
+        return "possible", f"matched variant '{matched_variant}' gives only initials for a shared surname"
+
+    if surname:
+        subject_tokens = [t.lower().strip(".") for t in subject_name.split()]
+        spelled_out = re.findall(rf"\b([A-Za-z]+)\s+{re.escape(subject_name.split()[-1])}\b", content, re.I)
+        for first in spelled_out:
+            first_low = first.lower()
+            # same-surname sibling only if the preceding token is a given name
+            # that is not part of the subject's own name (e.g. "Singh Yadav")
+            if first.lower() not in subject_tokens and len(first) > 2:
+                return "possible", (
+                    f"text also names a same-surname person '{first.title()} {subject_name.split()[-1]}' — "
+                    "confirm authorship/affiliation before attaching"
+                )
+
+    return "none", None

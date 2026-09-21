@@ -2,8 +2,10 @@ import { useState, useMemo } from "react";
 import type { PersonProfile, Claim } from "../types";
 import { ProfileTab } from "./ProfileTab";
 import ClaimsReview from "./ClaimsReview";
+import FactClusters from "./FactClusters";
 import TimelineTab from "./TimelineTab";
 import { safeHref } from "../url";
+import { getSession, profileRef } from "../api";
 
 interface Props {
   profile: PersonProfile;
@@ -393,6 +395,13 @@ export default function LivingDossier({
 
       {/* Review Queue Mode */}
       {viewMode === "review" && (
+        <>
+        <FactClusters
+          profile={profile}
+          onChanged={() => {
+            getSession(profileRef(profile)).then(onProfileUpdate).catch(() => {});
+          }}
+        />
         <ClaimsReview
           claims={profile.claims}
           allClaims={profile.claims}
@@ -400,6 +409,7 @@ export default function LivingDossier({
           onProfileUpdate={onProfileUpdate}
           emptyMessage="No claims have been collected."
         />
+        </>
       )}
 
       {/* Timeline Mode */}

@@ -1441,3 +1441,128 @@ def delete_namesake(namesake_id: str, profile_name: str) -> dict:
 def list_namesakes(profile_name: str) -> dict:
     profile = store._get_profile(profile_name)
     return {"namesakes": [n.model_dump() for n in profile.known_namesakes]}
+
+
+@research_router.get("/research/claim-clusters")
+def get_claim_clusters(profile_name: str) -> dict:
+    """Fact clusters: one fact, every supporting link, ranked best-citation first."""
+    from engine.claim_selection import build_claim_clusters
+    profile = store._get_profile(profile_name)
+    clusters = build_claim_clusters(profile)
+    return {
+        "clusters": clusters,
+        "multi_link": sum(1 for c in clusters if c["link_count"] > 1),
+        "total_facts": len(clusters),
+    }
+
+
+@research_router.post("/research/claim-clusters/select-source")
+def select_cluster_source(body: dict) -> dict:
+    """Rebind one claim to a better-ranked source for the same fact.
+
+    Honesty invariant: rebinding invalidates verification and draft approval for
+    that claim (the settled quote belonged to the previous source), so the fact
+    must be re-verified before it can enter the draft again.
+    """
+    profile = store._get_profile(body["profile_name"])
+    try:
+        idx = int(body["claim_index"])
+    except (KeyError, TypeError, ValueError):
+        raise HTTPException(400, "claim_index is required")
+    if idx < 0 or idx >= len(profile.claims):
+        raise HTTPException(400, "claim_index out of range")
+    new_url = (body.get("source_url") or "").strip()
+    if not new_url:
+        raise HTTPException(400, "source_url is required")
+    source = next((s for s in profile.sources if s.url == new_url), None)
+    if source is None:
+        raise HTTPException(404, f"Source not found in this session: {new_url}")
+
+    claim = profile.claims[idx]
+    previous_url = claim.source_url
+    claim.source_url = new_url
+    claim.verification = VerificationState.unverified
+    claim.settled_quote = None
+    claim.draft_approved = False
+    claim.draft_text = None
+    claim.draft_approved_by = None
+    claim.verified_by = None
+    log_claim_verification(
+        claim,
+        level="claim",
+        actor=body.get("actor", "human"),
+        action="rebind_source",
+        verdict="warning",
+        summary=f"Fact rebound to better-ranked source ({new_url[:80]}); re-verification required",
+        details={"previous_source_url": previous_url, "new_source_url": new_url},
+    )
+    profile.notability = score_notability(profile.name, profile.sources, profile.claims)
+    store._save_session(profile)
+    return {
+        "ok": True,
+        "claim_index": idx,
+        "claim": claim.model_dump(),
+        "best_source_url": new_url,
+    }
+
+
+@research_router.post("/research/claim-clusters/select-best-all")
+def select_best_all(body: dict) -> dict:
+    """Upgrade every multi-link fact to its best-ranked link (dry-run by default).
+
+    Only *upgrades* are applied: the best link must out-rank the fact's current
+    source. Rebinding clears that claim's verification/approval (honesty
+    invariant) so the change is visible in the review queue.
+    """
+    from engine.claim_selection import build_claim_clusters
+    profile = store._get_profile(body["profile_name"])
+    apply_changes = bool(body.get("apply"))
+    clusters = build_claim_clusters(profile)
+    planned: list[dict] = []
+    for cluster in clusters:
+        canon_idx = cluster.get("canonical_index")
+        if canon_idx is None or cluster["link_count"] < 2:
+            continue
+        claim = profile.claims[canon_idx]
+        ranked = cluster["sources"]
+        if not ranked:
+            continue
+        best = ranked[0]
+        if best["rank"] == -99.0:
+            continue
+        current_rank = next((r["rank"] for r in ranked if r["url"] == claim.source_url), None)
+        if current_rank is not None and best["rank"] <= current_rank:
+            continue
+        if claim.source_url == best["url"]:
+            continue
+        planned.append({
+            "claim_index": canon_idx,
+            "fact": (cluster["canonical_text"] or "")[:120],
+            "from": claim.source_url,
+            "to": best["url"],
+            "from_rank": current_rank,
+            "to_rank": best["rank"],
+        })
+        if apply_changes:
+            previous = claim.source_url
+            claim.source_url = best["url"]
+            claim.verification = VerificationState.unverified
+            claim.settled_quote = None
+            claim.draft_approved = False
+            claim.draft_text = None
+            claim.draft_approved_by = None
+            claim.verified_by = None
+            log_claim_verification(
+                claim,
+                level="claim",
+                actor=body.get("actor", "human"),
+                action="rebind_source_bulk",
+                verdict="warning",
+                summary=f"Fact auto-upgraded to best-ranked link ({best['url'][:80]}); re-verification required",
+                details={"previous_source_url": previous, "new_source_url": best["url"],
+                         "previous_rank": current_rank, "new_rank": best["rank"]},
+            )
+    if apply_changes and planned:
+        profile.notability = score_notability(profile.name, profile.sources, profile.claims)
+        store._save_session(profile)
+    return {"ok": True, "apply": apply_changes, "planned": planned, "count": len(planned)}

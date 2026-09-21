@@ -658,3 +658,54 @@ export async function deleteNamesake(profileName: string, namesakeId: string): P
   if (!r.ok) throw new Error(`namesake delete failed: ${r.status}`);
   return r.json();
 }
+
+export type FactClusterSource = {
+  url: string;
+  rank: number;
+  title: string | null;
+  category: string;
+  depth: string | null;
+  human_verified?: boolean;
+  liveness?: string | null;
+  note?: string;
+};
+
+export type FactCluster = {
+  cluster_id: string;
+  canonical_text: string;
+  field: string;
+  claim_indices: number[];
+  repetition_count: number;
+  canonical_index: number;
+  link_count: number;
+  sources: FactClusterSource[];
+  best_source_url: string | null;
+  best_source_rank: number | null;
+  approved: boolean;
+};
+
+export async function getClaimClusters(profileName: string): Promise<{ clusters: FactCluster[]; multi_link: number; total_facts: number }> {
+  const r = await fetch(`/api/research/claim-clusters?profile_name=${encodeURIComponent(profileName)}`);
+  if (!r.ok) throw new Error(`clusters failed: ${r.status}`);
+  return r.json();
+}
+
+export async function selectClusterSource(profileName: string, claimIndex: number, sourceUrl: string) {
+  const r = await fetch("/api/research/claim-clusters/select-source", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_name: profileName, claim_index: claimIndex, source_url: sourceUrl, actor: "human" }),
+  });
+  if (!r.ok) throw new Error(`select-source failed: ${r.status}`);
+  return r.json();
+}
+
+export async function selectBestAll(profileName: string, apply: boolean) {
+  const r = await fetch("/api/research/claim-clusters/select-best-all", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_name: profileName, apply, actor: "human" }),
+  });
+  if (!r.ok) throw new Error(`select-best-all failed: ${r.status}`);
+  return r.json();
+}

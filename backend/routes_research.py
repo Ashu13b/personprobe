@@ -10,7 +10,7 @@ from .schemas import (
     IdentifyRequest, ResearchRequest, AddSourceRequest, AddDocumentFact,
     AddSourcedClaimRequest, VerifyClaimRequest, BatchVerifyClaimsRequest, AddSourcePaste, CrawlRequest,
     TargetedSearchRequest, FindIdsRequest, RefreshPapersRequest, AssessSourceRequest,
-    VerifySourceLevelRequest, AddNamesakeRequest, DeleteNamesakeRequest,
+    VerifySourceLevelRequest, AddNamesakeRequest,
 )
 
 from engine.models import (

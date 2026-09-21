@@ -532,3 +532,9 @@ The "100+" figure is therefore a CV total across all output types, not a
 journal-article count, and must not be presented as a settled scholarly total in
 the draft. If a Google Scholar or Scopus author page URL is supplied, the
 citation/publication totals can be re-checked against it.
+
+## Identity-candidate rejections (2026-09-21)
+- ORCID 0000-0002-6503-7002 — "Prem Pal Singh", IIT Kharagpur PhD. NOT our subject.
+- Google Scholar EwoPZhsAAAAJ — "Ravindra Kumar Yadav", University of Delhi (cyanobacteria). NOT our subject.
+- S2 author ids 2238133948 (17 buffalo papers) and 46841787 (57 papers, 30 buffalo) — split S2 disambiguation of our author cluster; do not treat either alone as the canonical profile; OpenAlex A5111039070 remains the canonical id.
+Confirmed so far: scopus 57225411188, openalex A5111039070, researchgate Prem-Yadav-7.

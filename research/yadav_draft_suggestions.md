@@ -70,3 +70,14 @@ CV-sourced facts are blocked (CV is engine input, not evidence).
 - **position**: Promoted to Scientist (Senior Scale) on April 12, 1998 at ICAR-CIRB Hisar — source is CV input, never citable evidence
 - **award**: Served as Jury Member for the 12th Royan International Research Awards (Tehran, Iran, 2011) — source is CV input, never citable evidence
 - **career**: Superannuated as Principal Scientist and Head of Division (Animal Physiology and Reproduction) from ICAR-Centr — no source attached
+
+## Applied (2026-09-21)
+- Batch-approved all usable facts as **actor=agent** (delegated): draft approvals 61 → 86.
+- Rebound the Nanaji Deshmukh team-award fact from the institutional ICAR annual report to
+  Dainik Bhaskar's independent coverage (qa warning cleared; independent rank 15).
+- Added missing citation dates (india.com 10 Jan 2016; cirb.res.in/research-papers 2024).
+- Remaining 2 QA warnings are accepted as *issuer-institutional*: SAPI Fellow 2015
+  (society is the issuing body) and ISBD Distinguished Scientist Award 2019 (society
+  announcement; no independent URL located). Not blockers; documented, not hidden.
+- Draft link verification: 44 links, 0 broken; 4 archive.org URLs momentarily "unknown"
+  because the Internet Archive is in a global outage — recheck later per telemetry policy.

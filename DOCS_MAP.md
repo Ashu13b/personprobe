@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 15:37 UTC · sha 78aa8ee · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 15:50 UTC · sha dd50e4d · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -204,6 +204,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Ready (verified source + settled fact)
     - Needs confirmation (approving confirms the fact)
     - Blocked
+    - Applied (2026-09-21)
 - `research/yadav_icar_pdf_mentions.md`
   - Yadav ICAR-CIRB PDF/Text Mention Inventory
     - Per-document counts

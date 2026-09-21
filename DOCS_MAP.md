@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 17:15 UTC · sha d67d77b · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 17:56 UTC · sha dab3d17 · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -237,3 +237,4 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - 6. Gaps & unresolved
     - 7. Verdict
       - Recommended actions (priority order)
+    - 8. Remediation log (post-audit, same day)

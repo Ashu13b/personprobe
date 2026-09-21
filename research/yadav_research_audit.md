@@ -77,4 +77,14 @@
 5. **Re-run wayback verification** when Internet Archive recovers (telemetry recheck policy already parks hosts).
 6. **Human spot-check** of 10–15 agent-approved facts by opening their cited links (30 minutes) before publication.
 
-*Prepared from session state: 476 sources · 284 claims · 85 approved · 185 fact clusters · QA 0 errors, 2 accepted warnings, 1 info.*
+## 8. Remediation log (post-audit, same day)
+| Audit item | Action taken | Result |
+|---|---|---|
+| L4 quote coverage | `engine/quote_backfill.py` + guarded `POST /research/claims/set-quote`; matched claim→source sentence with date normalization, markup/nav filtering; Crossref metadata fallback for authored works; phone-bridge retry for blocked hosts | approved claims with evidence **12 → 54 of 90 (60%)** |
+| `human_verified` over-set | Re-verified the 16 significant origins as **agent** (real trail entries), then recomputed the flag mechanically (identity-confirmed OR human/agent trail) | **407 → 49**, meaning restored; notability unchanged at **15 origins / "Strong"** |
+| `needs_source_verification` facts | Identity-confirmed 5 sources as agent with per-source notes and quotes (ICAR awardee list, PMC author list, FLI publication list, CIRB project page, ICAR epubs) | 5 → 1 |
+| Institutional-only awards | Searched for independent coverage (DDG/Google/phone). None found for SAPI 2015 / ISBD 2019 | accepted issuer-institutional (documented) |
+| Possible ISBD office-bearer role | Surfaced only in a Google AI overview; no primary source | logged as a **lead**, explicitly NOT a fact |
+| Internet Archive | CDX/availability still offline/flapping through the audit window | wayback recheck remains queued (telemetry cooldown policy) |
+
+*Prepared from session state: 476 sources · 284 claims · 90 approved · 185 fact clusters · QA 0 errors, 2 accepted warnings, 1 info.*

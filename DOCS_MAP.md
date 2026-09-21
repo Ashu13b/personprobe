@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 15:50 UTC · sha dd50e4d · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 17:15 UTC · sha d67d77b · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -227,3 +227,13 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
       - 15. Scientific Reports 9:11366
     - Known-fact cross-check
     - New factual nuggets (not in the supplied known list)
+- `research/yadav_research_audit.md`
+  - Research Audit — Dr. Prem Singh Yadav (ICAR-CIRB)
+    - 1. Scope & method
+    - 2. Evidence base — volume
+    - 3. Identity & namesake discipline — strong
+    - 4. Claim integrity — the weakest layer (findings)
+    - 5. Key life-facts corroboration matrix
+    - 6. Gaps & unresolved
+    - 7. Verdict
+      - Recommended actions (priority order)

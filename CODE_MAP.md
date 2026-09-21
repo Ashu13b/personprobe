@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 05:47 UTC · sha 590a034 · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 05:50 UTC · sha b9d5353 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 97 files · 886 symbols
+- Python — 98 files · 889 symbols
 - TypeScript — 36 files · 288 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 138 files · 1177 symbols across 6 languages._
+_Total: 139 files · 1180 symbols across 6 languages._
 
 
 ## Compartments
@@ -106,6 +106,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `frontend/src/workflow.ts` — WorkspaceMode, WorkspaceTone, WorkspaceRoute, getWorkspaceRoute, canGenerateDraft, getDraftDestination
 ### scripts/
 - `scripts/bulk_ingest_candidates.py` — API_BASE, SESSION_ID, SESSION_FILE, def api_post, def load_existing_urls, def main
+- `scripts/coauthor_harvest.py` — API, def harvest_coauthors, def payload_url
 - `scripts/crawl_link_bucket.py` — API_BASE, SESSION_ID, SESSION_FILE, SEEDS, WRONG_PERSON_ENTITIES, def load_existing_urls, def normalize_url, def is_valid_candidate, def verify_dr_yadav, def api_post, def crawl
 - `scripts/deduplicate_session.py` — API_BASE, SESSION_ID, SESSION_FILE, DOMAIN_ALIAS_MAP, def canonical_url, def deduplicate
 - `scripts/forensic_hunter.py` — FORENSIC_QUERIES, def clean_google_url, def main

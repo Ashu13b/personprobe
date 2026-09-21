@@ -58,21 +58,32 @@ def fetch_via_mobile_bridge(url: str, wait_seconds: int = 5) -> Optional[dict[st
     client = get_mobile_client()
     if not client:
         return None
-    try:
-        res = client.navigate(url, wait_seconds=wait_seconds)
-        if res.get("status") == "error":
-            logger.debug("Mobile bridge navigation error for %s: %s", url, res.get("error"))
-            return None
+    from .fetch_telemetry import timed
+    with timed("phone", url) as t:
+        try:
+            res = client.navigate(url, wait_seconds=wait_seconds)
+            if res.get("status") == "error":
+                logger.debug("Mobile bridge navigation error for %s: %s", url, res.get("error"))
+                t.status = "error"
+                t.note = str(res.get("error"))[:120]
+                return None
 
-        dom = client.extract_dom(include_text=True, include_links=True)
-        content = dom.get("content", {})
-        return {
-            "title": dom.get("title", ""),
-            "text": content.get("text", "").strip(),
-            "url": dom.get("url", url),
-            "links": content.get("links", []),
-            "has_captcha": dom.get("has_captcha", False)
-        }
-    except Exception as e:
-        logger.warning("Failed to fetch %s via mobile bridge: %s", url, e)
-        return None
+            dom = client.extract_dom(include_text=True, include_links=True)
+            content = dom.get("content", {})
+            text = content.get("text", "").strip()
+            captcha = bool(dom.get("has_captcha", False))
+            t.status = "ok" if text else "empty"
+            t.throttled = captcha
+            t.note = "captcha" if captcha else ("empty render" if not text else "")
+            return {
+                "title": dom.get("title", ""),
+                "text": text,
+                "url": dom.get("url", url),
+                "links": content.get("links", []),
+                "has_captcha": captcha,
+            }
+        except Exception as e:
+            logger.warning("Failed to fetch %s via mobile bridge: %s", url, e)
+            t.status = "exception"
+            t.note = str(e)[:120]
+            return None

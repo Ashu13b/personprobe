@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 07:57 UTC · sha 95a16da · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 11:15 UTC · sha 11a08a1 · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -184,6 +184,16 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - New named links (highest value)
     - Likely / context (gated or book listings)
     - Excluded as namesakes (do not use)
+- `research/yadav_citation_impact.md`
+  - Prem Singh Yadav — Per-Publication Citation & Impact Table
+    - Headline numbers
+    - Citations by year (attributable works)
+    - Citations by decade (attributable works)
+    - Top 10 most-cited works
+    - Full per-publication table (sorted by citations, descending)
+    - Ambiguous / excluded works
+    - Method & caveats
+    - Impact summary (5 lines, dossier-ready)
 - `research/yadav_icar_pdf_mentions.md`
   - Yadav ICAR-CIRB PDF/Text Mention Inventory
     - Per-document counts

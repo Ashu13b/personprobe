@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 05:50 UTC · sha b9d5353 · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 11:15 UTC · sha 11a08a1 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 98 files · 889 symbols
+- Python — 99 files · 900 symbols
 - TypeScript — 36 files · 288 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 139 files · 1180 symbols across 6 languages._
+_Total: 140 files · 1191 symbols across 6 languages._
 
 
 ## Compartments
@@ -48,6 +48,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `engine/crawler.py` — TIMEOUT, S2_API, class SourceNode, class SourceGraph(to_sources), def crawl, def _extract_meta, def _extract_links, def _extract_dois, def _extract_entities, def _count_mentions, def _is_relevant_link, def _entity_worth_searching, def _search_entity, def _temporal_variants, def _expand_doi
 - `engine/discarded_registry.py` — def record_discarded, def is_discarded, def is_known_or_discarded, def get_known_and_discarded_canonical_urls, def recover_discarded, def get_discarded_by_reason
 - `engine/extractor.py` — WIKI_SLOTS, SLOT_SOURCE_HINTS, def find_missing_slots, SYSTEM, def _validate_and_filter_claims, def filter_person_snippets, def extract_claims, def _deduplicate
+- `engine/fetch_telemetry.py` — LOG_PATH, DEFAULT_DELAY_S, THROTTLE_DELAY_S, _THROTTLE_WINDOW_S, def _host, def record, def timed, class _Timer(__init__, __enter__, __exit__), def recent_throttles, def suggest_delay
 - `engine/fetcher.py` — HEADERS, BOT_HEADERS, TIMEOUT, MAX_FETCH_BYTES, BOT_WALL_RE, def is_safe_public_url, def check_liveness, def get_wayback_url, class FetchResult(__init__), _BROWSER_BASES, def _try_browser_server, def fetch_url, def _direct_fetch, def _pdf_extract, def _wayback_fetch, def _orcid_fetch, def _fetch_orcid_id, def _orcid_to_text, def _extract_text
 - `engine/fetcher_browser.py` — _SESSION_DIR, _LAUNCH_ARGS, _STEALTH_JS, _UA, def fetch_with_browser
 - `engine/forensics.py` — def generate_pivot_id, def generate_lead_id, def generate_inquiry_id, def seed_default_pivots, def generate_forensic_queries_for_pivot, def check_subject_mention, def build_forensic_sweep_leads, def _enrich_inquiry_dual_track, def generate_deductive_inquiries
@@ -139,7 +140,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_discarded_registry.py` — def test_record_discarded_canonical_dedup, def test_is_known_or_discarded, def test_get_known_and_discarded_canonical_urls, def test_recover_discarded, def test_get_discarded_by_reason
 - `tests/test_draft.py` — def _source, def _ready_profile, def test_audit_excludes_cv_animal_birth_and_unverified_sources, def test_audit_blocks_profiles_without_explicit_draft_approval, def test_audit_blocks_drafts_without_independent_secondary_coverage, def test_audit_warns_when_achievement_claim_rests_on_primary_source, def test_audit_no_achievement_warning_when_sources_are_independent, def test_research_action_rule_accepts_common_research_verbs, def test_birth_noise_rule_scans_source_title_too, def test_human_birth_claim_not_blocked_by_animal_rule, def test_renderer_cites_every_included_claim_and_never_fills_biography_gaps, def test_infobox_only_emits_fields_with_draft_approved_evidence, def test_renderer_places_birth_facts_under_early_life_not_education, def test_renderer_surfaces_curated_award_in_lead_without_repeating_section, def test_renderer_includes_approved_achievement_in_research, def test_renderer_uses_subject_specific_short_description, def test_publication_first_author_study_is_bibliographic_and_sorted_by_claim_year, def test_dr_yadav_saved_session_produces_policy_filtered_draft, def test_audit_accepts_sourced_research_stay_as_career_activity, def test_claim_draft_approval_is_a_separate_persisted_action, def test_unverified_claim_direct_draft_approval, def test_batch_verify_claims, def test_edit_draft_text_action, def test_publishers_registry_and_subdomains, def test_draft_endpoint_uses_server_session_and_persists_output, def test_add_sourced_claim_binds_fact_to_verified_source, def test_add_sourced_claim_requires_existing_source, def test_skip_suggestion_persists_url_so_discovery_stops_offering_it, def test_add_source_rejects_normalized_url_variant, def test_resume_never_repopulates_claims_from_stub_provider, def test_independent_count_uses_distinct_outlets_not_article_urls, def test_verified_amar_ujala_report_counts_as_independent_news, _SAMPLE_DRAFT, def test_extract_draft_links_prefers_archive_and_deduplicates, def test_extract_draft_links_handles_escaped_pipe_in_title, def test_citation_keeps_original_url_and_adds_archive_fields, def test_cv_blueprint_never_cited, def test_title_clean_strips_truncation_before_publisher_suffix, def test_check_draft_links_classifies_http_statuses, def test_check_draft_links_uses_browser_for_uncertain_links, def test_check_draft_links_keeps_requests_verdict_when_browser_errors, def test_check_draft_links_skips_browser_when_all_ok, def test_fetch_blocked_walks_blocked_sources_through_browser, def test_fetch_blocked_stops_at_bot_wall, def test_draft_links_endpoint_extracts_and_checks, def test_draft_verify_runs_checker_and_verifier, def test_draft_links_requires_generated_draft, def test_draft_preview_endpoint_returns_parsoid_html, def test_draft_preview_propagates_renderer_failure, def _qa_profile, def test_qa_flags_missing_structural_bits, def test_qa_passes_well_formed_draft, def test_qa_flags_dirty_titles_iso_dates_and_weak_sources, def test_qa_no_draft_is_an_error, def test_qa_flags_attribution_chains, def test_draft_qa_endpoint_lints_stored_draft, def test_draft_qa_endpoint_requires_draft, def test_qa_flags_duplicate_approved_claims, def test_qa_flags_institutional_achievement_sources, def test_wikilink_extraction_and_canonicalization, … +1 more
 - `tests/test_draft_hi.py` — def _sample_profile, def test_render_hindi_draft_contains_hindi_infobox_and_sections
-- `tests/test_fetcher_fallback.py` — def test_fetch_url_direct_success, def test_fetch_url_mobile_bridge_fallback, def test_fetch_url_browser_server_fallback_when_mobile_unavailable, def test_check_liveness_recovers_blocked_via_mobile_bridge
+- `tests/test_fetcher_fallback.py` — def test_fetch_url_direct_success, def test_fetch_url_mobile_bridge_fallback, def test_fetch_url_browser_server_fallback_when_mobile_unavailable, def test_check_liveness_recovers_blocked_via_mobile_bridge, def test_fetch_telemetry_records_and_advises
 - `tests/test_forensics.py` — def test_seed_default_pivots_from_profile, def test_generate_forensic_queries, def test_forensic_routes, def test_generate_deductive_inquiries_unit, def test_forensic_inquiries_api
 - `tests/test_lifecycle_audit.py` — def test_audit_discovery_stage, def test_audit_provenance_stage, def test_audit_claims_stage, def test_audit_draft_stage_blocked_when_no_evidence, def test_audit_full_lifecycle
 - `tests/test_liveness.py` — def test_check_liveness_live, def test_check_liveness_dead_looks_up_wayback, def test_check_liveness_blocked, def test_get_wayback_url_parses_snapshot, def test_audit_excludes_dead_unarchived_source, def test_renderer_cites_wayback_url_for_dead_archived_source

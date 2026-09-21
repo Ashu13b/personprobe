@@ -61,3 +61,29 @@ def test_check_liveness_recovers_blocked_via_mobile_bridge():
         status, archive = check_liveness("https://example.com/cloudflare-protected")
         assert status == "alive"
         assert archive is None
+
+
+def test_fetch_telemetry_records_and_advises(tmp_path, monkeypatch):
+    from engine import fetch_telemetry as ft
+
+    log = tmp_path / "telemetry.jsonl"
+    monkeypatch.setattr(ft, "LOG_PATH", log)
+
+    ft.record("phone", "https://example.test/page", status="ok", latency_ms=812)
+    ft.record("http", "https://example.test/page", status=429, latency_ms=250, throttled=True)
+
+    lines = log.read_text().strip().splitlines()
+    assert len(lines) == 2
+    import json as _json
+    first = _json.loads(lines[0])
+    assert first["transport"] == "phone"
+    assert first["latency_ms"] == 812
+    assert first["host"] == "example.test"
+
+    assert ft.recent_throttles(host="example.test") == 1
+    assert ft.suggest_delay("https://example.test/page") >= ft.THROTTLE_DELAY_S
+    assert ft.suggest_delay("https://clean.test/page") == ft.DEFAULT_DELAY_S
+
+    with ft.timed("http", "https://example.test/slow"):
+        pass
+    assert len(log.read_text().strip().splitlines()) == 3

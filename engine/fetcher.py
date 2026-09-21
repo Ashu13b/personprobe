@@ -63,12 +63,17 @@ def check_liveness(url: str) -> tuple[str, str | None]:
     """
     if not is_safe_public_url(url):
         return "unknown", None
+    from .fetch_telemetry import timed
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=12, allow_redirects=True, stream=True)
-        final_url = getattr(resp, "url", url)
-        if final_url != url and not is_safe_public_url(final_url):
-            return "unknown", None
-        code = resp.status_code
+        with timed("http", url) as t:
+            resp = requests.get(url, headers=HEADERS, timeout=12, allow_redirects=True, stream=True)
+            final_url = getattr(resp, "url", url)
+            if final_url != url and not is_safe_public_url(final_url):
+                t.status = "unsafe-redirect"
+                return "unknown", None
+            code = resp.status_code
+            t.status = code
+            t.throttled = code == 429
     except requests.RequestException:
         return "unknown", None
     if code in (404, 410):

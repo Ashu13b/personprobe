@@ -1574,3 +1574,42 @@ def get_draft_suggestions(profile_name: str, limit: int = 60) -> dict:
     from engine.claim_selection import suggest_draft_upgrades
     profile = store._get_profile(profile_name)
     return suggest_draft_upgrades(profile, limit=max(1, min(limit, 300)))
+
+
+@research_router.post("/research/claims/set-quote")
+def set_claim_quote(body: dict) -> dict:
+    """Attach a verbatim L4 quote to a claim (batch, guarded by source match).
+
+    Only accepts a quote when the claim's source_url matches the provided one,
+    so backfill cannot attach evidence from a different document.
+    """
+    profile = store._get_profile(body["profile_name"])
+    items = body.get("items") or []
+    actor = body.get("actor", "agent")
+    updated, skipped = 0, []
+    for item in items:
+        try:
+            idx = int(item["claim_index"])
+        except (KeyError, TypeError, ValueError):
+            skipped.append({"item": item, "why": "bad index"})
+            continue
+        if idx < 0 or idx >= len(profile.claims):
+            skipped.append({"claim_index": idx, "why": "out of range"})
+            continue
+        quote = (item.get("quote") or "").strip()
+        if not quote or len(quote) < 20:
+            skipped.append({"claim_index": idx, "why": "quote too short"})
+            continue
+        claim = profile.claims[idx]
+        if (item.get("source_url") or "") != (claim.source_url or ""):
+            skipped.append({"claim_index": idx, "why": "source mismatch (guard)"})
+            continue
+        claim.settled_quote = quote[:800]
+        log_claim_verification(
+            claim, level="claim", actor=actor, action="backfill_quote", verdict="passed",
+            summary=f"L4 quote backfilled by {actor} (score {item.get('score')})",
+            details={"score": item.get("score"), "quote": claim.settled_quote[:200]},
+        )
+        updated += 1
+    store._save_session(profile)
+    return {"ok": True, "updated": updated, "skipped": skipped}

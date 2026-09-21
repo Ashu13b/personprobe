@@ -630,3 +630,31 @@ export async function getFetchTelemetry(): Promise<FetchTelemetry> {
   if (!r.ok) throw new Error(`telemetry fetch failed: ${r.status}`);
   return r.json();
 }
+
+export async function listNamesakes(profileName: string): Promise<{ namesakes: import("./types").KnownNamesake[] }> {
+  const r = await fetch(`/api/session/namesakes?profile_name=${encodeURIComponent(profileName)}`);
+  if (!r.ok) throw new Error(`namesake list failed: ${r.status}`);
+  return r.json();
+}
+
+export async function addNamesake(
+  profileName: string,
+  body: { display_name: string; signature_terms: string[]; distinguishing_traits: string[]; notes?: string },
+): Promise<{ namesakes: import("./types").KnownNamesake[] }> {
+  const r = await fetch("/api/session/namesakes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_name: profileName, actor: "human", ...body }),
+  });
+  if (!r.ok) throw new Error(`namesake add failed: ${r.status}`);
+  return r.json();
+}
+
+export async function deleteNamesake(profileName: string, namesakeId: string): Promise<{ namesakes: import("./types").KnownNamesake[] }> {
+  const r = await fetch(
+    `/api/session/namesakes/${encodeURIComponent(namesakeId)}?profile_name=${encodeURIComponent(profileName)}`,
+    { method: "DELETE" },
+  );
+  if (!r.ok) throw new Error(`namesake delete failed: ${r.status}`);
+  return r.json();
+}

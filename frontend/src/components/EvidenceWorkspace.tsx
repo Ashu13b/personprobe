@@ -10,6 +10,7 @@ import { addSource, addSourcePaste, autoEnrich, deepCrawl, getSession, profileRe
 import { normalizeUrl } from "../url";
 import { SourceCard } from "./SourceCard";
 import DiscardedTab from "./DiscardedTab";
+import NamesakeRegistry from "./NamesakeRegistry";
 import BookmarkletCard from "./BookmarkletCard";
 
 interface Props {
@@ -476,6 +477,8 @@ export default function EvidenceWorkspace({
           );
         })}
       </div>
+
+      <NamesakeRegistry profile={profile} />
 
       {/* Discarded Sub-view or Active Sources List */}
       {selectedCategory === "discarded" ? (

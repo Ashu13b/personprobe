@@ -479,3 +479,13 @@ export interface MobileBridgeStatus {
 }
 
 
+
+export type KnownNamesake = {
+  namesake_id: string;
+  display_name: string;
+  signature_terms: string[];
+  distinguishing_traits: string[];
+  notes?: string | null;
+  created_by: string;
+  created_at?: string | null;
+};

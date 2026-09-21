@@ -1,4 +1,4 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 14:15 UTC · sha eaad4d6 · host instance-20260819-0844 -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-09-21 15:12 UTC · sha 400e079 · host instance-20260819-0844 -->
 
 # CODE_MAP
 
@@ -6,12 +6,12 @@ Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
 - Python — 101 files · 914 symbols
-- TypeScript — 32 files · 264 symbols
+- TypeScript — 33 files · 272 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 138 files · 1181 symbols across 6 languages._
+_Total: 139 files · 1189 symbols across 6 languages._
 
 
 ## Compartments
@@ -73,7 +73,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### frontend/
 - `frontend/index.html` — #root
 - `frontend/src/App.tsx` — ErrorBoundaryProps, ErrorBoundaryState, ErrorBoundary, constructor, getDerivedStateFromError, componentDidCatch, render, Stage, MainApp, handleMessage, handleConfirmed, handleResearchDone, handleDraft, handleReset, App
-- `frontend/src/api.ts` — apiPost, apiGet, apiDelete, apiPatch, IdentifyResult, identifyPerson, startResearch, getSession, addSource, fetchFromBrowser, fetchBlockedSources, skipSuggestion, addSourcePaste, deepCrawl, verifyClaim, batchVerifyClaims, verifySource, verifySourceLevel, getVerificationSummary, assessSource, rejectSource, getDraftAudit, getDraftLinks, getDraftPreview, getDraftQa, generateDraft, ClaimCoverage, ArticleProposal, getArticleProposal, SessionSummary, profileRef, listSessions, resumeSession, deleteSession, TargetedSearchResponse, addDocumentFact, targetedSearch, ResearcherIdsResponse, findResearcherIds, RefreshPapersResponse, refreshPapers, suggestUrls, AutoEnrichResponse, autoEnrich, getLifecycleAudit, getDiscardedSources, recoverDiscardedSource, getMobileBridgeStatus, getForensicsSummary, addInvestigationPivot, deleteInvestigationPivot, addAuxiliaryLead, updateAuxiliaryLead, deleteAuxiliaryLead, runForensicSweep, promoteLeadToSource, generateForensicInquiries, addForensicInquiry, updateForensicInquiry, deleteForensicInquiry, … +10 more
+- `frontend/src/api.ts` — apiPost, apiGet, apiDelete, apiPatch, IdentifyResult, identifyPerson, startResearch, getSession, addSource, fetchFromBrowser, fetchBlockedSources, skipSuggestion, addSourcePaste, deepCrawl, verifyClaim, batchVerifyClaims, verifySource, verifySourceLevel, getVerificationSummary, assessSource, rejectSource, getDraftAudit, getDraftLinks, getDraftPreview, getDraftQa, generateDraft, ClaimCoverage, ArticleProposal, getArticleProposal, SessionSummary, profileRef, listSessions, resumeSession, deleteSession, TargetedSearchResponse, addDocumentFact, targetedSearch, ResearcherIdsResponse, findResearcherIds, RefreshPapersResponse, refreshPapers, suggestUrls, AutoEnrichResponse, autoEnrich, getLifecycleAudit, getDiscardedSources, recoverDiscardedSource, getMobileBridgeStatus, getForensicsSummary, addInvestigationPivot, deleteInvestigationPivot, addAuxiliaryLead, updateAuxiliaryLead, deleteAuxiliaryLead, runForensicSweep, promoteLeadToSource, generateForensicInquiries, addForensicInquiry, updateForensicInquiry, deleteForensicInquiry, … +13 more
 - `frontend/src/components/ArticleProposal.tsx` — ArticleProposalView
 - `frontend/src/components/BookmarkletCard.tsx` — BookmarkletCard, handleCopy
 - `frontend/src/components/ClaimsReview.tsx` — FilterTab, ClaimsReview, toggleTrail, doVerify, handleBatchAction, ActionBtn
@@ -88,6 +88,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `frontend/src/components/GuideTab.tsx` — GuideTab
 - `frontend/src/components/LifecycleAuditCard.tsx` — Props, LifecycleAuditCard, handleStageClick, loadData
 - `frontend/src/components/LivingDossier.tsx` — Props, DossierViewMode, BioChapter, LivingDossier
+- `frontend/src/components/NamesakeRegistry.tsx` — NamesakeRegistry, load, handleAdd, handleDelete
 - `frontend/src/components/ProfileTab.tsx` — ProfileTab, setMode, handleSearch, handleAddUrl, handleManual, ResearcherIdsStrip
 - `frontend/src/components/SourceCard.tsx` — SourceCard, handleVerify, handleReject, handleAssess, handleVerifyIdentity, RelevanceBadge, FetchedByTag, AuthorMatchBadge, PipeStep, PipeConnector
 - `frontend/src/components/TimelineTab.tsx` — parseFirstYear, TimelineTab, TLEvent, GapInfo, EventRow, GapRow, handleFillGap
@@ -99,7 +100,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `frontend/src/pages/IdentifyPage.tsx` — Props, View, IdentifyPage, handleResume, handleDelete, handleSearch, handleConfirm, handleConfirmIdentity
 - `frontend/src/pages/ResearchPage.tsx` — Props, ResearchPage, Spinner
 - `frontend/src/thematic.ts` — ThematicCategory, ThematicCategoryMeta, getSourceCategories, computeCategoryCounts, filterSources
-- `frontend/src/types.ts` — PersonCandidate, SourceReliability, VerificationState, SourceFetchedBy, VerificationActor, VerificationLevel, VerificationLogEntry, Source, Claim, VerificationSummaryResponse, NotabilityResult, WikiStatus, ClaimCluster, ResearchSaturation, DiscardedSource, InvestigationPivot, AuxiliaryLead, ForensicInquiry, ForensicsSummaryResponse, PublicRecordRepository, SubjectRecordMatrix, AtlasResponse, AtlasMatrixResponse, PersonProfile, ResearchStartResponse, SdPipelineResult, AddSourceResponse, AddSourcePasteResponse, CrawlResponse, DraftIssue, DraftAudit, DraftResponse, DraftLinkStatus, DraftLink, DraftWikilinkStatus, DraftWikilink, DraftLinksResult, DraftQaSeverity, DraftQaFinding, DraftQaReport, UrlSuggestion, StageAuditItem, FullLifecycleAudit, MobileBridgeStatus
+- `frontend/src/types.ts` — PersonCandidate, SourceReliability, VerificationState, SourceFetchedBy, VerificationActor, VerificationLevel, VerificationLogEntry, Source, Claim, VerificationSummaryResponse, NotabilityResult, WikiStatus, ClaimCluster, ResearchSaturation, DiscardedSource, InvestigationPivot, AuxiliaryLead, ForensicInquiry, ForensicsSummaryResponse, PublicRecordRepository, SubjectRecordMatrix, AtlasResponse, AtlasMatrixResponse, PersonProfile, ResearchStartResponse, SdPipelineResult, AddSourceResponse, AddSourcePasteResponse, CrawlResponse, DraftIssue, DraftAudit, DraftResponse, DraftLinkStatus, DraftLink, DraftWikilinkStatus, DraftWikilink, DraftLinksResult, DraftQaSeverity, DraftQaFinding, DraftQaReport, UrlSuggestion, StageAuditItem, FullLifecycleAudit, MobileBridgeStatus, KnownNamesake
 - `frontend/src/url.ts` — normalizeUrl, getHostname, safeHref
 - `frontend/src/workflow.ts` — WorkspaceMode, WorkspaceTone, WorkspaceRoute, getWorkspaceRoute, canGenerateDraft, getDraftDestination
 ### scripts/

@@ -84,6 +84,9 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
   const [leadNotes, setLeadNotes] = useState("");
   const [leadQuery, setLeadQuery] = useState("");
 
+  // Section sub-tabs (split the 3 heavy panels)
+  const [subTab, setSubTab] = useState<"pivots" | "inquiries" | "leads">("pivots");
+
   // Filter & Search
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "lead" | "inspected" | "corroborated" | "dead_end">("all");
@@ -730,6 +733,45 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
         </div>
       )}
 
+      {/* Section sub-tabs */}
+      <nav
+        aria-label="Forensics sections"
+        style={{
+          display: "flex",
+          gap: 6,
+          background: "var(--surface)",
+          padding: 6,
+          borderRadius: 12,
+          border: "1px solid var(--border)",
+        }}
+      >
+        {([
+          ["pivots", "Investigation Pivots", pivots.length],
+          ["inquiries", "Deductive Inquiries", inquiries.length],
+          ["leads", "Auxiliary Leads", leads.length],
+        ] as const).map(([id, label, count]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setSubTab(id)}
+            style={{
+              flex: 1,
+              padding: "8px 12px",
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: subTab === id ? 700 : 500,
+              background: subTab === id ? "var(--primary)" : "transparent",
+              color: subTab === id ? "#ffffff" : "var(--muted)",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            {label} <span style={{ opacity: 0.8, fontSize: 11 }}>({count})</span>
+          </button>
+        ))}
+      </nav>
+
+      {subTab === "pivots" && (<>
       {/* Section 1: Investigation Pivots (Entity Anchors) */}
       <div className="card" style={{ padding: "18px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
@@ -848,6 +890,9 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
         )}
       </div>
 
+      </>)}
+
+      {subTab === "inquiries" && (<>
       {/* Section 2: Deductive Inquiry Engine ("If This Is True, What Must Exist?") */}
       <div className="card" style={{ padding: "18px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
@@ -1404,6 +1449,9 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
         )}
       </div>
 
+      </>)}
+
+      {subTab === "leads" && (<>
       {/* Section 3: Auxiliary Leads Stream (Public Records & Corroborating Clues) */}
       <div className="card" style={{ padding: "18px 20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
@@ -1704,6 +1752,8 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
           </div>
         )}
       </div>
+
+      </>)}
 
       {/* Add Pivot Modal */}
       {showAddPivot && (

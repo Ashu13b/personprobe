@@ -550,3 +550,17 @@ Confirmed so far: scopus 57225411188, openalex A5111039070, researchgate Prem-Ya
   be assessed on fetched body text at ingest time, not the stored truncated
   snippet — `verify_name_in_content` already does exactly that; sessions
   created before this rule had the snippet-only drift.
+
+## Final cleanup (2026-09-21, second recount)
+- 39 DOI "other Yadav" pages (Keerti/Poonam/Aayush/Saroj/Rishipal Yadav etc.)
+  resolved via OpenAlex authorship — none matched our subject's author id —
+  rejected as different_person (discarded registry, recoverable). Session
+  goes 503 → 464 active sources.
+- Vidwan profile 249583 re-flagged suspect: page body renders "Dr P S Yadav
+  / ICAR-Ce.." so the earlier Bharadwaj ruling needs human eyes. Engine
+  lesson: the identity verify-level endpoint hard-sets identity_status='confirmed'
+  regardless of the requested status when actor='human' — a bug to fix.
+- Final engine-visible counts: 464 active · ~281 named (snippet+body+PDF+author
+  matrix) · 183 aux, of which ~91 aux-relevant (subject story: ICAR/CIRB, clone
+  lineage, ARs, awards, projects) and ~92 aux-other (generic/listy context, not
+  story-core). disc registry 77 entries.

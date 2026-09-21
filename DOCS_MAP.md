@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 03:30 UTC · sha b68e5bf · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 04:04 UTC · sha baf3f62 · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -175,3 +175,4 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
       - Publication-count reconciliation (10 August 2026)
     - Identity-candidate rejections (2026-09-21)
     - Body-level name recount (2026-09-21)
+    - Final cleanup (2026-09-21, second recount)

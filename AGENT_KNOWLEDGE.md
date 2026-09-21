@@ -888,3 +888,12 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   (they break cite archive-url).
 
 - Namesake adjudications for the Yadav session moved to session data (profile.known_namesakes, seeded via POST /api/session/namesakes) and research/Prem_Singh_Yadav_cv_verification.md — the engine screens every ingest against these signatures automatically (engine/name_verifier.assess_namesake_risk).
+
+- Dev-env gotcha: /tmp/opencode/inspect.py shadows stdlib `inspect` for any
+  python script executed with sys.path[0]=/tmp/opencode (breaks fitz/pypdf
+  imports at dataclass import time); heredocs and repo-root CWD are safe.
+  Prefer running one-offs from the repo dir via `python3 - < script.py`.
+- Ingest identity gate (Sep 2026): initials/surname-only name matches attach
+  as identity_status='suspect' and require authorship/affiliation confirmation
+  before extraction (identity_strength field on NameVerificationResult).
+  Full given-name spell-out alone is 'full' evidence.

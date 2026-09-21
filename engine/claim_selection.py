@@ -99,3 +99,122 @@ def build_claim_clusters(profile: PersonProfile) -> list[dict]:
     # multi-link facts first, then single-link; approved sink lower
     out.sort(key=lambda c: (c["approved"], -c["link_count"], -(c["best_source_rank"] or 0)))
     return out
+
+
+# Draft-readiness statuses
+READY = "ready"                          # verified source + settled fact -> approve directly
+NEEDS_CONFIRM = "needs_confirmation"     # verified source, claim itself unconfirmed -> approving confirms it
+NEEDS_SOURCE = "needs_source_verification"  # claim fine, source not verified yet
+BLOCKED = "blocked"                      # cv/wrong-person/no source -> never suggest
+
+
+def _claim_source(profile: PersonProfile, url: str | None) -> Source | None:
+    if not url:
+        return None
+    return next((s for s in profile.sources if s.url == url), None)
+
+
+def evaluate_claim(profile: PersonProfile, index: int, cluster_link_count: int) -> dict:
+    """Assess one claim's readiness for the draft, with reasons."""
+    claim = profile.claims[index]
+    source = _claim_source(profile, claim.source_url)
+    blockers: list[str] = []
+    notes: list[str] = []
+
+    if source is None:
+        blockers.append("no source attached")
+    else:
+        if (source.provenance_category == "cv_blueprint"):
+            blockers.append("source is CV input, never citable evidence")
+        if source.relevance_flag == "likely_wrong" or source.identity_status == "wrong_person":
+            blockers.append("source belongs to a different person / namesake")
+        if source.identity_status == "suspect":
+            blockers.append("identity unconfirmed (initials-only match)")
+        if not blockers and not (source.human_verified or source.identity_status == "confirmed"):
+            notes.append("source identity not yet verified")
+        if source.liveness in ("dead", "blocked") and not source.archive_url:
+            notes.append(f"link is {source.liveness} without archive")
+
+    if claim.verification.value == "skipped":
+        blockers.append("claim was skipped in review")
+
+    status = BLOCKED if blockers else NEEDS_SOURCE if not (source and (source.human_verified or source.identity_status == "confirmed")) else (
+        READY if claim.verification.value in ("confirmed", "edited") else NEEDS_CONFIRM
+    )
+
+    rank = source_citation_rank(source) if source else -99.0
+    score = rank
+    if status == READY:
+        score += 6
+    elif status == NEEDS_CONFIRM:
+        score += 3
+    score += min(cluster_link_count, 6)
+    if claim.settled_quote:
+        score += 1.0
+
+    return {
+        "claim_index": index,
+        "text": claim.text,
+        "field": claim.field,
+        "verification": claim.verification.value,
+        "source_url": claim.source_url,
+        "source_title": source.title if source else None,
+        "source_rank": rank,
+        "link_count": cluster_link_count,
+        "status": status,
+        "blockers": blockers,
+        "notes": notes,
+        "score": round(score, 2),
+        "has_quote": bool(claim.settled_quote),
+    }
+
+
+def suggest_draft_upgrades(profile: PersonProfile, limit: int = 60) -> dict:
+    """Rank not-yet-approved facts for draft inclusion — one suggestion per fact.
+
+    The pipeline is: named+verified source -> claims -> same fact across many
+    links -> pick the best claim/link. Duplicate members of one fact cluster are
+    collapsed so the reviewer sees each fact once, on its strongest wording.
+    """
+    clusters = build_claim_clusters(profile)
+    seen: set[int] = set()
+    suggestions: list[dict] = []
+    approved_facts = 0
+
+    for cluster in clusters:
+        members = [i for i in cluster["claim_indices"] if not profile.claims[i].draft_approved]
+        if not members:
+            approved_facts += 1
+            continue
+        # best member = canonical wording if still open, else the one with the best source
+        candidate = cluster["canonical_index"] if cluster["canonical_index"] in members else members[0]
+        best = max((evaluate_claim(profile, i, cluster["link_count"]) for i in members),
+                   key=lambda e: e["score"])
+        chosen = best if candidate not in members else evaluate_claim(profile, candidate, cluster["link_count"])
+        # prefer the highest-scoring member unless canonical is materially better sourced
+        if best["score"] > chosen["score"]:
+            chosen = best
+        for i in members:
+            seen.add(i)
+        chosen["cluster_id"] = cluster["cluster_id"]
+        chosen["fact"] = cluster["canonical_text"]
+        suggestions.append(chosen)
+
+    # claims outside any cluster (shouldn't happen, but stay safe)
+    for i, claim in enumerate(profile.claims):
+        if i in seen or claim.draft_approved:
+            continue
+        suggestions.append(evaluate_claim(profile, i, 1))
+
+    suggestions.sort(key=lambda s: (s["status"] == BLOCKED, -s["score"]))
+    ready = [s for s in suggestions if s["status"] == READY]
+    return {
+        "suggestions": suggestions[:limit],
+        "counts": {
+            "ready": len(ready),
+            "needs_confirmation": sum(1 for s in suggestions if s["status"] == NEEDS_CONFIRM),
+            "needs_source_verification": sum(1 for s in suggestions if s["status"] == NEEDS_SOURCE),
+            "blocked": sum(1 for s in suggestions if s["status"] == BLOCKED),
+            "already_approved_facts": approved_facts,
+        },
+    }

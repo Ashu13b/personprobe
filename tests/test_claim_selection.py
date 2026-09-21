@@ -53,3 +53,32 @@ def test_build_claim_clusters_groups_same_fact_across_links():
     assert c["canonical_index"] in (0, 1)
     singles = [c for c in clusters if c["link_count"] <= 1]
     assert len(singles) == 1 and singles[0]["field"] == "careers"
+
+
+def test_suggest_draft_upgrades_collapses_dupes_and_classifies():
+    from engine.claim_selection import suggest_draft_upgrades
+    from engine.models import VerificationState
+
+    press = _src("https://press.test/a", "independent_secondary", "significant", verified=True)
+    suspect = _src("https://mirror.test/b", "independent_secondary")
+    suspect.identity_status = "suspect"
+    cv = _src("file:///cv.pdf", "cv_blueprint")
+
+    profile = PersonProfile(name="Prem Singh Yadav", sources=[press, suspect, cv], claims=[
+        Claim(text="Hisar Gaurav, the first cloned calf born at ICAR-CIRB Hisar, turned seven.",
+              field="research", source_url="https://press.test/a", verification=VerificationState.confirmed),
+        Claim(text="Hisar Gaurav, the first cloned calf born at ICAR-CIRB Hisar, turned seven on Sunday.",
+              field="research", source_url="https://mirror.test/b"),
+        Claim(text="Born on April 10, 1963 in village Nimoth, Rewari.",
+              field="birth_date", source_url="file:///cv.pdf"),
+    ])
+    res = suggest_draft_upgrades(profile)
+    # the two Hisar Gaurav claims are one fact -> exactly one suggestion for it
+    facts = [s for s in res["suggestions"] if "Hisar Gaurav" in s["text"]]
+    assert len(facts) == 1
+    assert facts[0]["status"] in ("ready", "needs_confirmation")
+    assert facts[0]["link_count"] == 2
+    # the CV-sourced fact is blocked
+    birth = [s for s in res["suggestions"] if s["field"] == "birth_date"][0]
+    assert birth["status"] == "blocked"
+    assert any("CV" in b for b in birth["blockers"])

@@ -1566,3 +1566,11 @@ def select_best_all(body: dict) -> dict:
         profile.notability = score_notability(profile.name, profile.sources, profile.claims)
         store._save_session(profile)
     return {"ok": True, "apply": apply_changes, "planned": planned, "count": len(planned)}
+
+
+@research_router.get("/research/draft-suggestions")
+def get_draft_suggestions(profile_name: str, limit: int = 60) -> dict:
+    """Facts ready (or nearly ready) to move into the draft, one per fact."""
+    from engine.claim_selection import suggest_draft_upgrades
+    profile = store._get_profile(profile_name)
+    return suggest_draft_upgrades(profile, limit=max(1, min(limit, 300)))

@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 12:36 UTC · sha 6b8267e · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 15:37 UTC · sha 78aa8ee · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -199,6 +199,11 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Ambiguous / excluded works
     - Method & caveats
     - Impact summary (5 lines, dossier-ready)
+- `research/yadav_draft_suggestions.md`
+  - Yadav — draft upgrade suggestions (2026-09-21)
+    - Ready (verified source + settled fact)
+    - Needs confirmation (approving confirms the fact)
+    - Blocked
 - `research/yadav_icar_pdf_mentions.md`
   - Yadav ICAR-CIRB PDF/Text Mention Inventory
     - Per-document counts

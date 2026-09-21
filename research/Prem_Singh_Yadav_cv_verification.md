@@ -577,3 +577,18 @@ Confirmed so far: scopus 57225411188, openalex A5111039070, researchgate Prem-Ya
   adjudicated wrong-person profile should never be trusted by collision alone —
   check every profile by discriminator match (affiliation + exact field +
   scopus/doi overlap), not the id string.
+
+## Co-author network built from the identity-bonded registry (2026-09-21)
+- Constructed from OpenAlex works of subject author A5111039070 (bonded to
+  Scopus 57225411188). 113 distinct co-authors logged as rank lead entries in
+  category coauthor_network (top: Dharmendra Kumar 18 joint works, Pradeep
+  Kumar 7, N. L. Selokar 6, Monika Saini 6, Meeti Punetha 6, Rasika
+  Rajendran 5; international ties include Wilfried Kues FLI Germany,
+  Jonathan Green/Missouri, Kristin Whitworth). Network saved at
+  /tmp/opencode/coauthor_network.json; also a candidate 'known_collaborators'
+  dossier zone for the future person-report engine.
+- Not using the *guided* full-Vidwan profile-by-profile crawl; the co-author
+  page harvest route stays behind Expert Login/SPA gating. If opened later
+  via human interaction the run path is scripts/coauthor_harvest.py width
+  engine/coauthor_network.py featuring the identity_strength gate already
+  encoded.

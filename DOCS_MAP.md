@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 04:35 UTC · sha c46af3b · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 06:14 UTC · sha 109fa17 · host instance-20260819-0844 -->
 
 # DOCS_MAP
 
@@ -177,3 +177,4 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - Body-level name recount (2026-09-21)
     - Final cleanup (2026-09-21, second recount)
     - VIDWAN profile fixed (2026-09-21, evening)
+    - Co-author network built from the identity-bonded registry (2026-09-21)

@@ -20,7 +20,7 @@ interface Props {
   onRelayConsumed?: () => void;
 }
 
-export type PrimarySpace = "evidence" | "dossier" | "forensics" | "outputs";
+export type PrimarySpace = "discovery" | "evidence" | "dossier" | "outputs";
 
 export default function HubPage({
   initialProfile,
@@ -234,7 +234,7 @@ export default function HubPage({
 
       <FetchOpsPanel />
 
-      {/* Primary 3-Step Guided Workflow Bar */}
+      {/* Primary 4-Phase Guided Workflow Bar */}
       <nav
         className="primary-space-bar"
         aria-label="Research workflow steps"
@@ -249,6 +249,46 @@ export default function HubPage({
           boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
         }}
       >
+        {/* Step 1: Discovery (OSINT & Leads) */}
+        <button
+          type="button"
+          onClick={() => setActiveSpace("discovery")}
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            padding: "9px 12px",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: activeSpace === "discovery" ? 700 : 500,
+            background: activeSpace === "discovery" ? "var(--primary)" : "transparent",
+            color: activeSpace === "discovery" ? "#ffffff" : "var(--muted)",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            border: "none",
+          }}
+        >
+          <span style={{ fontSize: 15 }}>🔍</span>
+          <span>1. Discovery (OSINT)</span>
+          {((profile.auxiliary_leads ?? []).length > 0 || (profile.investigation_pivots ?? []).length > 0) && (
+            <span
+              style={{
+                background: activeSpace === "discovery" ? "rgba(255,255,255,0.25)" : "#eff6ff",
+                color: activeSpace === "discovery" ? "#ffffff" : "#1d4ed8",
+                padding: "2px 7px",
+                borderRadius: 10,
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              {(profile.auxiliary_leads ?? []).length} leads
+            </span>
+          )}
+        </button>
+
+        {/* Step 2: Extraction & Evidence (Sources) */}
         <button
           type="button"
           onClick={() => setActiveSpace("evidence")}
@@ -258,7 +298,7 @@ export default function HubPage({
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            padding: "9px 14px",
+            padding: "9px 12px",
             borderRadius: 8,
             fontSize: 13,
             fontWeight: activeSpace === "evidence" ? 700 : 500,
@@ -269,8 +309,8 @@ export default function HubPage({
             border: "none",
           }}
         >
-          <span style={{ fontSize: 15 }}>1️⃣</span>
-          <span>Sources &amp; Evidence</span>
+          <span style={{ fontSize: 15 }}>📑</span>
+          <span>2. Extraction &amp; Evidence</span>
           <span
             style={{
               background: activeSpace === "evidence" ? "rgba(255,255,255,0.25)" : "var(--bg)",
@@ -285,6 +325,7 @@ export default function HubPage({
           </span>
         </button>
 
+        {/* Step 3: Claims & Life Timeline (Living Dossier) */}
         <button
           type="button"
           onClick={() => setActiveSpace("dossier")}
@@ -294,7 +335,7 @@ export default function HubPage({
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            padding: "9px 14px",
+            padding: "9px 12px",
             borderRadius: 8,
             fontSize: 13,
             fontWeight: activeSpace === "dossier" ? 700 : 500,
@@ -305,8 +346,8 @@ export default function HubPage({
             border: "none",
           }}
         >
-          <span style={{ fontSize: 15 }}>2️⃣</span>
-          <span>Living Dossier &amp; Facts</span>
+          <span style={{ fontSize: 15 }}>🧬</span>
+          <span>3. Claims &amp; Timeline</span>
           <span
             style={{
               background: activeSpace === "dossier" ? "rgba(255,255,255,0.25)" : "var(--bg)",
@@ -336,44 +377,7 @@ export default function HubPage({
           )}
         </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveSpace("forensics")}
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            padding: "9px 14px",
-            borderRadius: 8,
-            fontSize: 13,
-            fontWeight: activeSpace === "forensics" ? 700 : 500,
-            background: activeSpace === "forensics" ? "var(--primary)" : "transparent",
-            color: activeSpace === "forensics" ? "#ffffff" : "var(--muted)",
-            cursor: "pointer",
-            transition: "all 0.15s ease",
-            border: "none",
-          }}
-        >
-          <span style={{ fontSize: 15 }}>3️⃣</span>
-          <span>Forensic Leads &amp; Pivots</span>
-          {((profile.auxiliary_leads ?? []).length > 0 || (profile.investigation_pivots ?? []).length > 0) && (
-            <span
-              style={{
-                background: activeSpace === "forensics" ? "rgba(255,255,255,0.25)" : "#eff6ff",
-                color: activeSpace === "forensics" ? "#ffffff" : "#1d4ed8",
-                padding: "2px 7px",
-                borderRadius: 10,
-                fontSize: 11,
-                fontWeight: 700,
-              }}
-            >
-              {(profile.auxiliary_leads ?? []).length} leads
-            </span>
-          )}
-        </button>
-
+        {/* Step 4: Wikipedia Draft (Pipeline 2 Consumer) */}
         <button
           type="button"
           onClick={() => setActiveSpace("outputs")}
@@ -383,7 +387,7 @@ export default function HubPage({
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            padding: "9px 14px",
+            padding: "9px 12px",
             borderRadius: 8,
             fontSize: 13,
             fontWeight: activeSpace === "outputs" ? 700 : 500,
@@ -394,8 +398,8 @@ export default function HubPage({
             border: "none",
           }}
         >
-          <span style={{ fontSize: 15 }}>4️⃣</span>
-          <span>Outputs &amp; Draft</span>
+          <span style={{ fontSize: 15 }}>🌐</span>
+          <span>4. Wikipedia Draft</span>
           {draftAudit && (
             <span
               style={{
@@ -407,7 +411,7 @@ export default function HubPage({
                 fontWeight: 700,
               }}
             >
-              {draftAudit.ready ? "Ready" : `${draftAudit.blockers.length} blockers`}
+              {draftAudit.ready ? "AfC Ready" : `${draftAudit.blockers.length} blockers`}
             </span>
           )}
         </button>
@@ -416,6 +420,13 @@ export default function HubPage({
       {/* Main Workspace Layout + Optional Companion Remote Browser */}
       <div className={`hub-main-layout ${showVmDesktop ? "browser-open" : ""}`}>
         <main className="workspace-main-panel">
+          {activeSpace === "discovery" && (
+            <ForensicCanvas
+              profile={profile}
+              onProfileUpdate={setProfile}
+            />
+          )}
+
           {activeSpace === "evidence" && (
             <EvidenceWorkspace
               profile={profile}
@@ -428,13 +439,6 @@ export default function HubPage({
 
           {activeSpace === "dossier" && (
             <LivingDossier
-              profile={profile}
-              onProfileUpdate={setProfile}
-            />
-          )}
-
-          {activeSpace === "forensics" && (
-            <ForensicCanvas
               profile={profile}
               onProfileUpdate={setProfile}
             />

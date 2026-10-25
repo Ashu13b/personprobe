@@ -10,6 +10,7 @@ from .schemas import DraftRequest
 
 from adapters.wiki.wiki_check import draft_generation_allowed
 from adapters.wiki.draft import audit_profile, render_draft
+from adapters.wiki.intelligent_draft import render_intelligent_draft
 from adapters.wiki.draft_hi import render_hindi_draft
 
 draft_router = APIRouter()
@@ -24,7 +25,7 @@ def draft_audit(name: str) -> dict:
 
 @draft_router.post("/draft")
 def generate_draft(req: DraftRequest) -> dict:
-    """Generate and persist a deterministic draft from the server-owned session."""
+    """Generate and persist an intelligent encyclopedic draft from the server-owned session."""
     profile = store._get_profile(req.profile_name)
     sid = store._ensure_session_id(profile)
     wiki_status = store._wiki_statuses.get(sid) or store._wiki_statuses.get(
@@ -50,7 +51,11 @@ def generate_draft(req: DraftRequest) -> dict:
             },
         )
 
-    profile.wikitext_en = render_draft(profile, audit)
+    try:
+        profile.wikitext_en = render_intelligent_draft(profile, audit)
+    except Exception:
+        profile.wikitext_en = render_draft(profile, audit)
+
     try:
         profile.wikitext_hi = render_hindi_draft(profile, audit)
     except Exception:
@@ -159,3 +164,27 @@ def draft_verify(body: dict) -> dict:
         "links": [link.model_dump() for link in links],
         "verified": qa.passed and all(link.status == "ok" for link in links),
     }
+
+
+@draft_router.post("/draft/checker")
+def draft_checker_endpoint(body: dict) -> dict:
+    """Standalone deterministic & intelligence draft checker for any wikitext draft.
+    Can audit drafts from PersonProbe sessions, outside repositories, or human authors.
+    """
+    from dataclasses import asdict
+    from wiki_draft_checker import check_wiki_draft
+
+    wikitext = body.get("wikitext", "")
+    if not wikitext and "profile_name" in body:
+        profile = store._get_profile(body["profile_name"])
+        wikitext = profile.wikitext_en or ""
+
+    if not wikitext:
+        raise HTTPException(400, "No wikitext provided or draft found for this profile.")
+
+    check_live_links = bool(body.get("check_live_links", False))
+    timeout = int(body.get("timeout", 5))
+
+    report = check_wiki_draft(wikitext, check_live_links=check_live_links, timeout=timeout)
+    return asdict(report)
+

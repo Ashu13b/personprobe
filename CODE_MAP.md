@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-25 13:27 UTC · sha c1e5676 · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-25 20:09 UTC · sha ca7db32 · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 113 files · 983 symbols
-- TypeScript — 34 files · 286 symbols
+- Python — 116 files · 1007 symbols
+- TypeScript — 35 files · 293 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 152 files · 1272 symbols across 6 languages._
+_Total: 156 files · 1303 symbols across 6 languages._
 
 
 ## Compartments
@@ -24,18 +24,20 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### ./
 - `browser_home.html` — #status, #open-desktop
 - `browser_server.py` — PROFILE_DIR, XVFB_DISPLAY, PORT, _UA, def looks_like_wall, class _Cmd, _q, _headed, _running, _xvfb, … +29 more
+- `wiki_draft_checker.py` — class CheckFinding, class LinkAuditResult, class SentenceGroundingResult, class DraftCheckerReport, PEACOCK_TERMS, PRIVACY_PATTERNS, DIRTY_TITLE_PATTERNS, ISO_DATE_PATTERN, ABBREVIATIONS, class WikiDraftChecker(__init__, check, _check_structure, _check_links_and_citations, _verify_live_links, _split_into_sentences, _check_sentence_grounding, _check_privacy_and_blp, _check_tone_and_npov), … +2 more
 ### adapters/
 - `adapters/wiki/article_compare.py` — WIKI_API, HEADERS, STOPWORDS, _COVERAGE_THRESHOLD, class ClaimCoverage, class ArticleProposal, def title_from_url, def fetch_article_text, def _tokens, def claim_coverage, … +1 more
 - `adapters/wiki/draft.py` — class DraftIssue, class DraftEvidence, class DraftAudit, _NOISE_PATTERNS, _ROLE_WORDS, _CAREER_ACTIVITY_WORDS, _INSTITUTION_WORDS, _PUBLICATION_WORDS, _BIRTH_SUBJECT_NOISE, _RESEARCH_ACTIONS, … +25 more
 - `adapters/wiki/draft_hi.py` — def _hindi_infobox, def _render_hindi_items, def render_hindi_draft
 - `adapters/wiki/draft_qa.py` — Severity, class Finding, class QaReport(passed, counts), _WEAK_RELIABILITIES, _LEAD_END, _ATTRIBUTION, _REF_SNIPPET, _CITE_URL, _CITE_TITLE, _CITE_DATE, … +9 more
 - `adapters/wiki/draft_verifier.py` — class DraftLink, _REF_OPEN, _REF_CLOSE, _CITE_FIELD, _EXTERNAL_LINK, def extract_draft_links, def check_draft_links, def _check_links_via_requests, def render_preview, class DraftWikilink, … +4 more
+- `adapters/wiki/intelligent_draft.py` — def render_intelligent_draft
 - `adapters/wiki/wiki_check.py` — HEADERS, WIKI_API, class WikiStatus, def draft_generation_allowed, def check_title_for, def check_existing_page, def _page_exists, def _deletion_note
 ### backend/
 - `backend/main.py` — api_app, def lifespan, app, FRONTEND_DIST
 - `backend/pipelines.py` — def _add_sd_article, def _add_sd_author_profile
 - `backend/routes_browser.py` — browser_router, _last_captcha_solved, def captcha_solved, def last_captcha_solved
-- `backend/routes_draft.py` — draft_router, def draft_audit, def generate_draft, def draft_links, def draft_preview, def draft_qa, def draft_verify
+- `backend/routes_draft.py` — draft_router, def draft_audit, def generate_draft, def draft_links, def draft_preview, def draft_qa, def draft_verify, def draft_checker_endpoint
 - `backend/routes_forensics.py` — forensics_router, def get_forensics_summary, def add_pivot, def delete_pivot, def add_auxiliary_lead, def update_auxiliary_lead, def promote_lead_to_source, def delete_auxiliary_lead, def run_forensic_sweep, def generate_inquiries, … +12 more
 - `backend/routes_ops.py` — ops_router, def get_fetch_telemetry
 - `backend/routes_research.py` — research_router, def _namesake_check, def identify, def _find_resumable_session, def _enrich_and_flag_sources, def _populate_initial_sources, def research_start, def add_source, def add_document_fact, def add_sourced_claim, … +33 more
@@ -88,6 +90,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `frontend/src/components/ClaimsReview.tsx` — FilterTab, ClaimsReview, toggleTrail, doVerify, handleBatchAction, ActionBtn
 - `frontend/src/components/DiscardedTab.tsx` — Props, DiscardedTab, loadDiscarded, handleRecover
 - `frontend/src/components/DraftAndOutputs.tsx` — Props, OutputSubTab, DraftAndOutputs, handleCopyWikitext, handleCopyAfc, handleCopyDossier, handleDownloadDossier
+- `frontend/src/components/DraftChecker.tsx` — CheckFinding, LinkAuditResult, SentenceGroundingResult, DraftCheckerReport, Props, DraftChecker, runAudit
 - `frontend/src/components/DraftLinks.tsx` — DraftLinkRow, DraftWikilinkRow, DraftLinks, toggleVerified
 - `frontend/src/components/DraftPreview.tsx` — Props, DraftPreview, copy
 - `frontend/src/components/DraftQa.tsx` — DraftQa
@@ -160,10 +163,8 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_name_verifier.py` — def test_generate_name_variants_western, def test_generate_name_variants_indic, def test_verify_name_in_content_exact_and_initials, def test_verify_name_in_content_devanagari, def test_verify_name_no_match, def test_verify_name_homonym_risk, def test_namesake_risk_known_conflict_and_siblings, def test_identity_strength_full_vs_weak, def test_coauthor_profile_network_screen
 - `tests/test_osint.py` — def test_openalex_search_and_ranking, def test_openalex_get_works_and_convert_sources, def test_generate_osint_dorks, def test_pdf_metadata_extraction, def test_parse_pdf_date_variants, def test_multi_archive_fallback_to_archive_today
 - `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls
-- `tests/test_provenance.py` — def test_domain_trust_classification, def test_source_provenance_classification, def test_academic_indexes_never_count_as_independent_news, def test_search_discovery_does_not_make_unknown_site_independent, def test_claim_trust_evaluation, def test_strict_notability_independence, def test_notability_requires_confirmed_claims_and_deduplicates_outlets, def test_notability_keeps_unassessed_candidates_out_of_score, def test_notability_deduplicates_syndicated_editorial_origins, def test_icar_and_cirb_reports_are_institutional_primary_sources, … +5 more
-- `tests/test_quote_backfill.py` — def test_best_quote_matches_paraphrase_with_date_normalization, def test_best_quote_matches_birth_date_across_date_formats, def test_best_quote_refuses_when_no_support, def test_collect_claims_needing_quotes_filters, def test_apply_quote_candidates_requires_approved_source_bound_claim
 
 ### Collapsed Directories (Fractal Router)
-- 📁 `tests/` — 8 file(s) (_result, test_disambiguator_drops_institutional_stopwords, test_news_sweep_issues_site_restricted_and_hindi_queries, test_news_sweep_deduplicates_across_queries…) · `ck show tests/` lists them
+- 📁 `tests/` — 11 file(s) (test_domain_trust_classification, test_source_provenance_classification, test_academic_indexes_never_count_as_independent_news, test_search_discovery_does_not_make_unknown_site_independent…) · `ck show tests/` lists them
 
-_Router mode: 134 of 142 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._
+_Router mode: 135 of 146 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._

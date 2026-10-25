@@ -93,6 +93,20 @@
   `DraftPage.tsx` prepends submission template for direct Wikipedia submission.
 - Complete documentation & quality conventions: `README.md` authoring, house style
   conventions in `.context-kit/conventions`, and test suite purposing.
+- Intelligent Being Wikipedia Draft Engine (`adapters/wiki/intelligent_draft.py`):
+  Server-owned intelligent draft synthesis that arranges verified facts into coherent,
+  fluid encyclopedic prose adhering strictly to WP:MOS, WP:BLP, WP:PROF, and WP:NPOV,
+  with 100% inline footnote citations on every prose sentence.
+- Standalone Deterministic & Intelligence Wiki Draft Checker (`wiki_draft_checker.py`):
+  Independent CLI and library to audit wikitext from any external tool, process, or author
+  for empty links, dead links (concurrent HTTP probe), ungrounded sentences, link-text
+  grounding, WP:BLP residential/phone privacy leaks, and peacock puffery.
+- Dedicated Draft Checker API & Web UI: `POST /api/draft/checker` endpoint and
+  interactive "Draft Checker" sub-tab in `DraftAndOutputs.tsx` with severity filters,
+  actionable suggestions, and sentence grounding matrices.
+- 4-Phase Frontend Navigation Re-alignment (`HubPage.tsx`): Reorganized the PersonProbe
+  workflow into 1. Discovery (OSINT), 2. Extraction & Evidence, 3. Claims & Timeline,
+  and 4. Wikipedia Draft.
 
 ## Next
 - Second-subject dry run: Dr. Vishwa Mohan Katoch (V. M. Katoch, India) —

@@ -4,6 +4,7 @@ import { getDraftDestination } from "../workflow";
 import DraftPreview from "./DraftPreview";
 import DraftLinks from "./DraftLinks";
 import DraftQa from "./DraftQa";
+import DraftChecker from "./DraftChecker";
 import ArticleProposalView from "./ArticleProposal";
 
 interface Props {
@@ -15,7 +16,7 @@ interface Props {
   draftError: string | null;
 }
 
-type OutputSubTab = "preview" | "wikitext" | "dossier" | "audit";
+type OutputSubTab = "preview" | "wikitext" | "checker" | "dossier" | "audit";
 
 export default function DraftAndOutputs({
   profile,
@@ -236,11 +237,12 @@ export default function DraftAndOutputs({
         )}
       </div>
 
-      {/* Simplified 4 Sub-Tabs */}
+      {/* Simplified 5 Sub-Tabs */}
       <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--border)" }}>
         {[
           { id: "preview" as const, label: "Draft Preview", icon: "👁️" },
           { id: "wikitext" as const, label: "Wikitext", icon: "📋" },
+          { id: "checker" as const, label: "Draft Checker", icon: "🔍" },
           { id: "dossier" as const, label: "Research Dossier", icon: "📑" },
           { id: "audit" as const, label: "Evidence & Pre-flight Audit", icon: "🛡️" },
         ].map(tab => {
@@ -399,7 +401,12 @@ export default function DraftAndOutputs({
         </div>
       )}
 
-      {/* Sub-Tab 3: Research Dossier (Markdown) */}
+      {/* Sub-Tab 3: Standalone Wiki Draft & Integrity Checker */}
+      {subTab === "checker" && (
+        <DraftChecker profileName={profile.name} defaultWikitext={activeWikitext} />
+      )}
+
+      {/* Sub-Tab 4: Research Dossier (Markdown) */}
       {subTab === "dossier" && (
         <div className="card" style={{ padding: "20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>

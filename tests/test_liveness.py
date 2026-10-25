@@ -35,7 +35,10 @@ def test_check_liveness_dead_looks_up_wayback():
 
 
 def test_check_liveness_blocked():
-    with patch("engine.fetcher.requests.get") as mock_get:
+    with (
+        patch("engine.fetcher.requests.get") as mock_get,
+        patch("engine.fetcher.is_mobile_bridge_available", return_value=False),
+    ):
         resp = type("R", (), {"status_code": 403, "close": lambda self: None})()
         mock_get.return_value = resp
         assert check_liveness("https://example.test/cloudflare") == ("blocked", None)

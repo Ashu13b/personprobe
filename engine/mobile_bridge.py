@@ -62,6 +62,17 @@ def fetch_via_mobile_bridge(
     client = get_mobile_client()
     if not client:
         return None
+
+    # Guard physical phone against reserved dummy RFC 2606/6761 test domains (.test, .example, .invalid, .localhost)
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    hostname = (parsed.hostname or "").lower()
+    if any(
+        hostname == tld.lstrip(".") or hostname.endswith(tld)
+        for tld in (".test", ".example", ".invalid", ".localhost")
+    ):
+        return None
+
     from .fetch_telemetry import timed, looks_throttled
 
     with timed("phone", url) as t:

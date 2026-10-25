@@ -911,3 +911,21 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
   after truncation, zeroing ForensicCanvas.tsx; recovered via git checkout).
   Rule: write to a temp file then os.replace, and avoid \udXXX surrogate escapes
   in scripts — use real characters or none.
+
+## Pipeline Separation & Intelligent Synthesis vs. Standalone Verification (Oct 2026)
+- **Strict Two-Pipeline Architecture**:
+  1. *Pipeline 1 (Exhaustive Biographical Discovery & Offline Dossier)*: Captures the total civil, familial, residential, educational, career, and post-retirement reality of the subject. Uncensored and unredacted: includes ancestral roots, immediate family ties, domestic addresses, and post-superannuation roles. Never filtered for Wikipedia notability or WP:BLP.
+  2. *Pipeline 2 (Wikipedia AfC & Encyclopedic Drafting)*: A downstream consumer of discoveries. Selects only notable, encyclopedic, verified claims. Strictly filters for WP:BLP (censoring private residential plots, phone numbers, and non-notable family names), neutral encyclopedic tone (WP:NPOV, eliminating peacock praise), and standard layout (WP:MOS).
+- **Intelligent Being Drafting Layer (`adapters/wiki/intelligent_draft.py`)**:
+  - Mechanical code generation that glues fragmented claim snippets produces rigid, unnatural prose and triggers attribution warnings.
+  - The AI agent acts as the Intelligent Synthesis Provider: it composes fluid, articulate, encyclopedic sections (Lead, Early life and education, Career and research, Buffalo cloning milestones, Post-retirement leadership, Awards, Publications) while maintaining 100% sentence-to-citation grounding.
+- **Standalone Wiki Draft & Integrity Checker (`wiki_draft_checker.py`)**:
+  - Standalone verification module completely decoupled from internal session objects so it can audit wikitext from ANY source (PersonProbe sessions, outside tools, or human authors).
+  - CLI: `python3 wiki_draft_checker.py <path> [--json] [--no-live-links]`.
+  - Backend API: `POST /api/draft/checker` accepting arbitrary wikitext or profile name.
+  - Frontend UI: Standalone "Draft Checker" tab inside `DraftAndOutputs.tsx`.
+  - **Critical False-Positive Guards**:
+    1. *Bibliographic ISBN protection*: Masking `|isbn=...`, `|issn=...`, and citation URLs prevents Indian 10-digit mobile phone regexes from false-flagging book ISBNs (e.g. `8189304801`).
+    2. *Abbreviation shielding*: Replaces periods in `Dr.`, `Ph.D.`, `B.Sc.`, `P.S.`, `eds.`, etc., with temporary tokens during sentence segmentation, preventing bibliographies and initials from fragmenting into false ungrounded clauses.
+    3. *Non-English citation titles*: Recognizes Devanagari Hindi headlines in news citations (e.g. Amar Ujala, Dainik Bhaskar) to prevent false-alarm link-text mismatch warnings.
+

@@ -11,9 +11,8 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import Iterable
 
-from engine.models import PersonProfile, Source
+from engine.models import PersonProfile
 from adapters.wiki.draft import (
     DraftAudit,
     DraftEvidence,
@@ -21,9 +20,6 @@ from adapters.wiki.draft import (
     _citation,
     _display_name,
     _defaultsort,
-    _ref_name,
-    _clean,
-    _host,
 )
 
 
@@ -45,8 +41,10 @@ def render_intelligent_draft(
         by_field[item.claim.field].append(item)
 
     # 1. Structure Header
-    short_desc = "{{Short description|Indian animal biotechnology researcher and physiologist}}"
-    
+    short_desc = (
+        "{{Short description|Indian animal biotechnology researcher and physiologist}}"
+    )
+
     # 2. Infobox Scientist
     infobox_lines = [
         "{{Infobox scientist",
@@ -58,38 +56,65 @@ def render_intelligent_draft(
         # Match YYYY-MM-DD or YYYY
         m = re.search(r"(\d{4})", str(profile.birth_date))
         if m:
-            infobox_lines.append(f"| birth_date = {{{{birth date and age|1963|4|10}}}}")
+            infobox_lines.append("| birth_date = {{birth date and age|1963|4|10}}")
     if profile.birth_place:
-        infobox_lines.append(f"| birth_place = [[Nimoth]], [[Rewari district]], [[Haryana]], India")
-    
-    infobox_lines.extend([
-        "| nationality = Indian",
-        "| alma_mater = [[Chaudhary Charan Singh Haryana Agricultural University]] (B.Sc., M.Sc., Ph.D.)",
-        "| workplaces = [[Central Institute for Research on Buffaloes|ICAR-Central Institute for Research on Buffaloes]], Hisar (1993–2025)<br>RPS College of Veterinary Science, Balana (2025–present)",
-        "| known_for = Buffalo cloning (''Hisar Gaurav''), somatic cell nuclear transfer, semen cryobanking",
-        "| awards = Nanaji Deshmukh ICAR Team Award (2019)<br>''Limca Book of Records'' (2023)",
-        "}}"
-    ])
+        infobox_lines.append(
+            "| birth_place = [[Nimoth]], [[Rewari district]], [[Haryana]], India"
+        )
+
+    infobox_lines.extend(
+        [
+            "| nationality = Indian",
+            "| alma_mater = [[Chaudhary Charan Singh Haryana Agricultural University]] (B.Sc., M.Sc., Ph.D.)",
+            "| workplaces = [[Central Institute for Research on Buffaloes|ICAR-Central Institute for Research on Buffaloes]], Hisar (1993–2025)<br>RPS College of Veterinary Science, Balana (2025–present)",
+            "| known_for = Buffalo cloning (''Hisar Gaurav''), somatic cell nuclear transfer, semen cryobanking",
+            "| awards = Nanaji Deshmukh ICAR Team Award (2019)<br>''Limca Book of Records'' (2023)",
+            "}}",
+        ]
+    )
     infobox = "\n".join(infobox_lines)
 
     # 3. Lead Section (Targeting >= 3 comprehensive, encyclopedic sentences)
     lead_cites: list[str] = []
-    
+
     # Position & Affiliation citations
     pos_ev = next((ev for ev in by_field.get("position", []) if ev.source), None)
     aff_ev = next((ev for ev in by_field.get("affiliation", []) if ev.source), None)
-    lead_cite1 = _citation(pos_ev.source, used_refs) if pos_ev else (_citation(aff_ev.source, used_refs) if aff_ev else "")
-    
+    lead_cite1 = (
+        _citation(pos_ev.source, used_refs)
+        if pos_ev
+        else (_citation(aff_ev.source, used_refs) if aff_ev else "")
+    )
+
     # Cloning breakthrough citations (Times of India / Print / Tribune)
-    cloning_ev = next((ev for ev in by_field.get("known_for", []) if "hisar gaurav" in ev.claim.text.lower() or "cloned" in ev.claim.text.lower()), None)
+    cloning_ev = next(
+        (
+            ev
+            for ev in by_field.get("known_for", [])
+            if "hisar gaurav" in ev.claim.text.lower()
+            or "cloned" in ev.claim.text.lower()
+        ),
+        None,
+    )
     lead_cite2 = _citation(cloning_ev.source, used_refs) if cloning_ev else ""
-    
+
     # Retirement & current appointment citation (Ogarev Mordovia Univ / Amar Ujala)
-    ret_ev = next((ev for ev in by_field.get("career", []) if "rps" in ev.claim.text.lower() or "superannuation" in ev.claim.text.lower()), None)
+    ret_ev = next(
+        (
+            ev
+            for ev in by_field.get("career", [])
+            if "rps" in ev.claim.text.lower()
+            or "superannuation" in ev.claim.text.lower()
+        ),
+        None,
+    )
     lead_cite3 = _citation(ret_ev.source, used_refs) if ret_ev else ""
 
     # Limca record citation
-    limca_ev = next((ev for ev in by_field.get("award", []) if "limca" in ev.claim.text.lower()), None)
+    limca_ev = next(
+        (ev for ev in by_field.get("award", []) if "limca" in ev.claim.text.lower()),
+        None,
+    )
     lead_cite_limca = _citation(limca_ev.source, used_refs) if limca_ev else lead_cite2
 
     lead_text = (
@@ -104,10 +129,13 @@ def render_intelligent_draft(
     edu_cites: list[str] = []
     bp_ev = next((ev for ev in by_field.get("birth_place", []) if ev.source), None)
     bp_cite = _citation(bp_ev.source, used_refs) if bp_ev else ""
-    
-    satish_ev = next((ev for ev in by_field.get("education", []) if "satishserial" in ev.source.url), None)
+
+    satish_ev = next(
+        (ev for ev in by_field.get("education", []) if "satishserial" in ev.source.url),
+        None,
+    )
     edu_cite = _citation(satish_ev.source, used_refs) if satish_ev else ""
-    
+
     early_life = (
         "== Early life and education ==\n"
         f"Prem Singh Yadav was born on 10 April 1963 in the village of [[Nimoth]] in [[Rewari district]], [[Haryana]], India{bp_cite}. "
@@ -117,13 +145,25 @@ def render_intelligent_draft(
 
     # 5. Career and research Section
     career_items = by_field.get("career", [])
-    cirb_ev = next((ev for ev in career_items if "1993" in ev.claim.text or "joined" in ev.claim.text.lower()), None)
+    cirb_ev = next(
+        (
+            ev
+            for ev in career_items
+            if "1993" in ev.claim.text or "joined" in ev.claim.text.lower()
+        ),
+        None,
+    )
     cirb_cite = _citation(cirb_ev.source, used_refs) if cirb_ev else edu_cite
-    
-    trib_ev = next((ev for ev in career_items if "tribune" in ev.source.publisher.lower()), None)
+
+    trib_ev = next(
+        (ev for ev in career_items if "tribune" in ev.source.publisher.lower()), None
+    )
     trib_cite = _citation(trib_ev.source, used_refs) if trib_ev else ""
 
-    fli_ev = next((ev for ev in by_field.get("publications", []) if "fli.de" in ev.source.url), None)
+    fli_ev = next(
+        (ev for ev in by_field.get("publications", []) if "fli.de" in ev.source.url),
+        None,
+    )
     fli_cite = _citation(fli_ev.source, used_refs) if fli_ev else ""
 
     career = (
@@ -135,16 +175,27 @@ def render_intelligent_draft(
     )
 
     # 6. Buffalo Cloning and Breakthroughs Section
-    print_ev = next((ev for ev in by_field.get("known_for", []) if "theprint" in ev.source.url), None)
+    print_ev = next(
+        (ev for ev in by_field.get("known_for", []) if "theprint" in ev.source.url),
+        None,
+    )
     print_cite = _citation(print_ev.source, used_refs) if print_ev else ""
 
-    toi_ev = next((ev for ev in by_field.get("known_for", []) if "timesofindia" in ev.source.url), None)
+    toi_ev = next(
+        (ev for ev in by_field.get("known_for", []) if "timesofindia" in ev.source.url),
+        None,
+    )
     toi_cite = _citation(toi_ev.source, used_refs) if toi_ev else ""
 
-    limca_ev = next((ev for ev in by_field.get("award", []) if "limca" in ev.claim.text.lower()), None)
+    limca_ev = next(
+        (ev for ev in by_field.get("award", []) if "limca" in ev.claim.text.lower()),
+        None,
+    )
     limca_cite = _citation(limca_ev.source, used_refs) if limca_ev else ""
 
-    bhaskar_ev = next((ev for ev in by_field.get("known_for", []) if "bhaskar" in ev.source.url), None)
+    bhaskar_ev = next(
+        (ev for ev in by_field.get("known_for", []) if "bhaskar" in ev.source.url), None
+    )
     bhaskar_cite = _citation(bhaskar_ev.source, used_refs) if bhaskar_ev else ""
 
     cloning = (
@@ -158,7 +209,10 @@ def render_intelligent_draft(
     )
 
     # 7. Post-retirement appointments Section
-    mrsu_ev = next((ev for ev in by_field.get("career", []) if "mrsuniversity" in ev.source.url), None)
+    mrsu_ev = next(
+        (ev for ev in by_field.get("career", []) if "mrsuniversity" in ev.source.url),
+        None,
+    )
     mrsu_cite = _citation(mrsu_ev.source, used_refs) if mrsu_ev else ""
 
     post_retirement = (
@@ -169,7 +223,14 @@ def render_intelligent_draft(
     )
 
     # 8. Awards and recognition Section
-    award_ev = next((ev for ev in by_field.get("award", []) if "nanaji" in ev.claim.text.lower() or "icar" in ev.claim.text.lower()), None)
+    award_ev = next(
+        (
+            ev
+            for ev in by_field.get("award", [])
+            if "nanaji" in ev.claim.text.lower() or "icar" in ev.claim.text.lower()
+        ),
+        None,
+    )
     award_cite = _citation(award_ev.source, used_refs) if award_ev else ""
 
     awards = (
@@ -182,10 +243,20 @@ def render_intelligent_draft(
     )
 
     # 9. Selected publications Section
-    book_ev = next((ev for ev in by_field.get("publication", []) if "8189304801" in ev.claim.text or "reproductive biotechnology" in ev.claim.text.lower()), None)
+    book_ev = next(
+        (
+            ev
+            for ev in by_field.get("publication", [])
+            if "8189304801" in ev.claim.text
+            or "reproductive biotechnology" in ev.claim.text.lower()
+        ),
+        None,
+    )
     book_cite = _citation(book_ev.source, used_refs) if book_ev else ""
 
-    pmc_ev = next((ev for ev in by_field.get("publication", []) if "pmc" in ev.source.url), None)
+    pmc_ev = next(
+        (ev for ev in by_field.get("publication", []) if "pmc" in ev.source.url), None
+    )
     pmc_cite = _citation(pmc_ev.source, used_refs) if pmc_ev else ""
 
     publications = (
@@ -233,7 +304,7 @@ def render_intelligent_draft(
         "",
         publications,
         "",
-        "\n".join(footer)
+        "\n".join(footer),
     ]
 
     return "\n".join(sections)

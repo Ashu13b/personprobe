@@ -1,6 +1,5 @@
 """Tests for the Standalone Wiki Draft Checker engine and API endpoint."""
 
-import pytest
 from wiki_draft_checker import WikiDraftChecker, check_wiki_draft
 
 
@@ -75,14 +74,20 @@ def test_ungrounded_sentence_detected():
 
 
 def test_peacock_terms_npov():
-    draft = VALID_DRAFT + "\nHe was a visionary and legendary genius in animal biotechnology<ref name='src1' />."
+    draft = (
+        VALID_DRAFT
+        + "\nHe was a visionary and legendary genius in animal biotechnology<ref name='src1' />."
+    )
     report = check_wiki_draft(draft, check_live_links=False)
     rule_ids = {f.rule_id for f in report.findings}
     assert "peacock_term" in rule_ids
 
 
 def test_blp_privacy_phone_and_address():
-    draft = VALID_DRAFT + "\nHe lives at House No. 1425, Sector 14, Hisar and can be reached at +91 9812345678<ref name='src1' />."
+    draft = (
+        VALID_DRAFT
+        + "\nHe lives at House No. 1425, Sector 14, Hisar and can be reached at +91 9812345678<ref name='src1' />."
+    )
     report = check_wiki_draft(draft, check_live_links=False)
     assert report.verdict == "FAIL"
     rule_ids = {f.rule_id for f in report.findings}
@@ -92,7 +97,9 @@ def test_blp_privacy_phone_and_address():
 def test_isbn_not_falsely_flagged_as_phone():
     draft = VALID_DRAFT + "\n{{cite book|title=Test Book|isbn=8189304801}}"
     report = check_wiki_draft(draft, check_live_links=False)
-    blp_violations = [f for f in report.findings if f.rule_id == "blp_privacy_violation"]
+    blp_violations = [
+        f for f in report.findings if f.rule_id == "blp_privacy_violation"
+    ]
     assert len(blp_violations) == 0
 
 
@@ -101,7 +108,9 @@ def test_api_checker_endpoint():
     from backend.main import app
 
     client = TestClient(app)
-    resp = client.post("/api/draft/checker", json={"wikitext": VALID_DRAFT, "check_live_links": False})
+    resp = client.post(
+        "/api/draft/checker", json={"wikitext": VALID_DRAFT, "check_live_links": False}
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["verdict"] == "PASS"

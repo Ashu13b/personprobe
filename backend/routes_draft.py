@@ -180,11 +180,14 @@ def draft_checker_endpoint(body: dict) -> dict:
         wikitext = profile.wikitext_en or ""
 
     if not wikitext:
-        raise HTTPException(400, "No wikitext provided or draft found for this profile.")
+        raise HTTPException(
+            400, "No wikitext provided or draft found for this profile."
+        )
 
     check_live_links = bool(body.get("check_live_links", False))
     timeout = int(body.get("timeout", 5))
 
-    report = check_wiki_draft(wikitext, check_live_links=check_live_links, timeout=timeout)
+    report = check_wiki_draft(
+        wikitext, check_live_links=check_live_links, timeout=timeout
+    )
     return asdict(report)
-

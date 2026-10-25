@@ -65,6 +65,7 @@ def fetch_via_mobile_bridge(
 
     # Guard physical phone against reserved dummy RFC 2606/6761 test domains (.test, .example, .invalid, .localhost)
     from urllib.parse import urlparse
+
     parsed = urlparse(url)
     hostname = (parsed.hostname or "").lower()
     if any(

@@ -1,5 +1,4 @@
 from unittest.mock import patch, MagicMock
-from pathlib import Path
 import fitz
 
 from engine.models import PersonProfile
@@ -22,7 +21,9 @@ def test_openalex_search_and_ranking():
             {
                 "id": "https://openalex.org/A2",
                 "display_name": "Prem Singh Yadav",
-                "last_known_institutions": [{"display_name": "Central Institute for Research on Buffaloes"}],
+                "last_known_institutions": [
+                    {"display_name": "Central Institute for Research on Buffaloes"}
+                ],
                 "works_count": 29,
                 "summary_stats": {"h_index": 10},
             },
@@ -34,12 +35,16 @@ def test_openalex_search_and_ranking():
         resp.json.return_value = mock_payload
         mock_get.return_value = resp
 
-        authors = search_author("Prem Singh Yadav", "Central Institute for Research on Buffaloes")
+        authors = search_author(
+            "Prem Singh Yadav", "Central Institute for Research on Buffaloes"
+        )
         assert len(authors) == 2
         # CIRB author should rank first due to institution hint match
         assert authors[0]["id"] == "A2"
         assert authors[0]["h_index"] == 10
-        assert "Central Institute for Research on Buffaloes" in authors[0]["affiliations"]
+        assert (
+            "Central Institute for Research on Buffaloes" in authors[0]["affiliations"]
+        )
 
 
 def test_openalex_get_works_and_convert_sources():
@@ -109,12 +114,14 @@ def test_pdf_metadata_extraction():
     doc = fitz.open()
     page = doc.new_page()
     page.insert_text((50, 50), "Test Document Content")
-    doc.set_metadata({
-        "title": "Cloning Research Report",
-        "author": "Dr. Prem Singh Yadav",
-        "creator": "Word Processor 2024",
-        "creationDate": "D:20240315103000+05'30'",
-    })
+    doc.set_metadata(
+        {
+            "title": "Cloning Research Report",
+            "author": "Dr. Prem Singh Yadav",
+            "creator": "Word Processor 2024",
+            "creationDate": "D:20240315103000+05'30'",
+        }
+    )
     pdf_bytes = doc.tobytes()
     doc.close()
 
@@ -137,6 +144,7 @@ def test_multi_archive_fallback_to_archive_today():
     target_url = "https://example.com/lost-article"
     # When Wayback fails (returns None or exception), fallback to archive.ph
     with patch("engine.fetcher.requests.get") as mock_get:
+
         def side_effect(url, **kwargs):
             if "archive.org" in url:
                 mock_wb = MagicMock()
@@ -151,4 +159,7 @@ def test_multi_archive_fallback_to_archive_today():
 
         mock_get.side_effect = side_effect
         archive_res = get_wayback_url(target_url)
-        assert archive_res == "https://archive.ph/20240101/https://example.com/lost-article"
+        assert (
+            archive_res
+            == "https://archive.ph/20240101/https://example.com/lost-article"
+        )

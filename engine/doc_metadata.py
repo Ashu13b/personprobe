@@ -3,6 +3,7 @@
 Extracts internal metadata, creation timestamps, and author/system attributes
 from binary document assets (PDFs, reports, and scans) using PyMuPDF (fitz).
 """
+
 from __future__ import annotations
 
 import re

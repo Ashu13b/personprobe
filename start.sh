@@ -15,8 +15,8 @@ for port in $UNIFIED_PORT 3890 8001 7070; do
     fi
 done
 
-# Navigate to personprobe root directory
-cd /home/ubuntu/Expeei/personprobe
+# Navigate to root directory
+cd "$(dirname "$0")"
 
 # Build the latest frontend directly with Vite
 echo "Building the React frontend..."

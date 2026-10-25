@@ -3,21 +3,22 @@
 Provides open, non-rate-limited scholarly entity resolution for researchers,
 institutional affiliations, co-author networks, and grant attribution.
 """
+
 from __future__ import annotations
 
 import re
 from typing import Any, Optional
 import requests
 
-from .models import Source, SourceReliability, Claim
+from .models import Source, SourceReliability
 
 OPENALEX_API_BASE = "https://api.openalex.org"
-OPENALEX_HEADERS = {
-    "User-Agent": "PersonProbe/0.2 (mailto:ay.yadav53@gmail.com)"
-}
+OPENALEX_HEADERS = {"User-Agent": "PersonProbe/0.2 (mailto:ay.yadav53@gmail.com)"}
 
 
-def search_author(name: str, institution_hint: Optional[str] = None) -> list[dict[str, Any]]:
+def search_author(
+    name: str, institution_hint: Optional[str] = None
+) -> list[dict[str, Any]]:
     """Search OpenAlex for author entities matching the subject name and optional institution."""
     clean_name = (name or "").strip()
     if not clean_name:
@@ -37,7 +38,11 @@ def search_author(name: str, institution_hint: Optional[str] = None) -> list[dic
     authors: list[dict[str, Any]] = []
     for item in data.get("results", []):
         inst_list = item.get("last_known_institutions") or []
-        affil_names = [inst.get("display_name", "") for inst in inst_list if inst.get("display_name")]
+        affil_names = [
+            inst.get("display_name", "")
+            for inst in inst_list
+            if inst.get("display_name")
+        ]
         h_idx = (item.get("summary_stats") or {}).get("h_index", 0)
         author_id = item.get("id", "").split("/")[-1]
 
@@ -56,7 +61,9 @@ def search_author(name: str, institution_hint: Optional[str] = None) -> list[dic
         relevance_score = 1.0
         if institution_hint and affil_names:
             hint_tokens = set(re.findall(r"\b[a-zA-Z]{3,}\b", institution_hint.lower()))
-            aff_tokens = set(re.findall(r"\b[a-zA-Z]{3,}\b", " ".join(affil_names).lower()))
+            aff_tokens = set(
+                re.findall(r"\b[a-zA-Z]{3,}\b", " ".join(affil_names).lower())
+            )
             if hint_tokens & aff_tokens:
                 relevance_score += 2.0
 
@@ -112,23 +119,28 @@ def get_author_works(openalex_author_id: str, limit: int = 50) -> list[dict[str,
             if funder or award_id:
                 grants_info.append({"funder": funder, "award_id": award_id})
 
-        works.append({
-            "id": w.get("id"),
-            "doi": doi,
-            "title": title,
-            "year": year,
-            "publisher": publisher,
-            "url": host_url or (f"https://openalex.org/{w.get('id')}" if w.get("id") else ""),
-            "cited_by_count": w.get("cited_by_count", 0),
-            "coauthors": coauthors,
-            "grants": grants_info,
-            "is_oa": (w.get("open_access") or {}).get("is_oa", False),
-        })
+        works.append(
+            {
+                "id": w.get("id"),
+                "doi": doi,
+                "title": title,
+                "year": year,
+                "publisher": publisher,
+                "url": host_url
+                or (f"https://openalex.org/{w.get('id')}" if w.get("id") else ""),
+                "cited_by_count": w.get("cited_by_count", 0),
+                "coauthors": coauthors,
+                "grants": grants_info,
+                "is_oa": (w.get("open_access") or {}).get("is_oa", False),
+            }
+        )
 
     return works
 
 
-def convert_works_to_sources(works: list[dict[str, Any]], author_name: str) -> list[Source]:
+def convert_works_to_sources(
+    works: list[dict[str, Any]], author_name: str
+) -> list[Source]:
     """Convert OpenAlex work records into structured Source objects."""
     sources: list[Source] = []
     for w in works:

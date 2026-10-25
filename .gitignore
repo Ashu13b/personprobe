@@ -58,3 +58,36 @@ ENV_MAP.md
 !.context-kit/cold
 !.context-kit/references
 # <<< context-kit <<<
+
+# >>> context-kit >>>
+!.context-kit/baseline
+!.context-kit/baseline.waivers
+!.context-kit/gate_baseline
+.ssh/
+.aws/
+.gnupg/
+.kube/
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.sample
+!.env.dist
+*.env
+.npmrc
+.pypirc
+.netrc
+credentials.json
+secrets.json
+service_account.json
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.ppk
+# <<< context-kit <<<

@@ -2,6 +2,6 @@
 backend: FastAPI transport, session persistence, and workflow orchestration.
 engine: Domain services for identity, discovery, extraction, classification, and evidence analysis.
 frontend: React presentation, client API adapters, and user-workflow interaction.
-wiki: Wikimedia status checks and wikitext rendering policy.
+adapters: Wikipedia AfC and Hindi draft rendering, verification, and diffing.
 tests: Unit, integration, and regression test suites.
 scripts: Operational CLI utilities and offline automation scripts.

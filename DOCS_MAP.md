@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-09-21 17:56 UTC · sha dab3d17 · host instance-20260819-0844 -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-10-19 14:37 UTC · sha fe160fd · host instance-trading-bot-restored -->
 
 # DOCS_MAP
 
@@ -102,6 +102,12 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - 🔍 Evaluation Protocol
     - 📋 Required Output Report
       - 📦 Dependency Vetting Report
+- `.agents/skills/field-review/SKILL.md`
+  - Field Review
+    - 1. Load the contract
+    - 2. Verify your own findings before returning them
+    - 3. Judgment bias — approve unless proven wrong
+    - 4. Return
 - `.agents/skills/migration-safety/SKILL.md`
   - Database Migration & Schema Safety Guard
     - ⚡ Non-Negotiable Safety Rules
@@ -114,9 +120,6 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
     - 🔍 The 8-Dimension Audit Checklist
     - 📋 Required Audit Report Output
       - 🛡️ Pre-Production Audit Report
-        - Executive Verdict: [PASS | CONDITIONAL PASS | BLOCK]
-        - Findings
-        - Verification Protocol
 - `.agents/skills/root-cause-debug/SKILL.md`
   - Evidence-Based Root Cause Debugging
     - ⚡ Core Rules & Directives

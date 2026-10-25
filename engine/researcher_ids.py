@@ -1,11 +1,18 @@
 """Find and validate researcher profile IDs: ORCID, Google Scholar, Semantic Scholar, Scopus."""
+
 from __future__ import annotations
 import re
 import requests
 from .models import Source, SourceReliability
 
-HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)", "Accept": "application/json"}
-OA_HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)", "Accept": "application/json"}
+HEADERS = {
+    "User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)",
+    "Accept": "application/json",
+}
+OA_HEADERS = {
+    "User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)",
+    "Accept": "application/json",
+}
 
 # URL patterns to extract IDs from
 _ORCID_RE = re.compile(r"orcid\.org/(\d{4}-\d{4}-\d{4}-\d{3}[\dX])")
@@ -16,7 +23,9 @@ _SD_AUTHOR_RE = re.compile(r"sciencedirect\.com/author/(\d+)/")
 _RESEARCHGATE_RE = re.compile(r"researchgate\.net/profile/([A-Za-z0-9_-]+)")
 _S2_AUTHOR_RE = re.compile(r"semanticscholar\.org/author/[^/]+/(\d+)")
 # ScienceDirect article PII (Publisher Item Identifier)
-_SD_PII_RE = re.compile(r"sciencedirect\.com/science/article/(?:abs/)?pii/([A-Z0-9]+)", re.I)
+_SD_PII_RE = re.compile(
+    r"sciencedirect\.com/science/article/(?:abs/)?pii/([A-Z0-9]+)", re.I
+)
 
 
 def extract_ids_from_sources(sources: list[Source]) -> dict[str, str]:
@@ -76,7 +85,9 @@ def search_researcher_ids(
 
     # ResearchGate search (lower priority, often unreliable identity)
     if not ids.get("researchgate"):
-        rg_hits = _search_web(f'"{name}" {context} site:researchgate.net/profile'.strip())
+        rg_hits = _search_web(
+            f'"{name}" {context} site:researchgate.net/profile'.strip()
+        )
         for s in rg_hits:
             if m := _RESEARCHGATE_RE.search(s.url):
                 ids["researchgate"] = m.group(1)
@@ -99,8 +110,16 @@ def validate_orcid(orcid_id: str, name: str, affiliation: str | None = None) -> 
 
         # Check name match
         person = data.get("person", {})
-        given = (person.get("name", {}).get("given-names", {}) or {}).get("value", "").lower()
-        family = (person.get("name", {}).get("family-name", {}) or {}).get("value", "").lower()
+        given = (
+            (person.get("name", {}).get("given-names", {}) or {})
+            .get("value", "")
+            .lower()
+        )
+        family = (
+            (person.get("name", {}).get("family-name", {}) or {})
+            .get("value", "")
+            .lower()
+        )
         full = f"{given} {family}".strip()
         name_tokens = [t.lower() for t in name.split() if len(t) > 2]
         if not any(t in full for t in name_tokens):
@@ -108,11 +127,17 @@ def validate_orcid(orcid_id: str, name: str, affiliation: str | None = None) -> 
 
         if affiliation:
             # Check employment/education affiliations
-            affiliations_section = data.get("activities-summary", {}).get("employments", {})
+            affiliations_section = data.get("activities-summary", {}).get(
+                "employments", {}
+            )
             affil_groups = affiliations_section.get("affiliation-group", [])
             affil_text = " ".join(
-                (g.get("summaries", [{}])[0].get("employment-summary", {})
-                    .get("organization", {}).get("name", "")).lower()
+                (
+                    g.get("summaries", [{}])[0]
+                    .get("employment-summary", {})
+                    .get("organization", {})
+                    .get("name", "")
+                ).lower()
                 for g in affil_groups
             )
             affil_tokens = [t.lower() for t in affiliation.split() if len(t) > 3]
@@ -194,21 +219,27 @@ def fetch_orcid_works(orcid_id: str) -> list[Source]:
         journal = (summary.get("journal-title", {}) or {}).get("value", "")
         ext_ids = group.get("external-ids", {}).get("external-id", [])
         doi = next(
-            (e["external-id-value"] for e in ext_ids if e.get("external-id-type") == "doi"),
+            (
+                e["external-id-value"]
+                for e in ext_ids
+                if e.get("external-id-type") == "doi"
+            ),
             None,
         )
         url = f"https://doi.org/{doi}" if doi else f"https://orcid.org/{orcid_id}"
         if not title:
             continue
-        sources.append(Source(
-            url=url,
-            title=title,
-            publisher=journal or "Academic publication",
-            reliability=SourceReliability.reliable_secondary,
-            snippet=f"Published {year_val or 'unknown year'}.",
-            date=str(year_val) if year_val else None,
-            fetched_by="orcid",
-        ))
+        sources.append(
+            Source(
+                url=url,
+                title=title,
+                publisher=journal or "Academic publication",
+                reliability=SourceReliability.reliable_secondary,
+                snippet=f"Published {year_val or 'unknown year'}.",
+                date=str(year_val) if year_val else None,
+                fetched_by="orcid",
+            )
+        )
 
     return sources
 
@@ -278,10 +309,12 @@ def resolve_sd_article(url: str) -> dict | None:
             for authorship in oa.json().get("authorships", []):
                 author = authorship.get("author", {})
                 oa_id = (author.get("id") or "").split("/")[-1]  # strip URL prefix
-                openalex_authorships.append({
-                    "name": author.get("display_name", ""),
-                    "openalex_id": oa_id or None,
-                })
+                openalex_authorships.append(
+                    {
+                        "name": author.get("display_name", ""),
+                        "openalex_id": oa_id or None,
+                    }
+                )
     except Exception:
         pass
 
@@ -332,18 +365,22 @@ def fetch_openalex_works(openalex_author_id: str, limit: int = 30) -> list[Sourc
         url = f"https://doi.org/{doi}" if doi else ""
         if not url:
             continue
-        loc = (w.get("primary_location") or {})
-        journal = (loc.get("source") or {}).get("display_name") or "Academic publication"
+        loc = w.get("primary_location") or {}
+        journal = (loc.get("source") or {}).get(
+            "display_name"
+        ) or "Academic publication"
         year = w.get("publication_year")
-        sources.append(Source(
-            url=url,
-            title=w.get("title", ""),
-            publisher=journal,
-            reliability=SourceReliability.reliable_secondary,
-            snippet=f"Published {year or 'unknown year'}.",
-            date=str(year) if year else None,
-            fetched_by="openalex",
-        ))
+        sources.append(
+            Source(
+                url=url,
+                title=w.get("title", ""),
+                publisher=journal,
+                reliability=SourceReliability.reliable_secondary,
+                snippet=f"Published {year or 'unknown year'}.",
+                date=str(year) if year else None,
+                fetched_by="openalex",
+            )
+        )
     return sources
 
 
@@ -353,7 +390,10 @@ def fetch_s2_author_papers(author_id: str, limit: int = 20) -> list[Source]:
     try:
         resp = requests.get(
             f"{S2_API}/author/{author_id}/papers",
-            params={"fields": "title,year,externalIds,citationCount,venue", "limit": limit},
+            params={
+                "fields": "title,year,externalIds,citationCount,venue",
+                "limit": limit,
+            },
             timeout=15,
         )
         resp.raise_for_status()
@@ -364,14 +404,20 @@ def fetch_s2_author_papers(author_id: str, limit: int = 20) -> list[Source]:
     sources: list[Source] = []
     for paper in papers:
         doi = paper.get("externalIds", {}).get("DOI")
-        url = f"https://doi.org/{doi}" if doi else f"https://www.semanticscholar.org/paper/{paper.get('paperId', '')}"
-        sources.append(Source(
-            url=url,
-            title=paper.get("title", ""),
-            publisher=paper.get("venue") or "Academic publication",
-            reliability=SourceReliability.reliable_secondary,
-            snippet=f"Published {paper.get('year', 'unknown year')}, cited {paper.get('citationCount', 0)} times.",
-            date=str(paper.get("year")) if paper.get("year") else None,
-            fetched_by="semantic_scholar",
-        ))
+        url = (
+            f"https://doi.org/{doi}"
+            if doi
+            else f"https://www.semanticscholar.org/paper/{paper.get('paperId', '')}"
+        )
+        sources.append(
+            Source(
+                url=url,
+                title=paper.get("title", ""),
+                publisher=paper.get("venue") or "Academic publication",
+                reliability=SourceReliability.reliable_secondary,
+                snippet=f"Published {paper.get('year', 'unknown year')}, cited {paper.get('citationCount', 0)} times.",
+                date=str(paper.get("year")) if paper.get("year") else None,
+                fetched_by="semantic_scholar",
+            )
+        )
     return sources

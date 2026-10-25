@@ -1,4 +1,5 @@
 """Session lifecycle routes (load, resume, delete)."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
@@ -9,6 +10,7 @@ from engine.models import PersonProfile
 from engine.extractor import extract_claims
 
 sessions_router = APIRouter()
+
 
 @sessions_router.post("/sessions/resume")
 def resume_session(body: dict) -> dict:
@@ -37,7 +39,9 @@ def resume_session(body: dict) -> dict:
         raise HTTPException(500, "Could not read session file")
 
     profile = PersonProfile(**data["profile"])
-    wiki_status = data.get("wiki_status", {"status": "clear", "url": None, "note": None})
+    wiki_status = data.get(
+        "wiki_status", {"status": "clear", "url": None, "note": None}
+    )
 
     # Re-check Wikimedia status on resume so the workspace routes to reality
     # (an article or draft may have been created since the session was saved)
@@ -45,8 +49,10 @@ def resume_session(body: dict) -> dict:
     # check fails (e.g. offline).
     try:
         from adapters.wiki.wiki_check import check_existing_page, check_title_for
+
         wiki_status = check_existing_page(
-            check_title_for(profile.name, profile.wikipedia_url)).model_dump()
+            check_title_for(profile.name, profile.wikipedia_url)
+        ).model_dump()
     except Exception:
         pass
 
@@ -54,6 +60,7 @@ def resume_session(body: dict) -> dict:
     # Never repopulate a session from the stub provider: its extracted claims are fabricated.
     if profile.sources and not profile.claims:
         from engine.llm import has_real_llm
+
         if has_real_llm():
             profile.claims = extract_claims(profile, profile.sources, store.llm())
 
@@ -76,28 +83,30 @@ def resume_session(body: dict) -> dict:
 def list_sessions() -> dict:
     """List all saved research sessions from disk."""
     sessions = []
-    for path in sorted(store.SESSIONS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+    for path in sorted(
+        store.SESSIONS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+    ):
         data = store._load_session_file(path)
         if not data:
             continue
         profile = data.get("profile", {})
         notability = profile.get("notability") or {}
-        sessions.append({
-            "id": profile.get("session_id"),
-            "name": profile.get("name", path.stem.replace("_", " ")),
-            "field": profile.get("field"),
-            "affiliation": profile.get("affiliation"),
-            "photo_url": profile.get("photo_url"),
-            "source_count": len(profile.get("sources", [])),
-            "claim_count": len(profile.get("claims", [])),
-            "notability_label": notability.get("label", "Unknown"),
-            "notability_score": notability.get("score", 0),
-            "saved_at": data.get("saved_at"),
-            "file": path.name,
-        })
+        sessions.append(
+            {
+                "id": profile.get("session_id"),
+                "name": profile.get("name", path.stem.replace("_", " ")),
+                "field": profile.get("field"),
+                "affiliation": profile.get("affiliation"),
+                "photo_url": profile.get("photo_url"),
+                "source_count": len(profile.get("sources", [])),
+                "claim_count": len(profile.get("claims", [])),
+                "notability_label": notability.get("label", "Unknown"),
+                "notability_score": notability.get("score", 0),
+                "saved_at": data.get("saved_at"),
+                "file": path.name,
+            }
+        )
     return {"sessions": sessions}
-
-
 
 
 @sessions_router.delete("/sessions/{ref}")
@@ -114,7 +123,11 @@ def delete_session(ref: str) -> dict:
     profile = store._resolve_profile(sid)
     if profile is None:
         # Not loaded — resolve the file on disk directly.
-        path = (store.SESSIONS_DIR / ref if ref.endswith(".json") else store._session_path(sid)).resolve()
+        path = (
+            store.SESSIONS_DIR / ref
+            if ref.endswith(".json")
+            else store._session_path(sid)
+        ).resolve()
         if not path.is_relative_to(sessions_root):
             raise HTTPException(400, "Invalid session reference")
         if not path.exists():
@@ -133,7 +146,3 @@ def delete_session(ref: str) -> dict:
     if path.exists() and path.is_relative_to(sessions_root):
         path.unlink()
     return {"deleted": ref}
-
-
-
-

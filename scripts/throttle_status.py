@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Print fetch-telemetry status: parked hosts, recheck times, latency summary."""
+
 import json
 import sys
 from pathlib import Path
@@ -15,11 +16,13 @@ if ft.LOG_PATH.exists():
 print(f"telemetry rows : {len(rows)}")
 lat = [r["latency_ms"] for r in rows if r.get("latency_ms")]
 if lat:
-    print(f"latency ms     : mean {mean(lat):.0f} | median {sorted(lat)[len(lat)//2]} | max {max(lat)}")
+    print(
+        f"latency ms     : mean {mean(lat):.0f} | median {sorted(lat)[len(lat) // 2]} | max {max(lat)}"
+    )
 throttles = [r for r in rows if r.get("throttled")]
 print(f"throttle events: {len(throttles)}")
 for r in throttles[-8:]:
-    print(f"   {r['ts'][:19]} {r['host']:<24} {r.get('note','')}")
+    print(f"   {r['ts'][:19]} {r['host']:<24} {r.get('note', '')}")
 
 pending = ft.pending_rechecks()
 if pending:

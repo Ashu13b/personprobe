@@ -30,8 +30,9 @@ DOMAIN_ALIAS_MAP = {
     "m.bhaskar.com": "bhaskar.com",
     "m.punjabkesari.in": "punjabkesari.in",
     "m.haryana.punjabkesari.in": "punjabkesari.in",
-    "m.amarujala.com": "amarujala.com"
+    "m.amarujala.com": "amarujala.com",
 }
+
 
 def canonical_url(url: str) -> str:
     if not url:
@@ -41,7 +42,7 @@ def canonical_url(url: str) -> str:
     netloc = p.netloc.lower()
     if netloc.startswith("www."):
         netloc = netloc[4:]
-    
+
     # Map domain aliases and mobile mirrors
     if netloc in DOMAIN_ALIAS_MAP:
         netloc = DOMAIN_ALIAS_MAP[netloc]
@@ -64,12 +65,17 @@ def canonical_url(url: str) -> str:
         params = urllib.parse.parse_qsl(p.query)
         for k, v in params:
             k_low = k.lower()
-            if not any(k_low.startswith(prefix) for prefix in ["utm_", "_tp", "fbclid", "gclid", "ref", "source", "amp"]):
+            if not any(
+                k_low.startswith(prefix)
+                for prefix in ["utm_", "_tp", "fbclid", "gclid", "ref", "source", "amp"]
+            ):
                 clean_params.append((k, v))
     query_str = urllib.parse.urlencode(clean_params)
 
     # Normalize amp paths
-    clean_path = path.replace("/amp/", "/").replace("/amp_articleshow/", "/articleshow/")
+    clean_path = path.replace("/amp/", "/").replace(
+        "/amp_articleshow/", "/articleshow/"
+    )
     if clean_path.endswith("/amp"):
         clean_path = clean_path[:-4]
 
@@ -77,6 +83,7 @@ def canonical_url(url: str) -> str:
     if query_str:
         res += f"?{query_str}"
     return res.lower()
+
 
 def deduplicate():
     if not SESSION_FILE.exists():
@@ -144,12 +151,13 @@ def deduplicate():
         req = urllib.request.Request(
             API_BASE + "/sessions/resume",
             data=json.dumps({"session_id": SESSION_ID}).encode(),
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
         urllib.request.urlopen(req, timeout=30)
         print("[*] Session resumed and synchronized via backend.")
     except Exception as e:
         print(f"[*] Sync error: {e}")
+
 
 if __name__ == "__main__":
     deduplicate()

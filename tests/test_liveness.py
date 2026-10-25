@@ -1,7 +1,13 @@
 from unittest.mock import patch
 
 from engine.fetcher import check_liveness, get_wayback_url
-from engine.models import Source, SourceReliability, VerificationState, PersonProfile, Claim
+from engine.models import (
+    Source,
+    SourceReliability,
+    VerificationState,
+    PersonProfile,
+    Claim,
+)
 from adapters.wiki.draft import audit_profile, render_draft
 
 
@@ -13,11 +19,19 @@ def test_check_liveness_live():
 
 
 def test_check_liveness_dead_looks_up_wayback():
-    with patch("engine.fetcher.requests.get") as mock_get, \
-         patch("engine.fetcher.get_wayback_url", return_value="https://web.archive.org/web/2023id_/x"):
+    with (
+        patch("engine.fetcher.requests.get") as mock_get,
+        patch(
+            "engine.fetcher.get_wayback_url",
+            return_value="https://web.archive.org/web/2023id_/x",
+        ),
+    ):
         resp = type("R", (), {"status_code": 404, "close": lambda self: None})()
         mock_get.return_value = resp
-        assert check_liveness("https://example.test/gone") == ("dead", "https://web.archive.org/web/2023id_/x")
+        assert check_liveness("https://example.test/gone") == (
+            "dead",
+            "https://web.archive.org/web/2023id_/x",
+        )
 
 
 def test_check_liveness_blocked():
@@ -30,9 +44,14 @@ def test_check_liveness_blocked():
 def test_get_wayback_url_parses_snapshot():
     with patch("engine.fetcher.requests.get") as mock_get:
         mock_get.return_value.json.return_value = {
-            "archived_snapshots": {"closest": {"url": "https://web.archive.org/web/20230101/x"}}
+            "archived_snapshots": {
+                "closest": {"url": "https://web.archive.org/web/20230101/x"}
+            }
         }
-        assert get_wayback_url("https://example.test/x") == "https://web.archive.org/web/20230101/x"
+        assert (
+            get_wayback_url("https://example.test/x")
+            == "https://web.archive.org/web/20230101/x"
+        )
 
 
 def test_audit_excludes_dead_unarchived_source():
@@ -48,13 +67,15 @@ def test_audit_excludes_dead_unarchived_source():
     profile = PersonProfile(
         name="Example Person",
         sources=[source],
-        claims=[Claim(
-            field="known_for",
-            text="Led an independently reported research project",
-            source_url=source.url,
-            verification=VerificationState.confirmed,
-            draft_approved=True,
-        )],
+        claims=[
+            Claim(
+                field="known_for",
+                text="Led an independently reported research project",
+                source_url=source.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            )
+        ],
     )
     audit = audit_profile(profile)
     assert not audit.ready
@@ -86,12 +107,27 @@ def test_renderer_cites_wayback_url_for_dead_archived_source():
         nationality="Indian",
         sources=[dead, second],
         claims=[
-            Claim(field="field", text="Animal biotechnology", source_url=dead.url,
-                  verification=VerificationState.confirmed, draft_approved=True),
-            Claim(field="known_for", text="Led an independently reported research project", source_url=dead.url,
-                  verification=VerificationState.confirmed, draft_approved=True),
-            Claim(field="position", text="Principal Scientist at an institute", source_url=second.url,
-                  verification=VerificationState.confirmed, draft_approved=True),
+            Claim(
+                field="field",
+                text="Animal biotechnology",
+                source_url=dead.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="known_for",
+                text="Led an independently reported research project",
+                source_url=dead.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="position",
+                text="Principal Scientist at an institute",
+                source_url=second.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
         ],
     )
     wikitext = render_draft(profile)

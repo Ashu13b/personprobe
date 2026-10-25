@@ -45,9 +45,16 @@ def test_get_provider_falls_back_to_agent_when_vertex_unavailable(monkeypatch):
     class _BrokenVertex:
         def __init__(self, project_id, region):
             self.messages = type(
-                "M", (), {"create": staticmethod(lambda *a, **k: (_ for _ in ()).throw(RuntimeError("no model")))}
+                "M",
+                (),
+                {
+                    "create": staticmethod(
+                        lambda *a, **k: (_ for _ in ()).throw(RuntimeError("no model"))
+                    )
+                },
             )()
 
     monkeypatch.setattr(anthropic, "AnthropicVertex", _BrokenVertex)
     from engine.agent_llm import AgentProvider
+
     assert isinstance(get_provider(), AgentProvider)

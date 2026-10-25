@@ -10,40 +10,55 @@ class IdentifyPreviewTests(TestCase):
     @patch("engine.researcher._duckduckgo_html", return_value=None)
     @patch("engine.researcher._google_cse")
     @patch("engine.identifier.find_candidates")
-    def test_identify_merges_identity_matches_and_web_clues(self, find_candidates, google_cse, _ddg, check_page):
+    def test_identify_merges_identity_matches_and_web_clues(
+        self, find_candidates, google_cse, _ddg, check_page
+    ):
         from engine.models import PersonCandidate, Source
-        find_candidates.return_value = [PersonCandidate(
-            name="Prem Singh Yadav (scientist)",
-            photo_url="https://example.test/ps.jpg",
-            bio_snippet="Indian buffalo cloning scientist",
-            birth_year="1963",
-            nationality="Indian",
-            field="Animal biotechnology",
-            affiliation="ICAR-CIRB",
-            wikipedia_url="https://en.wikipedia.org/wiki/Prem_Singh_Yadav_(scientist)",
-            wikidata_id="Q123456",
-        )]
-        google_cse.return_value = [Source(
-            url="https://news.example.test/report",
-            title="Buffalo cloning report",
-            publisher="Example News",
-            snippet="A cloned buffalo calf was born.",
-        )]
+
+        find_candidates.return_value = [
+            PersonCandidate(
+                name="Prem Singh Yadav (scientist)",
+                photo_url="https://example.test/ps.jpg",
+                bio_snippet="Indian buffalo cloning scientist",
+                birth_year="1963",
+                nationality="Indian",
+                field="Animal biotechnology",
+                affiliation="ICAR-CIRB",
+                wikipedia_url="https://en.wikipedia.org/wiki/Prem_Singh_Yadav_(scientist)",
+                wikidata_id="Q123456",
+            )
+        ]
+        google_cse.return_value = [
+            Source(
+                url="https://news.example.test/report",
+                title="Buffalo cloning report",
+                publisher="Example News",
+                snippet="A cloned buffalo calf was born.",
+            )
+        ]
 
         class _Clear:
             def model_dump(self):
                 return {"status": "clear", "url": None, "note": None}
+
         check_page.return_value = _Clear()
         from backend.main import identify
         from backend.schemas import IdentifyRequest
 
-        result = identify(IdentifyRequest(name="Prem Singh Yadav", field="biotech", affiliation="ICAR-CIRB"))
+        result = identify(
+            IdentifyRequest(
+                name="Prem Singh Yadav", field="biotech", affiliation="ICAR-CIRB"
+            )
+        )
 
         identity = [r for r in result["results"] if r["kind"] == "identity"]
         web = [r for r in result["results"] if r["kind"] == "web"]
         self.assertEqual(len(identity), 1)
         self.assertEqual(identity[0]["wikidata_id"], "Q123456")
-        self.assertEqual(identity[0]["wikipedia_url"], "https://en.wikipedia.org/wiki/Prem_Singh_Yadav_(scientist)")
+        self.assertEqual(
+            identity[0]["wikipedia_url"],
+            "https://en.wikipedia.org/wiki/Prem_Singh_Yadav_(scientist)",
+        )
         self.assertEqual(identity[0]["photo_url"], "https://example.test/ps.jpg")
         self.assertEqual(len(web), 1)
         self.assertEqual(web[0]["title"], "Buffalo cloning report")
@@ -56,7 +71,9 @@ class ResearchStartRoutingTests(TestCase):
     @patch("backend.routes_research.fetch_institution_sources", return_value=[])
     @patch("backend.routes_research.fetch_auto_sources", return_value=([], None))
     @patch("backend.routes_research.check_existing_page")
-    def test_confirmed_wikipedia_url_routes_by_article_title(self, check_page, _auto, _inst):
+    def test_confirmed_wikipedia_url_routes_by_article_title(
+        self, check_page, _auto, _inst
+    ):
         class _WikiStatus:
             def model_dump(self):
                 return {"status": "clear", "url": None, "note": None}
@@ -65,10 +82,12 @@ class ResearchStartRoutingTests(TestCase):
         from backend.main import research_start
         from backend.schemas import ResearchRequest
 
-        research_start(ResearchRequest(
-            name="Prem Singh Yadav",
-            wikipedia_url="https://en.wikipedia.org/wiki/Prem_Singh_Yadav_(scientist)",
-        ))
+        research_start(
+            ResearchRequest(
+                name="Prem Singh Yadav",
+                wikipedia_url="https://en.wikipedia.org/wiki/Prem_Singh_Yadav_(scientist)",
+            )
+        )
 
         check_page.assert_called_once_with("Prem Singh Yadav (scientist)")
 
@@ -96,7 +115,9 @@ class WikiStatusRoutingTests(TestCase):
         self.assertEqual(status.url, "https://en.wikipedia.org/wiki/Draft:Ada_Example")
         deletion_note.assert_not_called()
 
-    @patch("adapters.wiki.wiki_check._deletion_note", return_value="delete on 2025-01-02")
+    @patch(
+        "adapters.wiki.wiki_check._deletion_note", return_value="delete on 2025-01-02"
+    )
     @patch("adapters.wiki.wiki_check._page_exists", return_value=False)
     def test_prior_deletion_routes_to_review(self, _page_exists, _deletion_note):
         status = check_existing_page("Ada Example")
@@ -115,7 +136,10 @@ class WikidataEnrichmentTests(TestCase):
         self.assertIsNone(fetch_wikidata_photo_by_id("Ada Example"))
         detail.assert_not_called()
 
-    @patch("engine.identifier._wikidata_detail", return_value={"photo_url": "https://example.test/ada.jpg"})
+    @patch(
+        "engine.identifier._wikidata_detail",
+        return_value={"photo_url": "https://example.test/ada.jpg"},
+    )
     def test_confirmed_qid_can_supply_photo(self, detail):
         self.assertEqual(
             fetch_wikidata_photo_by_id("Q123"),

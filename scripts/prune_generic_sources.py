@@ -9,16 +9,27 @@ SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 
 URLS_TO_PRUNE = {
-    canonical_url("https://en.wikipedia.org/wiki/Central_Institute_for_Research_on_Buffaloes"), # WP:CIRCULAR
-    canonical_url("https://cirb.res.in/hisar-1/"),                                            # General campus page
-    canonical_url("https://krishijagran.com/jobs/senior-research-fellow-srf-at-icar-cirb-hisar-haryana/"), # Job posting
-    canonical_url("https://www.icar.org.in/sites/default/files/inline-files/Nanaji-Deshmukh-2021.pdf"),     # Award rules PDF
-    canonical_url("https://cirb.res.in/awards/"),                                            # Empty awards index
-    canonical_url("https://cirb.res.in/"),                                                  # Institute homepage
-    canonical_url("https://www.issrf.org/issrf-awards/prof-s-s-guraya-memorial-oration"),    # General ISSRF list
-    canonical_url("https://www.pashudhanpraharee.com/improving-buffalo-welfare-through-the-use-of-r"), # General article
-    canonical_url("https://readingsbell.com/buffalo/")                                      # SEO blog
+    canonical_url(
+        "https://en.wikipedia.org/wiki/Central_Institute_for_Research_on_Buffaloes"
+    ),  # WP:CIRCULAR
+    canonical_url("https://cirb.res.in/hisar-1/"),  # General campus page
+    canonical_url(
+        "https://krishijagran.com/jobs/senior-research-fellow-srf-at-icar-cirb-hisar-haryana/"
+    ),  # Job posting
+    canonical_url(
+        "https://www.icar.org.in/sites/default/files/inline-files/Nanaji-Deshmukh-2021.pdf"
+    ),  # Award rules PDF
+    canonical_url("https://cirb.res.in/awards/"),  # Empty awards index
+    canonical_url("https://cirb.res.in/"),  # Institute homepage
+    canonical_url(
+        "https://www.issrf.org/issrf-awards/prof-s-s-guraya-memorial-oration"
+    ),  # General ISSRF list
+    canonical_url(
+        "https://www.pashudhanpraharee.com/improving-buffalo-welfare-through-the-use-of-r"
+    ),  # General article
+    canonical_url("https://readingsbell.com/buffalo/"),  # SEO blog
 }
+
 
 def main():
     if not SESSION_FILE.exists():
@@ -54,7 +65,9 @@ def main():
     for s in pruned_sources:
         print(f"    - [{s.get('title')}]({s.get('url')})")
 
-    print(f"[*] Pruned {len(pruned_claims)} unapproved placeholder claims bound to pruned sources:")
+    print(
+        f"[*] Pruned {len(pruned_claims)} unapproved placeholder claims bound to pruned sources:"
+    )
     for c in pruned_claims:
         print(f"    - Text: {c.get('text')[:80]}...")
 
@@ -63,9 +76,12 @@ def main():
     data["profile"] = profile
 
     SESSION_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False))
-    print(f"[*] Updated session: {len(kept_sources)} sources, {len(kept_claims)} claims.")
+    print(
+        f"[*] Updated session: {len(kept_sources)} sources, {len(kept_claims)} claims."
+    )
 
     deduplicate()
+
 
 if __name__ == "__main__":
     main()

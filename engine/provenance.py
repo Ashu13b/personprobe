@@ -1,4 +1,5 @@
 """Strict Provenance & Trust Scoring engine for sources and claims."""
+
 from __future__ import annotations
 from urllib.parse import urlparse
 from .models import Source, Claim, SourceReliability, PersonProfile, VerificationState
@@ -10,11 +11,19 @@ from .publishers import (
     RECORD_REGISTRY_DOMAINS,
 )
 
-HIGH_TRUST_DOMAINS = INDEPENDENT_NEWS_DOMAINS | ACADEMIC_PUBLISHER_DOMAINS | {"ncbi.nlm.nih.gov"}
+HIGH_TRUST_DOMAINS = (
+    INDEPENDENT_NEWS_DOMAINS | ACADEMIC_PUBLISHER_DOMAINS | {"ncbi.nlm.nih.gov"}
+)
 
 MEDIUM_TRUST_DOMAINS = {
-    "wikipedia.org", "wikidata.org", "britannica.com", "researchgate.net",
-    "academia.edu", "semanticscholar.org", "orcid.org", "sgttimes.com",
+    "wikipedia.org",
+    "wikidata.org",
+    "britannica.com",
+    "researchgate.net",
+    "academia.edu",
+    "semanticscholar.org",
+    "orcid.org",
+    "sgttimes.com",
 }
 
 UNTRUSTED_DOMAINS = SELF_PUBLISHED_DOMAINS | UNRELIABLE_PUBLISHER_DOMAINS
@@ -38,9 +47,16 @@ def normalize_url(url: str | None) -> str:
         u = u[:-1]
     return u
 
+
 MEDIUM_TRUST_DOMAINS = {
-    "wikipedia.org", "wikidata.org", "britannica.com", "researchgate.net",
-    "academia.edu", "semanticscholar.org", "orcid.org", "sgttimes.com",
+    "wikipedia.org",
+    "wikidata.org",
+    "britannica.com",
+    "researchgate.net",
+    "academia.edu",
+    "semanticscholar.org",
+    "orcid.org",
+    "sgttimes.com",
 }
 
 UNTRUSTED_DOMAINS = SELF_PUBLISHED_DOMAINS | UNRELIABLE_PUBLISHER_DOMAINS
@@ -54,7 +70,7 @@ def get_domain_trust(url: str) -> str:
         domain = urlparse(url).netloc.lower()
         if domain.startswith("www."):
             domain = domain[4:]
-        
+
         def match_domain(target_set: set[str]) -> bool:
             return any(domain == d or domain.endswith("." + d) for d in target_set)
 
@@ -67,7 +83,18 @@ def get_domain_trust(url: str) -> str:
             return "medium"
 
         # Check domain extensions / TLDs
-        if domain.endswith((".gov", ".gov.in", ".gov.uk", ".edu", ".ac.uk", ".ac.in", ".res.in", ".edu.au")):
+        if domain.endswith(
+            (
+                ".gov",
+                ".gov.in",
+                ".gov.uk",
+                ".edu",
+                ".ac.uk",
+                ".ac.in",
+                ".res.in",
+                ".edu.au",
+            )
+        ):
             return "high"
         if domain.endswith((".org", ".edu")):
             return "medium"
@@ -92,7 +119,6 @@ def classify_source_provenance(source: Source, subject_name: str = "") -> Source
         source.reliability = SourceReliability.primary
         return source
 
-
     # Record registries verify that a registry made a recognition, but they are
     # the issuing body rather than independent coverage of the subject.
     try:
@@ -101,28 +127,45 @@ def classify_source_provenance(source: Source, subject_name: str = "") -> Source
             hostname = hostname[4:]
     except Exception:
         hostname = ""
-    if any(hostname == domain or hostname.endswith("." + domain) for domain in RECORD_REGISTRY_DOMAINS):
+    if any(
+        hostname == domain or hostname.endswith("." + domain)
+        for domain in RECORD_REGISTRY_DOMAINS
+    ):
         source.provenance_category = "record_registry"
         source.is_independent = False
         source.reliability = SourceReliability.primary
         return source
 
     academic_domains = (
-        "doi.org", "pubmed.ncbi.nlm.nih.gov", "pmc.ncbi.nlm.nih.gov",
-        "semanticscholar.org", "openalex.org", "orcid.org",
-        "researchgate.net", "sciencedirect.com",
+        "doi.org",
+        "pubmed.ncbi.nlm.nih.gov",
+        "pmc.ncbi.nlm.nih.gov",
+        "semanticscholar.org",
+        "openalex.org",
+        "orcid.org",
+        "researchgate.net",
+        "sciencedirect.com",
     )
     academic_paths = (
-        "nature.com/articles/", "journals.plos.org/", "link.springer.com/chapter/",
-        "intechopen.com/chapters/", "acspublisher.com/journals/",
+        "nature.com/articles/",
+        "journals.plos.org/",
+        "link.springer.com/chapter/",
+        "intechopen.com/chapters/",
+        "acspublisher.com/journals/",
     )
     # Academic authored publication
     if (
         source.fetched_by == "semantic_scholar"
         or source.author_match_status in ("confirmed", "possible")
-        or any(hostname == domain or hostname.endswith("." + domain) for domain in academic_domains)
+        or any(
+            hostname == domain or hostname.endswith("." + domain)
+            for domain in academic_domains
+        )
         or any(path in url_lower for path in academic_paths)
-        or any(k in url_lower for k in ("doi.org", "arxiv.org", "paper", "article/abstract"))
+        or any(
+            k in url_lower
+            for k in ("doi.org", "arxiv.org", "paper", "article/abstract")
+        )
         or "journal" in pub_lower
     ):
         source.provenance_category = "authored_publication"
@@ -131,18 +174,42 @@ def classify_source_provenance(source: Source, subject_name: str = "") -> Source
         return source
 
     # Institutional bio / faculty profile
-    is_inst_domain = any(k in url_lower for k in (".edu", ".ac.", ".res.in")) or any(k in pub_lower for k in ("university", "institute", "college", "school of"))
-    is_icar_domain = any(k in url_lower for k in ("cirb.res.in", "icar.org.in", "icar.gov.in"))
-    is_inst_path = any(k in url_lower for k in ("/faculty/", "/staff/", "/people/", "/directory/", "/person/", "/cv/", "faculty-profile"))
-    
-    if is_icar_domain or (is_inst_domain and (is_inst_path or "bio" in url_lower or "profile" in url_lower)) or (is_inst_path and "news" not in pub_lower):
+    is_inst_domain = any(k in url_lower for k in (".edu", ".ac.", ".res.in")) or any(
+        k in pub_lower for k in ("university", "institute", "college", "school of")
+    )
+    is_icar_domain = any(
+        k in url_lower for k in ("cirb.res.in", "icar.org.in", "icar.gov.in")
+    )
+    is_inst_path = any(
+        k in url_lower
+        for k in (
+            "/faculty/",
+            "/staff/",
+            "/people/",
+            "/directory/",
+            "/person/",
+            "/cv/",
+            "faculty-profile",
+        )
+    )
+
+    if (
+        is_icar_domain
+        or (
+            is_inst_domain
+            and (is_inst_path or "bio" in url_lower or "profile" in url_lower)
+        )
+        or (is_inst_path and "news" not in pub_lower)
+    ):
         source.provenance_category = "institutional_bio"
         source.is_independent = False
         source.reliability = SourceReliability.primary
         return source
 
     # Self-published / social / blog
-    if domain_trust == "untrusted" or any(k in url_lower for k in ("blog", "personal", "github.io", "linkedin")):
+    if domain_trust == "untrusted" or any(
+        k in url_lower for k in ("blog", "personal", "github.io", "linkedin")
+    ):
         source.provenance_category = "self_published"
         source.is_independent = False
         source.reliability = SourceReliability.self_published
@@ -160,7 +227,9 @@ def classify_source_provenance(source: Source, subject_name: str = "") -> Source
     return source
 
 
-def evaluate_claim_trust(claim: Claim, source: Source | None, profile: PersonProfile | None = None) -> Claim:
+def evaluate_claim_trust(
+    claim: Claim, source: Source | None, profile: PersonProfile | None = None
+) -> Claim:
     """Calculate trust score (0.0-1.0) and provenance status for a claim."""
     if not source or not claim.source_url:
         claim.trust_score = 0.2 if claim.user_provided else 0.0
@@ -205,7 +274,10 @@ def evaluate_claim_trust(claim: Claim, source: Source | None, profile: PersonPro
 
     if trust_score >= 0.7 and is_indep:
         claim.provenance_status = "verified_independent"
-    elif category in ("institutional_bio", "authored_publication", "record_registry") or not is_indep:
+    elif (
+        category in ("institutional_bio", "authored_publication", "record_registry")
+        or not is_indep
+    ):
         claim.provenance_status = "primary_sourced"
     else:
         claim.provenance_status = "unverified"

@@ -9,6 +9,7 @@ re-triggering the block.
 Runtime output lives under sessions/ (gitignored) — telemetry is per-host state,
 not repo content.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,6 +22,7 @@ LOG_PATH = Path("sessions/fetch_telemetry.jsonl")
 DEFAULT_DELAY_S = 2.0
 THROTTLE_DELAY_S = 20.0
 _THROTTLE_WINDOW_S = 900  # 15 minutes
+MAX_HOST_ATTEMPTS = 5
 
 
 def _host(url: str) -> str:
@@ -30,14 +32,20 @@ def _host(url: str) -> str:
         return ""
 
 
-def record(transport: str, url: str, status=None, latency_ms: int | None = None,
-           throttled: bool = False, note: str = "") -> None:
+def record(
+    transport: str,
+    url: str,
+    status=None,
+    latency_ms: int | None = None,
+    throttled: bool = False,
+    note: str = "",
+) -> None:
     """Append one telemetry row. Never raises (telemetry must not break fetches)."""
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         row = {
             "ts": datetime.now(timezone.utc).isoformat(),
-            "transport": transport,          # http | phone | api
+            "transport": transport,  # http | phone | api
             "host": _host(url),
             "url": url[:500],
             "status": status,
@@ -79,7 +87,9 @@ class _Timer:
         latency_ms = int((time.time() - self._t0) * 1000)
         if exc_type is not None and not self.note:
             self.note = f"exception:{exc_type.__name__}"
-        record(self.transport, self.url, self.status, latency_ms, self.throttled, self.note)
+        record(
+            self.transport, self.url, self.status, latency_ms, self.throttled, self.note
+        )
         return False
 
 
@@ -126,6 +136,16 @@ def suggest_delay(url_or_host: str, default: float = DEFAULT_DELAY_S) -> float:
     if recent_throttles() > 2:
         return max(default, THROTTLE_DELAY_S / 2)
     return default
+
+
+def retry_allowed(url_or_host: str) -> bool:
+    """Allow at most five throttled attempts per host in the active window."""
+    host = _host(url_or_host) if "://" in url_or_host else url_or_host
+    return (
+        bool(host)
+        and recent_throttles(host=host) < MAX_HOST_ATTEMPTS
+        and wait_time(host) == 0
+    )
 
 
 COOLDOWN_S = 900  # a throttled host is parked for 15 minutes before any retry
@@ -198,7 +218,9 @@ def pending_rechecks(cooldown_s: int = COOLDOWN_S) -> list[dict]:
                 continue
             out[host] = {
                 "host": host,
-                "recheck_at": datetime.fromtimestamp(epoch + cooldown_s, timezone.utc).isoformat(),
+                "recheck_at": datetime.fromtimestamp(
+                    epoch + cooldown_s, timezone.utc
+                ).isoformat(),
                 "wait_s": round(remaining),
             }
     except Exception:

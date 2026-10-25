@@ -12,6 +12,7 @@ the unified server is the supported way to run it.
 Install Xvfb first for headed mode (lets you solve CAPTCHAs visually):
     sudo apt install -y xvfb
 """
+
 from __future__ import annotations
 import os
 import time
@@ -46,8 +47,10 @@ def looks_like_wall(text: str) -> bool:
     """True when rendered page text is a bot-wall/challenge, not real content."""
     return bool(text and _WALL_SIGNALS.search(text.lower()))
 
+
 # ── Command queue — all Playwright calls go through this ──────────────────────
 # Playwright's sync API is thread-bound; endpoints dispatch here and wait.
+
 
 @dataclass
 class _Cmd:
@@ -56,6 +59,7 @@ class _Cmd:
     done: threading.Event = field(default_factory=threading.Event)
     result: Any = None
     error: str | None = None
+
 
 _q: queue.Queue[_Cmd] = queue.Queue()
 _headed = False
@@ -89,6 +93,7 @@ def browser_link_status(ctx: Any, urls: list[str]) -> dict[str, dict]:
     try:
         try:
             from playwright_stealth import Stealth
+
             Stealth().apply_stealth_sync(page)
         except Exception:
             pass
@@ -133,7 +138,8 @@ def _try_start_xvfb() -> bool:
     try:
         _xvfb = subprocess.Popen(
             ["Xvfb", XVFB_DISPLAY, "-screen", "0", "1280x800x24", "-nolisten", "tcp"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         time.sleep(1.0)
         return _xvfb.poll() is None
@@ -156,6 +162,7 @@ def _browser_thread():
 
     from playwright.sync_api import sync_playwright
     from playwright_stealth import Stealth
+
     stealth = Stealth()
     with sync_playwright() as pw:
         ctx = pw.chromium.launch_persistent_context(
@@ -227,7 +234,7 @@ def _browser_thread():
         live = [p for p in ctx.pages if not p.is_closed()]
         page = live[0] if live else ctx.new_page()
         stealth.apply_stealth_sync(page)
-        
+
         # Additional stealth: inject scripts to hide automation
         page.add_init_script("""
             Object.defineProperty(navigator, 'webdriver', {
@@ -241,7 +248,7 @@ def _browser_thread():
                 get: () => ['en-US', 'en', 'hi']
             });
         """)
-        
+
         _running = True
         print("[DEBUG] Browser thread ready, _running=True", flush=True)
 
@@ -256,7 +263,9 @@ def _browser_thread():
             try:
                 a = cmd.action
                 if a == "screenshot":
-                    cmd.result = page.screenshot(type="jpeg", quality=60, full_page=False)
+                    cmd.result = page.screenshot(
+                        type="jpeg", quality=60, full_page=False
+                    )
                 elif a == "navigate":
                     url = cmd.args["url"]
                     if "://" not in url:
@@ -337,20 +346,25 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="remote-browser", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+)
 
 
 # ── API endpoints ──────────────────────────────────────────────────────────────
 
+
 @app.get("/screenshot")
 def screenshot():
     data = _dispatch("screenshot")
-    return Response(content=data, media_type="image/jpeg",
-                    headers={"Cache-Control": "no-store"})
+    return Response(
+        content=data, media_type="image/jpeg", headers={"Cache-Control": "no-store"}
+    )
 
 
 class NavReq(BaseModel):
     url: str
+
 
 @app.post("/navigate")
 def navigate(req: NavReq):
@@ -377,6 +391,7 @@ class ViewportReq(BaseModel):
     width: int
     height: int
 
+
 @app.post("/viewport")
 def set_viewport(req: ViewportReq):
     w = max(320, min(req.width, 1920))
@@ -390,6 +405,7 @@ class ClickReq(BaseModel):
     img_w: float
     img_h: float
 
+
 @app.post("/click")
 def click(req: ClickReq):
     _dispatch("click", x=req.x, y=req.y, img_w=req.img_w, img_h=req.img_h)
@@ -398,6 +414,7 @@ def click(req: ClickReq):
 
 class TypeReq(BaseModel):
     text: str
+
 
 @app.post("/type")
 def type_text(req: TypeReq):
@@ -408,6 +425,7 @@ def type_text(req: TypeReq):
 class KeyReq(BaseModel):
     key: str
 
+
 @app.post("/key")
 def press_key(req: KeyReq):
     _dispatch("key", key=req.key)
@@ -416,6 +434,7 @@ def press_key(req: KeyReq):
 
 class ScrollReq(BaseModel):
     delta: float
+
 
 @app.post("/scroll")
 def scroll(req: ScrollReq):
@@ -427,9 +446,11 @@ def scroll(req: ScrollReq):
 def go_back():
     return _dispatch("back")
 
+
 @app.get("/forward")
 def go_forward():
     return _dispatch("forward")
+
 
 @app.get("/reload")
 def reload():
@@ -454,6 +475,7 @@ def status():
 # the old screenshot-polling UI (browser_ui.html) is retired — git history
 # is its archive. All /browser/* automation endpoints are unchanged.
 
+
 @app.get("/")
 def index():
     return HTMLResponse((Path(__file__).parent / "browser_home.html").read_text())
@@ -465,13 +487,16 @@ def start_browser() -> None:
     if _running:
         return
     import threading
+
     t = threading.Thread(target=_browser_thread, daemon=True)
     t.start()
     for _ in range(40):
         if _running:
             break
         import time
+
         time.sleep(0.25)
+
 
 def stop_browser() -> None:
     """Stop the browser thread, close Playwright context, and terminate Xvfb."""
@@ -489,6 +514,8 @@ def stop_browser() -> None:
         except Exception:
             pass
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=PORT, log_level="warning")

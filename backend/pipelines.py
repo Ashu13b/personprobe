@@ -1,4 +1,5 @@
 """ScienceDirect -> CrossRef -> OpenAlex pipelines used by the add-source routes."""
+
 from __future__ import annotations
 
 from . import store
@@ -9,8 +10,12 @@ from engine.notability import score_notability
 from engine.extractor import extract_claims, find_missing_slots
 from engine.relevance import flag_sources
 from engine.researcher_ids import (
-    resolve_sd_article, find_openalex_id_for_person, fetch_openalex_works, _SD_AUTHOR_RE,
+    resolve_sd_article,
+    find_openalex_id_for_person,
+    fetch_openalex_works,
+    _SD_AUTHOR_RE,
 )
+
 
 def _add_sd_article(profile, url: str) -> dict:
     """Resolve a ScienceDirect article URL via PII→CrossRef→OpenAlex."""
@@ -20,11 +25,19 @@ def _add_sd_article(profile, url: str) -> dict:
         source, blocked = fetch_url_source(url, profile.name)
         [source] = classify_sources([source], store.llm())
         profile.sources.append(source)
-        profile.notability = score_notability(profile.name, profile.sources, profile.claims)
+        profile.notability = score_notability(
+            profile.name, profile.sources, profile.claims
+        )
         store._save_session(profile)
-        return {"source": source.model_dump(), "blocked": blocked, "new_claims": [],
-                "notability": profile.notability.model_dump(), "pipeline": None,
-                "researcher_ids": profile.researcher_ids, "confirmed_ids": profile.confirmed_ids}
+        return {
+            "source": source.model_dump(),
+            "blocked": blocked,
+            "new_claims": [],
+            "notability": profile.notability.model_dump(),
+            "pipeline": None,
+            "researcher_ids": profile.researcher_ids,
+            "confirmed_ids": profile.confirmed_ids,
+        }
 
     doi = resolved["doi"]
     doi_url = f"https://doi.org/{doi}"
@@ -35,8 +48,10 @@ def _add_sd_article(profile, url: str) -> dict:
     pipeline_msg: dict = {
         "doi": doi,
         "title": resolved["title"],
-        "crossref_authors": [f"{a.get('given','')} {a.get('family','')}".strip()
-                              for a in resolved["crossref_authors"]],
+        "crossref_authors": [
+            f"{a.get('given', '')} {a.get('family', '')}".strip()
+            for a in resolved["crossref_authors"]
+        ],
         "openalex_author_id": None,
         "openalex_works_added": 0,
     }
@@ -47,19 +62,23 @@ def _add_sd_article(profile, url: str) -> dict:
             title=resolved["title"],
             publisher=resolved["publisher"],
             reliability=SourceReliability.reliable_secondary,
-            snippet=f"Published {resolved['year'] or 'unknown year'}. Authors: " +
-                    ", ".join(pipeline_msg["crossref_authors"][:6]),
+            snippet=f"Published {resolved['year'] or 'unknown year'}. Authors: "
+            + ", ".join(pipeline_msg["crossref_authors"][:6]),
             date=str(resolved["year"]) if resolved["year"] else None,
             fetched_by="openalex",
             user_provided=True,
             human_verified=True,
         )
         [article_source] = classify_sources([article_source], store.llm())
-        store._check_doi_sources([article_source], profile.name, profile.affiliation or "")
+        store._check_doi_sources(
+            [article_source], profile.name, profile.affiliation or ""
+        )
         new_sources.append(article_source)
 
     # Find person in author list → get OpenAlex author ID
-    oa_author_id = find_openalex_id_for_person(profile.name, resolved["openalex_authorships"])
+    oa_author_id = find_openalex_id_for_person(
+        profile.name, resolved["openalex_authorships"]
+    )
     if oa_author_id:
         pipeline_msg["openalex_author_id"] = oa_author_id
         profile.researcher_ids["openalex"] = oa_author_id
@@ -68,13 +87,21 @@ def _add_sd_article(profile, url: str) -> dict:
         oa_works = fetch_openalex_works(oa_author_id, limit=30)
         for s in oa_works:
             s.human_verified = True
-            if s.url not in existing_urls and s.url not in {ns.url for ns in new_sources}:
+            if s.url not in existing_urls and s.url not in {
+                ns.url for ns in new_sources
+            }:
                 new_sources.append(s)
-        pipeline_msg["openalex_works_added"] = len(new_sources) - (1 if doi_url not in existing_urls else 0)
+        pipeline_msg["openalex_works_added"] = len(new_sources) - (
+            1 if doi_url not in existing_urls else 0
+        )
 
     new_sources = classify_sources(new_sources, store.llm()) if new_sources else []
-    flag_sources(new_sources, profile.name, profile.field or "", profile.affiliation or "")
-    new_claims = extract_claims(profile, new_sources, store.llm()) if new_sources else []
+    flag_sources(
+        new_sources, profile.name, profile.field or "", profile.affiliation or ""
+    )
+    new_claims = (
+        extract_claims(profile, new_sources, store.llm()) if new_sources else []
+    )
 
     profile.sources.extend(new_sources)
     profile.claims.extend(new_claims)
@@ -83,7 +110,10 @@ def _add_sd_article(profile, url: str) -> dict:
     store._save_session(profile)
 
     # Return the canonical article source as the "added source" for UI
-    main_source = next((s for s in new_sources if s.url == doi_url), new_sources[0] if new_sources else None)
+    main_source = next(
+        (s for s in new_sources if s.url == doi_url),
+        new_sources[0] if new_sources else None,
+    )
     return {
         "source": main_source.model_dump() if main_source else None,
         "blocked": False,
@@ -109,7 +139,11 @@ def _add_sd_author_profile(profile, url: str) -> dict:
     source, blocked = fetch_url_source(url, profile.name)
     if blocked:
         source.title = f"ScienceDirect author profile: {profile.name}"
-        source.snippet = f"Scopus author ID: {scopus_id}" if scopus_id else "ScienceDirect author profile"
+        source.snippet = (
+            f"Scopus author ID: {scopus_id}"
+            if scopus_id
+            else "ScienceDirect author profile"
+        )
 
     source.user_provided = True
     source.human_verified = True
@@ -123,6 +157,7 @@ def _add_sd_author_profile(profile, url: str) -> dict:
     oa_author_id = None
     try:
         import requests as rq
+
         resp = rq.get(
             "https://api.openalex.org/authors",
             params={"search": profile.name, "per-page": 5},
@@ -132,7 +167,9 @@ def _add_sd_author_profile(profile, url: str) -> dict:
         if resp.status_code == 200:
             results = resp.json().get("results", [])
             # Pick best match by affiliation
-            affil_kw = [t.lower() for t in (profile.affiliation or "").split() if len(t) > 3]
+            affil_kw = [
+                t.lower() for t in (profile.affiliation or "").split() if len(t) > 3
+            ]
             for r in results:
                 aff_text = " ".join(
                     a.get("institution", {}).get("display_name", "")
@@ -149,7 +186,11 @@ def _add_sd_author_profile(profile, url: str) -> dict:
     if oa_author_id:
         profile.researcher_ids["openalex"] = oa_author_id
         existing_urls = {s.url for s in profile.sources}
-        oa_works = [s for s in fetch_openalex_works(oa_author_id, limit=30) if s.url not in existing_urls]
+        oa_works = [
+            s
+            for s in fetch_openalex_works(oa_author_id, limit=30)
+            if s.url not in existing_urls
+        ]
         for s in oa_works:
             s.human_verified = True
         oa_works = classify_sources(oa_works, store.llm())
@@ -166,10 +207,11 @@ def _add_sd_author_profile(profile, url: str) -> dict:
         "blocked": blocked,
         "new_claims": [c.model_dump() for c in new_claims],
         "notability": profile.notability.model_dump(),
-        "pipeline": {"scopus_id": scopus_id, "openalex_author_id": oa_author_id,
-                     "openalex_works_added": len(oa_works)},
+        "pipeline": {
+            "scopus_id": scopus_id,
+            "openalex_author_id": oa_author_id,
+            "openalex_works_added": len(oa_works),
+        },
         "researcher_ids": profile.researcher_ids,
         "confirmed_ids": profile.confirmed_ids,
     }
-
-

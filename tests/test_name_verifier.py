@@ -1,4 +1,5 @@
 """Tests for the Name Verification and Disambiguation Gate."""
+
 from engine.name_verifier import generate_name_variants, verify_name_in_content
 
 
@@ -30,7 +31,9 @@ def test_verify_name_in_content_exact_and_initials():
 
 def test_verify_name_in_content_devanagari():
     text = "हिसार के केंद्रीय भैंस अनुसंधान संस्थान में प्रधान वैज्ञानिक डॉ. प्रेम सिंह यादव ने क्लोनिंग तकनीक पर व्याख्यान दिया।"
-    res = verify_name_in_content("Prem Singh Yadav", text, affiliation="CIRB", nationality="Indian")
+    res = verify_name_in_content(
+        "Prem Singh Yadav", text, affiliation="CIRB", nationality="Indian"
+    )
     assert res.matched is True
     assert "प्रेम सिंह यादव" in res.variant
 
@@ -85,14 +88,18 @@ def test_identity_strength_full_vs_weak():
     from engine.name_verifier import verify_name_in_content
 
     full = verify_name_in_content(
-        "Prem Singh Yadav", "Team leader was Dr. Prem Singh Yadav of ICAR-CIRB, Hisar",
-        title="story", affiliation="ICAR-Central Institute for Research on Buffaloes",
+        "Prem Singh Yadav",
+        "Team leader was Dr. Prem Singh Yadav of ICAR-CIRB, Hisar",
+        title="story",
+        affiliation="ICAR-Central Institute for Research on Buffaloes",
     )
     assert full.matched and full.identity_strength == "full"
 
     weak = verify_name_in_content(
-        "Prem Singh Yadav", "authors: Poonam Yadav, Aayush Yadav, P. S. Yadav at ICAR-CIRB",
-        title="article", affiliation="ICAR-Central Institute for Research on Buffaloes",
+        "Prem Singh Yadav",
+        "authors: Poonam Yadav, Aayush Yadav, P. S. Yadav at ICAR-CIRB",
+        title="article",
+        affiliation="ICAR-Central Institute for Research on Buffaloes",
     )
     assert weak.matched
     assert weak.identity_strength == "weak"
@@ -102,11 +109,16 @@ def test_coauthor_profile_network_screen():
     from engine.models import PersonProfile
     from engine.coauthor_network import coauthor_source_batch
 
-    profile = PersonProfile(name="Prem Singh Yadav", field="Animal Physiology",
-                            affiliation="ICAR-Central Institute for Research on Buffaloes")
+    profile = PersonProfile(
+        name="Prem Singh Yadav",
+        field="Animal Physiology",
+        affiliation="ICAR-Central Institute for Research on Buffaloes",
+    )
     pages = [
-        ("https://vidwan.example.test/profile/999",
-         "Publications: Fetal Stem Cells in Farm Animals... Authors: P. S. Yadav; R. K. Singh, B. Singh. ICAR-CIRB Hisar"),
+        (
+            "https://vidwan.example.test/profile/999",
+            "Publications: Fetal Stem Cells in Farm Animals... Authors: P. S. Yadav; R. K. Singh, B. Singh. ICAR-CIRB Hisar",
+        ),
     ]
     got = coauthor_source_batch(profile, pages)
     assert len(got) == 1
@@ -120,9 +132,20 @@ def test_coauthor_profile_network_screen():
     class NS:
         display_name = "Other Yadav"
         signature_terms = ["Bharadwaj"]
+
     nsnap = []
-    ns = type("NS", (), {"display_name": "Other Yadav", "signature_terms": ["Bharadwaj"]})()
+    ns = type(
+        "NS", (), {"display_name": "Other Yadav", "signature_terms": ["Bharadwaj"]}
+    )()
     profile.known_namesakes = [ns]
-    got2 = coauthor_source_batch(profile, pages[:0] + [("https://vidwan.example.test/profile/998",
-        "Dr A Bharadwaj, ICAR-Central Institute for Research on Buffaloes, expertise: Veterinary Sciences")])
+    got2 = coauthor_source_batch(
+        profile,
+        pages[:0]
+        + [
+            (
+                "https://vidwan.example.test/profile/998",
+                "Dr A Bharadwaj, ICAR-Central Institute for Research on Buffaloes, expertise: Veterinary Sciences",
+            )
+        ],
+    )
     assert got2 == []

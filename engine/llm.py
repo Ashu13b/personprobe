@@ -12,6 +12,7 @@ class LLMProvider(Protocol):
 class ClaudeProvider:
     def __init__(self) -> None:
         import anthropic
+
         self._client = anthropic.Anthropic()
         self._model = os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6")
 
@@ -28,6 +29,7 @@ class ClaudeProvider:
 class GeminiProvider:
     def __init__(self) -> None:
         import google.generativeai as genai
+
         genai.configure(api_key=os.environ["GEMINI_API_KEY"])  # type: ignore[reportPrivateImportUsage]
         model_name = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
         self._model = genai.GenerativeModel(  # type: ignore[reportPrivateImportUsage]
@@ -55,11 +57,14 @@ class VertexClaudeProvider:
 
     def __init__(self) -> None:
         import anthropic
+
         self._client = anthropic.AnthropicVertex(  # type: ignore[reportPrivateImportUsage]
             project_id=os.environ["ANTHROPIC_VERTEX_PROJECT_ID"],
             region=os.environ.get("CLOUD_ML_REGION", "us-east5"),
         )
-        self._model = os.environ.get("VERTEX_CLAUDE_MODEL", "claude-sonnet-4-5@20250929")
+        self._model = os.environ.get(
+            "VERTEX_CLAUDE_MODEL", "claude-sonnet-4-5@20250929"
+        )
         self._client.messages.create(
             model=self._model,
             max_tokens=1,
@@ -78,11 +83,14 @@ class VertexClaudeProvider:
 
 class LocalProvider:
     def complete(self, system: str, user: str) -> str:
-        raise NotImplementedError("Local provider not yet wired — set PERSONPROBE_LLM=claude")
+        raise NotImplementedError(
+            "Local provider not yet wired — set PERSONPROBE_LLM=claude"
+        )
 
 
 class NullProvider:
     """Fallback when no API key is configured — LLM-dependent steps silently skip."""
+
     def complete(self, system: str, user: str) -> str:
         return "{}"
 
@@ -108,15 +116,20 @@ class StubProvider:
 
     def _classify(self, user: str) -> str:
         import json
+
         url = ""
         for line in user.splitlines():
             if line.startswith("URL:"):
                 url = line.split(":", 1)[1].strip().lower()
                 break
         if any(kw in url for kw in ["ncbi", "pubmed", "doi.org", "plos", "springer"]):
-            return json.dumps({"reliability": "reliable_secondary", "reason": "academic publisher"})
+            return json.dumps(
+                {"reliability": "reliable_secondary", "reason": "academic publisher"}
+            )
         if any(kw in url for kw in ["researchgate", "academia.edu", "linkedin"]):
-            return json.dumps({"reliability": "self_published", "reason": "self-published profile"})
+            return json.dumps(
+                {"reliability": "self_published", "reason": "self-published profile"}
+            )
         return json.dumps({"reliability": "primary", "reason": "stub classification"})
 
     # ── extractor ─────────────────────────────────────────────────────────────
@@ -124,6 +137,7 @@ class StubProvider:
     def _extract(self, user: str) -> str:
         import json
         import re
+
         person, content, title, publisher = "", "", "", ""
         for line in user.splitlines():
             if line.startswith("Person:"):
@@ -144,9 +158,22 @@ class StubProvider:
             (["born", "birth"], "birth_date"),
             (["award", "prize", "fellow", "honour", "felicitat"], "award"),
             (["phd", "m.sc", "b.sc", "degree", "studied", "graduated"], "education"),
-            (["director", "principal scientist", "head", "chief", "professor", "scientist"], "position"),
+            (
+                [
+                    "director",
+                    "principal scientist",
+                    "head",
+                    "chief",
+                    "professor",
+                    "scientist",
+                ],
+                "position",
+            ),
             (["published", "paper", "journal", "article", "research"], "publication"),
-            (["university", "institute", "icar", "iit", "college", "laborator"], "affiliation"),
+            (
+                ["university", "institute", "icar", "iit", "college", "laborator"],
+                "affiliation",
+            ),
         ]
 
         _PRONOUNS = {"he", "she", "they", "his", "her", "their", "who"}
@@ -159,9 +186,25 @@ class StubProvider:
             any(p in content_lower for p in name_parts)
             or (content_lower.split()[:1] or [""])[0] in _PRONOUNS
         )
-        paper_keywords = ["gene", "embryo", "protein", "effect", "analysis", "study",
-                          "assessment", "evaluation", "production", "role", "impact",
-                          "crispr", "sperm", "oocyte", "buffalo", "bovine", "cloning"]
+        paper_keywords = [
+            "gene",
+            "embryo",
+            "protein",
+            "effect",
+            "analysis",
+            "study",
+            "assessment",
+            "evaluation",
+            "production",
+            "role",
+            "impact",
+            "crispr",
+            "sperm",
+            "oocyte",
+            "buffalo",
+            "bovine",
+            "cloning",
+        ]
         effective_title = title or content
         if (
             effective_title
@@ -170,15 +213,21 @@ class StubProvider:
         ):
             pub_text = f'{person} co-authored "{effective_title}"'
             if publisher:
-                pub_text += f', published in {publisher}'
+                pub_text += f", published in {publisher}"
             claims.append({"field": "publication", "text": pub_text})
             return json.dumps({"claims": claims})
 
-        sentences = [s.strip() for s in re.split(r'[.!?]', content) if len(s.strip()) > 15]
+        sentences = [
+            s.strip() for s in re.split(r"[.!?]", content) if len(s.strip()) > 15
+        ]
         for sent in sentences:
             sl = sent.lower()
             first_word = sl.split()[0] if sl.split() else ""
-            mentions_person = any(p in sl for p in name_parts) or first_word in _PRONOUNS or len(sentences) <= 3
+            mentions_person = (
+                any(p in sl for p in name_parts)
+                or first_word in _PRONOUNS
+                or len(sentences) <= 3
+            )
             if not mentions_person:
                 continue
             field = "known_for"
@@ -187,7 +236,22 @@ class StubProvider:
                     field = f
                     break
             if field == "birth_date":
-                animal_kws = ["cloned", "cloning", "animal", "buffalo", "calf", "cow", "bull", "sheep", "goat", "offspring", "garima", "samrupa", "ganga", "dolly"]
+                animal_kws = [
+                    "cloned",
+                    "cloning",
+                    "animal",
+                    "buffalo",
+                    "calf",
+                    "cow",
+                    "bull",
+                    "sheep",
+                    "goat",
+                    "offspring",
+                    "garima",
+                    "samrupa",
+                    "ganga",
+                    "dolly",
+                ]
                 if any(akw in sl for akw in animal_kws):
                     field = "known_for"
             claims.append({"field": field, "text": sent.strip()})
@@ -203,6 +267,7 @@ _agent_warned = False
 
 def _agent_provider() -> LLMProvider:
     from .agent_llm import AgentProvider
+
     return AgentProvider()
 
 
@@ -244,6 +309,7 @@ def get_provider() -> LLMProvider:
             # Try reading from ~/.anthropic/credentials or other SDK locations
             try:
                 import anthropic
+
                 c = anthropic.Anthropic()
                 # SDK stores the resolved key as an attribute
                 key = getattr(c, "api_key", "") or ""

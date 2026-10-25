@@ -1,7 +1,9 @@
 """Generate a deterministic, evidence-grounded AfC draft from a saved session."""
+
 import sys
 import os
 import json
+
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(root_dir, "backend"))
 sys.path.insert(0, root_dir)

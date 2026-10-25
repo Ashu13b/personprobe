@@ -1,4 +1,5 @@
 """Production hardening unit tests for SSRF guards, atomic persistence, and citation safety."""
+
 import json
 
 from engine.fetcher import is_safe_public_url, _direct_fetch, check_liveness
@@ -113,6 +114,7 @@ def test_resume_and_delete_session_block_path_traversal(tmp_path, monkeypatch):
 
 def test_browser_server_navigate_blocks_unsafe_urls():
     from browser_server import navigate, NavReq
+
     res = navigate(NavReq(url="http://169.254.169.254/latest/meta-data"))
     assert "Disallowed URL target" in res.get("error", "")
 

@@ -8,6 +8,7 @@ Serves two essential purposes:
 2. Canonical Deduplication: Ensures discovery engines, crawlers, and AI agents
    never re-crawl, re-fetch, or re-recommend previously discarded URLs.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -130,6 +131,8 @@ def recover_discarded(profile: PersonProfile, url: str) -> Optional[DiscardedSou
     return recovered
 
 
-def get_discarded_by_reason(profile: PersonProfile, reason: str) -> list[DiscardedSource]:
+def get_discarded_by_reason(
+    profile: PersonProfile, reason: str
+) -> list[DiscardedSource]:
     """Filter discarded sources by specific reason (e.g. 'no_name_match')."""
     return [d for d in profile.discarded_sources if d.reason == reason]

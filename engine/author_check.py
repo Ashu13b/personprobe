@@ -6,6 +6,7 @@ the person we're researching actually appears as an author.
 The challenge: "P.S. Yadav" matches both "Prem Singh Yadav" and
 "Prem Shankar Singh Yadav". We use affiliation to disambiguate.
 """
+
 from __future__ import annotations
 import re
 import requests
@@ -62,7 +63,9 @@ def _normalise(name: str) -> str:
     return re.sub(r"[.\s]+", " ", name.lower()).strip()
 
 
-def _author_matches_variants(author_given: str, author_family: str, variants: list[str]) -> bool:
+def _author_matches_variants(
+    author_given: str, author_family: str, variants: list[str]
+) -> bool:
     full = f"{author_given} {author_family}".strip()
     normed = _normalise(full)
     normed_variants = [_normalise(v) for v in variants]
@@ -80,13 +83,17 @@ def _author_matches_variants(author_given: str, author_family: str, variants: li
             # Last name matches — check initials
             initials_from_variant = "".join(p[0] for p in v_parts[:-1])
             initials_from_author = "".join(p[0] for p in author_given.split())
-            if initials_from_variant and initials_from_author.startswith(initials_from_variant):
+            if initials_from_variant and initials_from_author.startswith(
+                initials_from_variant
+            ):
                 return True
 
     return False
 
 
-def _affiliation_matches(author_affils: list[dict], known_affiliation: str) -> bool | None:
+def _affiliation_matches(
+    author_affils: list[dict], known_affiliation: str
+) -> bool | None:
     """True = strong match, False = clearly different, None = unknown."""
     if not author_affils:
         return None
@@ -123,10 +130,22 @@ def check_doi_authors(
     try:
         resp = requests.get(f"{CROSSREF_API}/{doi}", timeout=TIMEOUT)
         if not resp.ok:
-            return {"status": "no_data", "matched_author": "", "matched_affiliation": "", "all_authors": [], "paper_title": ""}
+            return {
+                "status": "no_data",
+                "matched_author": "",
+                "matched_affiliation": "",
+                "all_authors": [],
+                "paper_title": "",
+            }
         msg = resp.json().get("message", {})
     except Exception:
-        return {"status": "no_data", "matched_author": "", "matched_affiliation": "", "all_authors": [], "paper_title": ""}
+        return {
+            "status": "no_data",
+            "matched_author": "",
+            "matched_affiliation": "",
+            "all_authors": [],
+            "paper_title": "",
+        }
 
     paper_title = " ".join(msg.get("title", []))
     authors = msg.get("author", [])
@@ -150,20 +169,50 @@ def check_doi_authors(
         # Full name exact match (3+ tokens) is unambiguous — no affiliation needed
         full_name_match = _normalise(full_author) == _normalise(person_name)
         if full_name_match:
-            return {"status": "confirmed", "matched_author": full_author, "matched_affiliation": matched_affil, "all_authors": all_names, "paper_title": paper_title}
+            return {
+                "status": "confirmed",
+                "matched_author": full_author,
+                "matched_affiliation": matched_affil,
+                "all_authors": all_names,
+                "paper_title": paper_title,
+            }
 
         # Abbreviated match — need affiliation to disambiguate
         if person_affiliation:
             affil_ok = _affiliation_matches(affils, person_affiliation)
             if affil_ok is True:
-                return {"status": "confirmed", "matched_author": full_author, "matched_affiliation": matched_affil, "all_authors": all_names, "paper_title": paper_title}
+                return {
+                    "status": "confirmed",
+                    "matched_author": full_author,
+                    "matched_affiliation": matched_affil,
+                    "all_authors": all_names,
+                    "paper_title": paper_title,
+                }
             elif affil_ok is False:
-                return {"status": "wrong_person", "matched_author": full_author, "matched_affiliation": matched_affil, "all_authors": all_names, "paper_title": paper_title}
+                return {
+                    "status": "wrong_person",
+                    "matched_author": full_author,
+                    "matched_affiliation": matched_affil,
+                    "all_authors": all_names,
+                    "paper_title": paper_title,
+                }
 
         # Abbreviated match, affiliation unknown or not provided
-        return {"status": "possible", "matched_author": full_author, "matched_affiliation": matched_affil, "all_authors": all_names, "paper_title": paper_title}
+        return {
+            "status": "possible",
+            "matched_author": full_author,
+            "matched_affiliation": matched_affil,
+            "all_authors": all_names,
+            "paper_title": paper_title,
+        }
 
-    return {"status": "not_found", "matched_author": "", "matched_affiliation": "", "all_authors": all_names, "paper_title": paper_title}
+    return {
+        "status": "not_found",
+        "matched_author": "",
+        "matched_affiliation": "",
+        "all_authors": all_names,
+        "paper_title": paper_title,
+    }
 
 
 def extract_doi(url: str) -> str | None:

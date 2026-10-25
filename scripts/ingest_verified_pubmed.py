@@ -11,11 +11,27 @@ API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
 
 CONFIRMED_PMIDS = [
-    "41527787", "41009405", "40229609", "39498956", "39178617",
-    "39042556", "39029316", "38200865", "38035499", "37042654",
-    "36958101", "36880183", "35451101", "33301776", "32822364",
-    "31388074", "29851497", "25373338", "25141841"
+    "41527787",
+    "41009405",
+    "40229609",
+    "39498956",
+    "39178617",
+    "39042556",
+    "39029316",
+    "38200865",
+    "38035499",
+    "37042654",
+    "36958101",
+    "36880183",
+    "35451101",
+    "33301776",
+    "32822364",
+    "31388074",
+    "29851497",
+    "25373338",
+    "25141841",
 ]
+
 
 def api_post(path: str, payload: dict) -> dict:
     req = urllib.request.Request(
@@ -24,6 +40,7 @@ def api_post(path: str, payload: dict) -> dict:
         headers={"Content-Type": "application/json"},
     )
     return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
+
 
 def fetch_pubmed_details(pmids: list[str]) -> list[dict]:
     url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={','.join(pmids)}&retmode=xml"
@@ -34,7 +51,7 @@ def fetch_pubmed_details(pmids: list[str]) -> list[dict]:
     for article in root.findall(".//PubmedArticle"):
         pmid = article.find(".//MedlineCitation/PMID").text
         title = (article.find(".//ArticleTitle").text or "").strip()
-        
+
         # Abstract
         abstract_parts = []
         for ab in article.findall(".//Abstract/AbstractText"):
@@ -69,28 +86,36 @@ def fetch_pubmed_details(pmids: list[str]) -> list[dict]:
                 doi = aid.text
                 break
 
-        results.append({
-            "pmid": pmid,
-            "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
-            "doi_url": f"https://doi.org/{doi}" if doi else None,
-            "title": title,
-            "abstract": abstract,
-            "journal": journal_title,
-            "year": year_str,
-            "authors": ", ".join(authors),
-        })
+        results.append(
+            {
+                "pmid": pmid,
+                "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
+                "doi_url": f"https://doi.org/{doi}" if doi else None,
+                "title": title,
+                "abstract": abstract,
+                "journal": journal_title,
+                "year": year_str,
+                "authors": ", ".join(authors),
+            }
+        )
     return results
+
 
 def main():
     print(f"[*] Fetching details for {len(CONFIRMED_PMIDS)} confirmed PMIDs...")
     details = fetch_pubmed_details(CONFIRMED_PMIDS)
     print(f"[*] Retrieved {len(details)} articles from NCBI.")
 
-    session_file = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
+    session_file = (
+        Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
+    )
     existing_urls = set()
     if session_file.exists():
         sdata = json.loads(session_file.read_text())
-        existing_urls = {s.get("url", "").lower().rstrip("/") for s in sdata.get("profile", {}).get("sources", [])}
+        existing_urls = {
+            s.get("url", "").lower().rstrip("/")
+            for s in sdata.get("profile", {}).get("sources", [])
+        }
 
     ingested = 0
     for doc in details:
@@ -112,11 +137,10 @@ def main():
 
         print(f"[*] Ingesting PMID {doc['pmid']}: {doc['title'][:60]}...")
         try:
-            res = api_post("/research/add-source-paste", {
-                "profile_name": SESSION_ID,
-                "url": url,
-                "pasted_text": pasted_text
-            })
+            res = api_post(
+                "/research/add-source-paste",
+                {"profile_name": SESSION_ID, "url": url, "pasted_text": pasted_text},
+            )
             existing_urls.add(norm_url)
             ingested += 1
             print(f"    [OK] Ingested. Source ID: {res.get('source', {}).get('id')}")
@@ -126,20 +150,26 @@ def main():
         # Also ingest DOI mirror if available
         if doc["doi_url"] and doc["doi_url"].lower().rstrip("/") not in existing_urls:
             try:
-                api_post("/research/add-source-paste", {
-                    "profile_name": SESSION_ID,
-                    "url": doc["doi_url"],
-                    "pasted_text": pasted_text
-                })
+                api_post(
+                    "/research/add-source-paste",
+                    {
+                        "profile_name": SESSION_ID,
+                        "url": doc["doi_url"],
+                        "pasted_text": pasted_text,
+                    },
+                )
                 existing_urls.add(doc["doi_url"].lower().rstrip("/"))
             except Exception:
                 pass
 
         time.sleep(1)
 
-    print(f"\n[DONE] Successfully ingested {ingested} PubMed sources and DOI mirrors into session {SESSION_ID}.")
+    print(
+        f"\n[DONE] Successfully ingested {ingested} PubMed sources and DOI mirrors into session {SESSION_ID}."
+    )
     api_post("/sessions/resume", {"session_id": SESSION_ID})
     print("[*] Session resumed and saved.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,13 @@
 """Tests for the Research Lifecycle Audit engine."""
-from engine.models import PersonProfile, Source, Claim, VerificationState, SourceReliability, DiscardedSource
+
+from engine.models import (
+    PersonProfile,
+    Source,
+    Claim,
+    VerificationState,
+    SourceReliability,
+    DiscardedSource,
+)
 from engine.lifecycle_audit import (
     audit_discovery_stage,
     audit_provenance_stage,
@@ -13,13 +21,38 @@ def test_audit_discovery_stage():
     profile = PersonProfile(
         name="Test Subject",
         sources=[
-            Source(url="https://example.com/live1", title="S1", publisher="P1", liveness="alive"),
-            Source(url="https://example.com/dead1", title="Dead", publisher="P2", liveness="dead", archive_url="https://archive.org/dead1"),
-            Source(url="https://example.com/dead2", title="Dead No Arch", publisher="P3", liveness="dead", archive_url=None),
+            Source(
+                url="https://example.com/live1",
+                title="S1",
+                publisher="P1",
+                liveness="alive",
+            ),
+            Source(
+                url="https://example.com/dead1",
+                title="Dead",
+                publisher="P2",
+                liveness="dead",
+                archive_url="https://archive.org/dead1",
+            ),
+            Source(
+                url="https://example.com/dead2",
+                title="Dead No Arch",
+                publisher="P3",
+                liveness="dead",
+                archive_url=None,
+            ),
         ],
         discarded_sources=[
-            DiscardedSource(url="https://example.com/disc1", canonical_url="https://example.com/disc1", reason="no_name_match"),
-            DiscardedSource(url="https://example.com/disc2", canonical_url="https://example.com/disc2", reason="homonym_risk"),
+            DiscardedSource(
+                url="https://example.com/disc1",
+                canonical_url="https://example.com/disc1",
+                reason="no_name_match",
+            ),
+            DiscardedSource(
+                url="https://example.com/disc2",
+                canonical_url="https://example.com/disc2",
+                reason="homonym_risk",
+            ),
         ],
     )
 
@@ -74,9 +107,24 @@ def test_audit_claims_stage():
     profile = PersonProfile(
         name="Test Subject",
         claims=[
-            Claim(field="field", text="Animal biotechnology", verification=VerificationState.confirmed, draft_approved=True),
-            Claim(field="position", text="Principal Scientist", verification=VerificationState.confirmed, draft_approved=False),
-            Claim(field="award", text="National Award", verification=VerificationState.unverified, draft_approved=False),
+            Claim(
+                field="field",
+                text="Animal biotechnology",
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="position",
+                text="Principal Scientist",
+                verification=VerificationState.confirmed,
+                draft_approved=False,
+            ),
+            Claim(
+                field="award",
+                text="National Award",
+                verification=VerificationState.unverified,
+                draft_approved=False,
+            ),
         ],
     )
 
@@ -123,10 +171,20 @@ def test_audit_full_lifecycle():
             ),
         ],
         claims=[
-            Claim(field="field", text="Animal biotechnology", source_url="https://thehindu.com/article",
-                  verification=VerificationState.confirmed, draft_approved=True),
-            Claim(field="position", text="Principal Scientist at CIRB", source_url="https://timesofindia.com/article",
-                  verification=VerificationState.confirmed, draft_approved=True),
+            Claim(
+                field="field",
+                text="Animal biotechnology",
+                source_url="https://thehindu.com/article",
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="position",
+                text="Principal Scientist at CIRB",
+                source_url="https://timesofindia.com/article",
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
         ],
     )
 

@@ -2,14 +2,33 @@ from unittest.mock import patch
 
 from engine.llm import StubProvider
 from engine.models import PersonProfile, Source, UrlSuggestion
-from engine.suggester import _generate_multiyear_report_urls, is_profile_url, suggest_next_urls
+from engine.suggester import (
+    _generate_multiyear_report_urls,
+    is_profile_url,
+    suggest_next_urls,
+)
 
 
 def test_multiyear_sweep_never_fabricates_dois_or_publisher_urls():
-    assert _generate_multiyear_report_urls("https://doi.org/10.48165/aru.2023.3.1.6") == []
-    assert _generate_multiyear_report_urls("https://www.nature.com/articles/s41598-019-47909-8") == []
-    assert _generate_multiyear_report_urls("https://pubmed.ncbi.nlm.nih.gov/37793222/") == []
-    assert _generate_multiyear_report_urls("https://www.researchgate.net/publication/12345") == []
+    assert (
+        _generate_multiyear_report_urls("https://doi.org/10.48165/aru.2023.3.1.6") == []
+    )
+    assert (
+        _generate_multiyear_report_urls(
+            "https://www.nature.com/articles/s41598-019-47909-8"
+        )
+        == []
+    )
+    assert (
+        _generate_multiyear_report_urls("https://pubmed.ncbi.nlm.nih.gov/37793222/")
+        == []
+    )
+    assert (
+        _generate_multiyear_report_urls(
+            "https://www.researchgate.net/publication/12345"
+        )
+        == []
+    )
 
 
 def test_multiyear_sweep_still_covers_institutional_report_series():
@@ -75,16 +94,18 @@ def test_profile_link_suggestions_drop_generic_links():
         name="Example Person",
         affiliation="Example Institute",
         field="Animal science",
-        sources=[Source(
-            url="https://news.example/report",
-            title="Example Person at Example Institute",
-            publisher="Example News",
-            profile_links=[
-                "https://example.test/author/administrator/",
-                "https://linkedin.com/company/example",
-                "https://example.edu/staff/example-person/",
-            ],
-        )],
+        sources=[
+            Source(
+                url="https://news.example/report",
+                title="Example Person at Example Institute",
+                publisher="Example News",
+                profile_links=[
+                    "https://example.test/author/administrator/",
+                    "https://linkedin.com/company/example",
+                    "https://example.edu/staff/example-person/",
+                ],
+            )
+        ],
     )
 
     with patch("engine.suggester._search_queries", return_value=[]):

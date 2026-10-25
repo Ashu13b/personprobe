@@ -18,24 +18,29 @@ QUERIES = [
     "site:bhaskar.com CIRB हिसार गौरव",
     "site:amarujala.com CIRB हिसार गौरव",
     "site:jagran.com CIRB हिसार गौरव",
-    "site:icar.org.in \"Prem Singh Yadav\"",
-    "site:icar.org.in \"Hisar Gaurav\"",
-    "site:icar.org.in \"Veer Gaurav\"",
-    "site:icar.org.in \"Sach Gaurav\"",
-    "site:icar.org.in \"cloned buffalo\" Hisar",
-    "site:ndri.res.in \"Prem Singh Yadav\"",
-    "site:naas.org.in \"Prem Singh Yadav\"",
-    "site:sapi.in \"Prem Singh Yadav\""
+    'site:icar.org.in "Prem Singh Yadav"',
+    'site:icar.org.in "Hisar Gaurav"',
+    'site:icar.org.in "Veer Gaurav"',
+    'site:icar.org.in "Sach Gaurav"',
+    'site:icar.org.in "cloned buffalo" Hisar',
+    'site:ndri.res.in "Prem Singh Yadav"',
+    'site:naas.org.in "Prem Singh Yadav"',
+    'site:sapi.in "Prem Singh Yadav"',
 ]
+
 
 def load_existing_urls() -> set[str]:
     if not SESSION_FILE.exists():
         return set()
     try:
         data = json.loads(SESSION_FILE.read_text())
-        return {s.get("url", "").lower().rstrip("/") for s in data.get("profile", {}).get("sources", [])}
+        return {
+            s.get("url", "").lower().rstrip("/")
+            for s in data.get("profile", {}).get("sources", [])
+        }
     except Exception:
         return set()
+
 
 def main():
     client = MobileBrowserClient()
@@ -45,7 +50,7 @@ def main():
     all_harvested = {}
 
     for idx, q in enumerate(QUERIES):
-        print(f"\n[{idx+1}/{len(QUERIES)}] Query: {q}")
+        print(f"\n[{idx + 1}/{len(QUERIES)}] Query: {q}")
         search_url = "https://html.duckduckgo.com/html/?q=" + urllib.parse.quote(q)
         try:
             res = client.navigate(search_url, wait_seconds=6)
@@ -64,7 +69,9 @@ def main():
                 if "uddg=" in href:
                     parsed = urllib.parse.parse_qs(urllib.parse.urlparse(href).query)
                     target = parsed.get("uddg", [""])[0]
-                    if not target or any(d in target for d in ["duckduckgo.com", "bing.com", "yahoo.com"]):
+                    if not target or any(
+                        d in target for d in ["duckduckgo.com", "bing.com", "yahoo.com"]
+                    ):
                         continue
                     clean_target = target.split("?")[0].rstrip("/")
                     norm = clean_target.lower()
@@ -72,7 +79,7 @@ def main():
                         all_harvested[norm] = {
                             "url": clean_target,
                             "title": text,
-                            "query": q
+                            "query": q,
                         }
 
             print(f"  Total unique candidates so far: {len(all_harvested)}")
@@ -82,9 +89,12 @@ def main():
             print(f"  [EXCEPTION] {e}")
             time.sleep(4)
 
-    print(f"\n[DONE] Finished harvesting queries. Total unique candidates: {len(all_harvested)}")
+    print(
+        f"\n[DONE] Finished harvesting queries. Total unique candidates: {len(all_harvested)}"
+    )
     with open("/tmp/media_and_icar_candidates.json", "w") as f:
         json.dump(list(all_harvested.values()), f, indent=2)
+
 
 if __name__ == "__main__":
     main()

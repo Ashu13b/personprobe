@@ -6,7 +6,13 @@ from fastapi import HTTPException
 
 from backend import main as backend_main
 from backend import store
-from engine.models import Claim, PersonProfile, Source, SourceReliability, VerificationState
+from engine.models import (
+    Claim,
+    PersonProfile,
+    Source,
+    SourceReliability,
+    VerificationState,
+)
 from adapters.wiki.draft import audit_profile, render_draft, _citation
 from adapters.wiki.draft_verifier import extract_draft_links, check_draft_links
 
@@ -16,10 +22,14 @@ def _source(url: str, *, independent: bool = True) -> Source:
         url=url,
         title="Published profile of Example Person",
         publisher="Example News",
-        reliability=SourceReliability.reliable_secondary if independent else SourceReliability.primary,
+        reliability=SourceReliability.reliable_secondary
+        if independent
+        else SourceReliability.primary,
         human_verified=True,
         is_independent=independent,
-        provenance_category="independent_secondary" if independent else "institutional_bio",
+        provenance_category="independent_secondary"
+        if independent
+        else "institutional_bio",
         relevance_flag="relevant",
     )
 
@@ -75,29 +85,31 @@ def test_audit_excludes_cv_animal_birth_and_unverified_sources():
     unchecked = _source("https://example.test/unchecked")
     unchecked.human_verified = False
     profile.sources.extend([cv, animal, unchecked])
-    profile.claims.extend([
-        Claim(
-            field="birth_date",
-            text="Born on 10 April 1963",
-            source_url=cv.url,
-            verification=VerificationState.confirmed,
-            draft_approved=True,
-        ),
-        Claim(
-            field="birth_date",
-            text="4 kg calf born through normal delivery in 2015",
-            source_url=animal.url,
-            verification=VerificationState.confirmed,
-            draft_approved=True,
-        ),
-        Claim(
-            field="award",
-            text="Received an example scientific award",
-            source_url=unchecked.url,
-            verification=VerificationState.confirmed,
-            draft_approved=True,
-        ),
-    ])
+    profile.claims.extend(
+        [
+            Claim(
+                field="birth_date",
+                text="Born on 10 April 1963",
+                source_url=cv.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="birth_date",
+                text="4 kg calf born through normal delivery in 2015",
+                source_url=animal.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="award",
+                text="Received an example scientific award",
+                source_url=unchecked.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+        ]
+    )
 
     audit = audit_profile(profile)
     exclusions = {issue.code: issue.count for issue in audit.exclusions}
@@ -124,30 +136,41 @@ def test_audit_blocks_drafts_without_independent_secondary_coverage():
     profile = _ready_profile()
     for claim in profile.claims:
         claim.source_url = "https://institute.example.test/staff"
-    profile.sources = [_source("https://institute.example.test/staff", independent=False)]
+    profile.sources = [
+        _source("https://institute.example.test/staff", independent=False)
+    ]
 
     audit = audit_profile(profile)
 
     assert not audit.ready
-    assert any(issue.code == "insufficient_independent_coverage" for issue in audit.blockers)
+    assert any(
+        issue.code == "insufficient_independent_coverage" for issue in audit.blockers
+    )
 
 
 def test_audit_warns_when_achievement_claim_rests_on_primary_source():
     profile = _ready_profile()
-    institution = _source("https://institute.example.test/announcement", independent=False)
+    institution = _source(
+        "https://institute.example.test/announcement", independent=False
+    )
     profile.sources.append(institution)
-    profile.claims.append(Claim(
-        field="award",
-        text="Received the Outstanding Scientist Award from the institute",
-        source_url=institution.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="award",
+            text="Received the Outstanding Scientist Award from the institute",
+            source_url=institution.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     audit = audit_profile(profile)
 
     assert audit.ready
-    warning = next((w for w in audit.warnings if w.code == "achievement_claim_not_independent"), None)
+    warning = next(
+        (w for w in audit.warnings if w.code == "achievement_claim_not_independent"),
+        None,
+    )
     assert warning is not None
     assert warning.count == 1
 
@@ -158,7 +181,9 @@ def test_audit_no_achievement_warning_when_sources_are_independent():
     audit = audit_profile(profile)
 
     assert audit.ready
-    assert not any(w.code == "achievement_claim_not_independent" for w in audit.warnings)
+    assert not any(
+        w.code == "achievement_claim_not_independent" for w in audit.warnings
+    )
 
 
 def test_research_action_rule_accepts_common_research_verbs():
@@ -183,7 +208,9 @@ def test_research_action_rule_accepts_common_research_verbs():
     audit = audit_profile(profile)
 
     assert audit.ready
-    assert not any(e.code == "research_claim_has_no_subject_action" for e in audit.exclusions)
+    assert not any(
+        e.code == "research_claim_has_no_subject_action" for e in audit.exclusions
+    )
 
 
 def test_birth_noise_rule_scans_source_title_too():
@@ -193,13 +220,15 @@ def test_birth_noise_rule_scans_source_title_too():
     animal_src.title = "ICAR-CIRB celebrates first birthday of cloned calf Hisar-Gaurav"
     profile = _ready_profile()
     profile.sources.append(animal_src)
-    profile.claims.append(Claim(
-        field="birth_date",
-        text="Born on December 11, 2015",
-        source_url=animal_src.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="birth_date",
+            text="Born on December 11, 2015",
+            source_url=animal_src.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     audit = audit_profile(profile)
 
@@ -212,18 +241,22 @@ def test_human_birth_claim_not_blocked_by_animal_rule():
     roster.title = "ICAR-CIRB Scientists Remunerations 2023"
     profile = _ready_profile()
     profile.sources.append(roster)
-    profile.claims.append(Claim(
-        field="birth_date",
-        text="Born on 10 April 1963",
-        source_url=roster.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="birth_date",
+            text="Born on 10 April 1963",
+            source_url=roster.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     audit = audit_profile(profile)
 
     assert audit.ready
-    assert not any(e.code == "claim_appears_to_describe_animal" for e in audit.exclusions)
+    assert not any(
+        e.code == "claim_appears_to_describe_animal" for e in audit.exclusions
+    )
 
 
 def test_renderer_cites_every_included_claim_and_never_fills_biography_gaps():
@@ -231,11 +264,12 @@ def test_renderer_cites_every_included_claim_and_never_fills_biography_gaps():
     wikitext = render_draft(profile)
 
     assert "'''Example Person''' is an Indian scientist" in wikitext
-    assert all("<ref" in line for line in wikitext.splitlines() if line.startswith("* "))
+    assert all(
+        "<ref" in line for line in wikitext.splitlines() if line.startswith("* ")
+    )
     assert "{{citation needed}}" not in wikitext
     assert "joined the Indian Council of Agricultural Research" not in wikitext
     assert "file:///" not in wikitext
-
 
 
 def test_infobox_only_emits_fields_with_draft_approved_evidence():
@@ -256,13 +290,15 @@ def test_renderer_places_birth_facts_under_early_life_not_education():
     profile = _ready_profile()
     birth_source = _source("https://news.example.test/birth-record")
     profile.sources.append(birth_source)
-    profile.claims.append(Claim(
-        field="birth_place",
-        text="Born in Example Village in 1963",
-        source_url=birth_source.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="birth_place",
+            text="Born in Example Village in 1963",
+            source_url=birth_source.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     wikitext = render_draft(profile)
 
@@ -274,13 +310,15 @@ def test_renderer_surfaces_curated_award_in_lead_without_repeating_section():
     profile = _ready_profile()
     award_source = _source("https://news.example.test/national-award")
     profile.sources.append(award_source)
-    profile.claims.append(Claim(
-        field="award",
-        text="Received the National Example Prize for interdisciplinary research",
-        source_url=award_source.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="award",
+            text="Received the National Example Prize for interdisciplinary research",
+            source_url=award_source.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     wikitext = render_draft(profile)
 
@@ -292,13 +330,15 @@ def test_renderer_includes_approved_achievement_in_research():
     profile = _ready_profile()
     source = _source("https://news.example.test/cloning-result")
     profile.sources.append(source)
-    profile.claims.append(Claim(
-        field="achievement",
-        text="In 2020, the team produced seven clones of an elite buffalo bull",
-        source_url=source.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="achievement",
+            text="In 2020, the team produced seven clones of an elite buffalo bull",
+            source_url=source.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     wikitext = render_draft(profile)
 
@@ -322,19 +362,25 @@ def test_publication_first_author_study_is_bibliographic_and_sorted_by_claim_yea
     source = _source("https://journal.example.test/paper")
     source.date = "2025"
     profile.sources.append(source)
-    profile.claims.append(Claim(
-        field="publication",
-        text="Yadav was first author of a 2005 study in Example Journal",
-        source_url=source.url,
-        verification=VerificationState.confirmed,
-        draft_approved=True,
-    ))
+    profile.claims.append(
+        Claim(
+            field="publication",
+            text="Yadav was first author of a 2005 study in Example Journal",
+            source_url=source.url,
+            verification=VerificationState.confirmed,
+            draft_approved=True,
+        )
+    )
 
     audit = audit_profile(profile)
     wikitext = render_draft(profile, audit)
 
-    assert not any(issue.code == "publication_claim_not_bibliographic" for issue in audit.exclusions)
+    assert not any(
+        issue.code == "publication_claim_not_bibliographic"
+        for issue in audit.exclusions
+    )
     assert "Yadav was first author of a 2005 study" in wikitext
+
 
 def test_dr_yadav_saved_session_produces_policy_filtered_draft():
     session_path = Path(__file__).parent / "fixtures" / "Prem_Singh_Yadav.json"
@@ -352,9 +398,16 @@ def test_dr_yadav_saved_session_produces_policy_filtered_draft():
     assert wikitext.count("{{cite web") >= 5
     assert "4 kg born through normal delivery" not in wikitext
     assert "file:///" not in wikitext
-    assert "joined the Indian Council of Agricultural Research (ICAR) as a scientist in 1993" not in wikitext
-    assert all("<ref" in line for line in wikitext.splitlines() if line.startswith("* "))
-    assert wikitext.index("joining date of 12 April 1993") < wikitext.index("In 2018, The Tribune")
+    assert (
+        "joined the Indian Council of Agricultural Research (ICAR) as a scientist in 1993"
+        not in wikitext
+    )
+    assert all(
+        "<ref" in line for line in wikitext.splitlines() if line.startswith("* ")
+    )
+    assert wikitext.index("joining date of 12 April 1993") < wikitext.index(
+        "In 2018, The Tribune"
+    )
     assert "In 2018, The Tribune" in wikitext
     assert "In 2022, a PTI report" in wikitext
     assert "2024 annual report" in wikitext
@@ -368,7 +421,9 @@ def test_dr_yadav_saved_session_produces_policy_filtered_draft():
     assert "Reproductive Biotechnology in Buffalo" in wikitext
     assert "chief scientist of the project" in wikitext
     assert "orcid.org/0000-0002-0943-7306" not in wikitext
-    assert wikitext.index("Theriogenology in 2024") < wikitext.index("published in Cellular Reprogramming")
+    assert wikitext.index("Theriogenology in 2024") < wikitext.index(
+        "published in Cellular Reprogramming"
+    )
 
 
 def test_audit_accepts_sourced_research_stay_as_career_activity():
@@ -416,7 +471,9 @@ def test_claim_draft_approval_is_a_separate_persisted_action(tmp_path, monkeypat
     profile.claims[0].draft_approved = False
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store, "_wiki_statuses", {profile.session_id: {"status": "clear"}}
+    )
 
     approved = backend_main.verify_claim(
         profile.name,
@@ -440,7 +497,9 @@ def test_unverified_claim_direct_draft_approval(tmp_path, monkeypatch):
     profile.claims[0].draft_approved = False
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store, "_wiki_statuses", {profile.session_id: {"status": "clear"}}
+    )
 
     approved = backend_main.verify_claim(
         profile.name,
@@ -459,7 +518,9 @@ def test_batch_verify_claims(tmp_path, monkeypatch):
         c.draft_approved = False
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store, "_wiki_statuses", {profile.session_id: {"status": "clear"}}
+    )
 
     # Batch approve usable
     res = backend_main.batch_verify_claims(
@@ -494,7 +555,9 @@ def test_edit_draft_text_action(tmp_path, monkeypatch):
     profile.session_id = "py-example-person-edit-draft-text"
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store, "_wiki_statuses", {profile.session_id: {"status": "clear"}}
+    )
 
     res = backend_main.verify_claim(
         profile.name,
@@ -517,10 +580,20 @@ def test_publishers_registry_and_subdomains():
     )
 
     # Subdomains & domains
-    assert extract_domain("https://www.hindustantimes.com/world/story.html") == "hindustantimes.com"
-    assert extract_domain("http://timesofindia.indiatimes.com/city/delhi") == "timesofindia.indiatimes.com"
-    assert is_independent_secondary_news("https://www.thehindu.com/news/national/") is True
-    assert is_independent_secondary_news("https://edition.cnn.com/article") is False  # not in set
+    assert (
+        extract_domain("https://www.hindustantimes.com/world/story.html")
+        == "hindustantimes.com"
+    )
+    assert (
+        extract_domain("http://timesofindia.indiatimes.com/city/delhi")
+        == "timesofindia.indiatimes.com"
+    )
+    assert (
+        is_independent_secondary_news("https://www.thehindu.com/news/national/") is True
+    )
+    assert (
+        is_independent_secondary_news("https://edition.cnn.com/article") is False
+    )  # not in set
     assert is_independent_secondary_news("https://m.amarujala.com/haryana/") is True
     assert is_primary_or_institutional("https://cirb.res.in/about-us") is True
     assert is_primary_or_institutional("https://icar.gov.in/node/123") is True
@@ -533,9 +606,15 @@ def test_draft_endpoint_uses_server_session_and_persists_output(tmp_path, monkey
     profile.session_id = "py-example-person-test2"
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "clear", "url": None, "note": None}})
+    monkeypatch.setattr(
+        store,
+        "_wiki_statuses",
+        {profile.session_id: {"status": "clear", "url": None, "note": None}},
+    )
 
-    result = backend_main.generate_draft(backend_main.DraftRequest(profile_name=profile.name))
+    result = backend_main.generate_draft(
+        backend_main.DraftRequest(profile_name=profile.name)
+    )
     saved = json.loads((tmp_path / f"{profile.session_id}.json").read_text())
 
     assert result["audit"]["ready"] is True
@@ -583,12 +662,16 @@ def test_add_sourced_claim_requires_existing_source(tmp_path, monkeypatch):
         )
 
 
-def test_skip_suggestion_persists_url_so_discovery_stops_offering_it(tmp_path, monkeypatch):
+def test_skip_suggestion_persists_url_so_discovery_stops_offering_it(
+    tmp_path, monkeypatch
+):
     profile = _ready_profile()
     profile.session_id = "py-example-person-test3"
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store, "_wiki_statuses", {profile.session_id: {"status": "clear"}}
+    )
     url = "https://skipped.test/report"
 
     result = backend_main.skip_suggestion({"profile_name": profile.name, "url": url})
@@ -629,7 +712,14 @@ def test_resume_never_repopulates_claims_from_stub_provider(tmp_path, monkeypatc
     monkeypatch.setattr(store, "_sessions", {})
     monkeypatch.setattr(store, "_wiki_statuses", {})
     monkeypatch.setattr("engine.llm.has_real_llm", lambda: False)
-    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: type("S", (), {"model_dump": lambda self: {"status": "clear", "url": None, "note": None}})())
+    monkeypatch.setattr(
+        "adapters.wiki.wiki_check.check_existing_page",
+        lambda title: type(
+            "S",
+            (),
+            {"model_dump": lambda self: {"status": "clear", "url": None, "note": None}},
+        )(),
+    )
 
     result = backend_main.resume_session({"file": "Example_Person.json"})
 
@@ -703,10 +793,10 @@ _SAMPLE_DRAFT = (
     "'''Example Person''' is a scientist<ref name=\"src-one\">{{cite web|url=https://news.example.test/report|"
     "title=Report on Example Person|website=Example News|date=2024}}</ref>.\n"
     "==Research==\n"
-    "* Led a study<ref name=\"src-two\">{{cite web|url=https://paywalled.example.test/paper|"
+    '* Led a study<ref name="src-two">{{cite web|url=https://paywalled.example.test/paper|'
     "archive-url=https://web.archive.org/web/2024/https://paywalled.example.test/paper|"
     "title=Paywalled|website=Journal}}</ref>.\n"
-    "* Repeated cite<ref name=\"src-one\" />.\n"
+    '* Repeated cite<ref name="src-one" />.\n'
     "* Raw link [https://raw.example.test/bio Read the bio].\n"
     "==References==\n"
     "{{reflist}}\n"
@@ -728,14 +818,17 @@ def test_extract_draft_links_prefers_archive_and_deduplicates():
 
 
 def test_extract_draft_links_handles_escaped_pipe_in_title():
-    wikitext = ('Led a study<ref name="a">{{cite web|url=https://news.example.test/x|'
-                'title=Title {{!}} with pipe|website=Example News}}</ref>.')
+    wikitext = (
+        'Led a study<ref name="a">{{cite web|url=https://news.example.test/x|'
+        "title=Title {{!}} with pipe|website=Example News}}</ref>."
+    )
     links = extract_draft_links(wikitext)
     assert links[0].label == "Title | with pipe"
 
 
 def test_citation_keeps_original_url_and_adds_archive_fields():
     from engine.models import Source
+
     source = Source(
         url="https://news.example.test/report",
         title="Report on Example Person",
@@ -755,7 +848,11 @@ def test_cv_blueprint_never_cited():
     from engine.models import Source
     from engine.provenance import classify_source_provenance
 
-    cv = classify_source_provenance(Source(url="file:///home/user/PSYadav-CV_2025.pdf", publisher="Local", title="CV"))
+    cv = classify_source_provenance(
+        Source(
+            url="file:///home/user/PSYadav-CV_2025.pdf", publisher="Local", title="CV"
+        )
+    )
     assert cv.provenance_category == "cv_blueprint"
     assert not cv.is_independent
     assert _citation(cv, set()) == ""
@@ -764,21 +861,26 @@ def test_cv_blueprint_never_cited():
 def test_title_clean_strips_truncation_before_publisher_suffix():
     from adapters.wiki.draft import _title_clean
 
-    assert _title_clean("Telomerase Structure and Function, Activity and Its... | IntechOpen") == (
-        "Telomerase Structure and Function, Activity and Its"
+    assert _title_clean(
+        "Telomerase Structure and Function, Activity and Its... | IntechOpen"
+    ) == ("Telomerase Structure and Function, Activity and Its")
+    assert (
+        _title_clean("How Buffaloes Clone | Amar Ujala")
+        == "How Buffaloes Clone | Amar Ujala"
     )
-    assert _title_clean("How Buffaloes Clone | Amar Ujala") == "How Buffaloes Clone | Amar Ujala"
     assert _title_clean("A plain title.") == "A plain title"
 
 
 def test_check_draft_links_classifies_http_statuses(monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", False)
 
     class FakeResp:
         def __init__(self, code, url):
             self.status_code = code
             self.url = url
+
         def close(self):
             pass
 
@@ -794,25 +896,38 @@ def test_check_draft_links_classifies_http_statuses(monkeypatch):
         return FakeResp(200, url)
 
     monkeypatch.setattr("requests.get", fake_get)
-    results = check_draft_links([
-        "https://news.example.test/report",
-        "https://dead.example.test/x",
-        "https://blocked.example.test/y",
-        "https://web.archive.org/web/20240101000000/https://news.example.test/report",
-        "https://web.archive.org/web/498test/https://news.example.test/x",
-        "https://doi.org/10.1089/cell.2023.0003",
-    ])
+    results = check_draft_links(
+        [
+            "https://news.example.test/report",
+            "https://dead.example.test/x",
+            "https://blocked.example.test/y",
+            "https://web.archive.org/web/20240101000000/https://news.example.test/report",
+            "https://web.archive.org/web/498test/https://news.example.test/x",
+            "https://doi.org/10.1089/cell.2023.0003",
+        ]
+    )
 
     assert results["https://news.example.test/report"]["status"] == "ok"
     assert results["https://dead.example.test/x"]["status"] == "dead"
     assert results["https://blocked.example.test/y"]["status"] == "blocked"
-    assert results["https://web.archive.org/web/20240101000000/https://news.example.test/report"]["status"] == "ok"
-    assert results["https://web.archive.org/web/498test/https://news.example.test/x"]["status"] == "ok"
+    assert (
+        results[
+            "https://web.archive.org/web/20240101000000/https://news.example.test/report"
+        ]["status"]
+        == "ok"
+    )
+    assert (
+        results["https://web.archive.org/web/498test/https://news.example.test/x"][
+            "status"
+        ]
+        == "ok"
+    )
     assert results["https://doi.org/10.1089/cell.2023.0003"]["status"] == "ok"
 
 
 def test_check_draft_links_uses_browser_for_uncertain_links(monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", True)
     captured = {}
 
@@ -820,6 +935,7 @@ def test_check_draft_links_uses_browser_for_uncertain_links(monkeypatch):
         def __init__(self, code, url):
             self.status_code = code
             self.url = url
+
         def close(self):
             pass
 
@@ -833,14 +949,19 @@ def test_check_draft_links_uses_browser_for_uncertain_links(monkeypatch):
     def fake_dispatch(action, **kwargs):
         captured["action"] = action
         captured["urls"] = kwargs["urls"]
-        return {u: {"status": "ok", "status_code": 200, "final_url": u} for u in kwargs["urls"]}
+        return {
+            u: {"status": "ok", "status_code": 200, "final_url": u}
+            for u in kwargs["urls"]
+        }
 
     monkeypatch.setattr(bs, "_dispatch", fake_dispatch)
 
-    result = check_draft_links([
-        "https://news.example.test/report",
-        "https://blocked.example.test/y",
-    ])
+    result = check_draft_links(
+        [
+            "https://news.example.test/report",
+            "https://blocked.example.test/y",
+        ]
+    )
 
     assert result["https://news.example.test/report"]["status"] == "ok"
     assert result["https://blocked.example.test/y"]["status"] == "ok"
@@ -850,6 +971,7 @@ def test_check_draft_links_uses_browser_for_uncertain_links(monkeypatch):
 
 def test_check_draft_links_keeps_requests_verdict_when_browser_errors(monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", True)
 
     def fake_dispatch(action, **kwargs):
@@ -861,6 +983,7 @@ def test_check_draft_links_keeps_requests_verdict_when_browser_errors(monkeypatc
         def __init__(self, code, url):
             self.status_code = code
             self.url = url
+
         def close(self):
             pass
 
@@ -872,6 +995,7 @@ def test_check_draft_links_keeps_requests_verdict_when_browser_errors(monkeypatc
 
 def test_check_draft_links_skips_browser_when_all_ok(monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", True)
     dispatched = []
 
@@ -885,11 +1009,14 @@ def test_check_draft_links_skips_browser_when_all_ok(monkeypatch):
         def __init__(self, code, url):
             self.status_code = code
             self.url = url
+
         def close(self):
             pass
 
     monkeypatch.setattr("requests.get", lambda *a, **kw: FakeResp(200, a[0]))
-    result = check_draft_links(["https://news.example.test/a", "https://news.example.test/b"])
+    result = check_draft_links(
+        ["https://news.example.test/a", "https://news.example.test/b"]
+    )
 
     assert dispatched == []
     assert all(v["status"] == "ok" for v in result.values())
@@ -897,16 +1024,20 @@ def test_check_draft_links_skips_browser_when_all_ok(monkeypatch):
 
 def test_fetch_blocked_walks_blocked_sources_through_browser(tmp_path, monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", True)
 
     profile = _ready_profile()
-    profile.sources.append(Source(
-        url="https://blocked.example.test/paper",
-        title="Paper", publisher="Example",
-        reliability=SourceReliability.primary,
-        snippet="",
-        liveness="blocked",
-    ))
+    profile.sources.append(
+        Source(
+            url="https://blocked.example.test/paper",
+            title="Paper",
+            publisher="Example",
+            reliability=SourceReliability.primary,
+            snippet="",
+            liveness="blocked",
+        )
+    )
     monkeypatch.setattr(store, "_sessions", {profile.name: profile})
 
     navigated = []
@@ -916,8 +1047,10 @@ def test_fetch_blocked_walks_blocked_sources_through_browser(tmp_path, monkeypat
             navigated.append(kwargs["url"])
             return {"url": kwargs["url"], "title": "Paper"}
         if action == "content":
-            return {"url": "https://blocked.example.test/paper",
-                    "text": "Full rendered text about buffalo cloning at CIRB Hisar." * 4}
+            return {
+                "url": "https://blocked.example.test/paper",
+                "text": "Full rendered text about buffalo cloning at CIRB Hisar." * 4,
+            }
         raise AssertionError(f"unexpected action {action}")
 
     monkeypatch.setattr(bs, "_dispatch", fake_dispatch)
@@ -935,12 +1068,14 @@ def test_fetch_blocked_walks_blocked_sources_through_browser(tmp_path, monkeypat
 
 def test_fetch_blocked_stops_at_bot_wall(tmp_path, monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", True)
 
     profile = _ready_profile()
     blocked = Source(
         url="https://blocked.example.test/wall",
-        title="Wall", publisher="Example",
+        title="Wall",
+        publisher="Example",
         reliability=SourceReliability.primary,
         snippet="",
         liveness="blocked",
@@ -952,8 +1087,10 @@ def test_fetch_blocked_stops_at_bot_wall(tmp_path, monkeypatch):
         if action == "navigate":
             return {"url": kwargs["url"], "title": "Wall"}
         if action == "content":
-            return {"url": "https://blocked.example.test/wall",
-                    "text": "Please verify you are human. Access denied by Cloudflare."}
+            return {
+                "url": "https://blocked.example.test/wall",
+                "text": "Please verify you are human. Access denied by Cloudflare.",
+            }
         raise AssertionError(f"unexpected action {action}")
 
     monkeypatch.setattr(bs, "_dispatch", fake_dispatch)
@@ -976,6 +1113,7 @@ def test_draft_links_endpoint_extracts_and_checks(tmp_path, monkeypatch):
         def __init__(self):
             self.status_code = 200
             self.url = "https://news.example.test/report"
+
         def close(self):
             pass
 
@@ -990,6 +1128,7 @@ def test_draft_links_endpoint_extracts_and_checks(tmp_path, monkeypatch):
 
 def test_draft_verify_runs_checker_and_verifier(tmp_path, monkeypatch):
     import browser_server as bs
+
     monkeypatch.setattr(bs, "_running", False)
     profile = _ready_profile()
     profile.wikitext_en = _SAMPLE_DRAFT
@@ -1001,6 +1140,7 @@ def test_draft_verify_runs_checker_and_verifier(tmp_path, monkeypatch):
         def __init__(self):
             self.status_code = 200
             self.url = "https://news.example.test/report"
+
         def close(self):
             pass
 
@@ -1031,6 +1171,7 @@ def test_draft_preview_endpoint_returns_parsoid_html(tmp_path, monkeypatch):
 
     class FakeResp:
         text = '<div class="mw-parser-output"><p>Example</p></div>'
+
         def raise_for_status(self):
             pass
 
@@ -1079,7 +1220,7 @@ def test_qa_passes_well_formed_draft():
 
     profile = _qa_profile()
     cites = "\n".join(
-        f"* Sentence number {i} of the article body<ref name=\"s{i}\">{{{{cite web|url=https://news.example.test/r{i}|"
+        f'* Sentence number {i} of the article body<ref name="s{i}">{{{{cite web|url=https://news.example.test/r{i}|'
         f"title=Report number {i}|website=Example News|date={i} May 2024}}}}</ref>."
         for i in range(10)
     )
@@ -1087,8 +1228,8 @@ def test_qa_passes_well_formed_draft():
         "{{Draft article}}\n{{Short description|Indian scientist}}\n"
         "{{Infobox scientist|name = Example Person|field = Animal biotechnology}}\n"
         "'''Example Person''' is an Indian scientist who studies animal biotechnology<ref name=\"s1\" />. "
-        "They led a cloning study at Example Institute<ref name=\"s2\" /> and reported a national milestone<ref "
-        "name=\"s3\" />. The work was widely covered by the Indian press<ref name=\"s4\" />.\n"
+        'They led a cloning study at Example Institute<ref name="s2" /> and reported a national milestone<ref '
+        'name="s3" />. The work was widely covered by the Indian press<ref name="s4" />.\n'
         f"==Research==\n{cites}\n==References==\n{{{{reflist}}}}\n\n"
         "{{Authority control}}\n{{DEFAULTSORT:Person, Example}}\n[[Category:Living people]]\n"
     )
@@ -1133,8 +1274,8 @@ def test_qa_flags_attribution_chains():
         "{{Short description|Indian scientist}}\n"
         "{{Infobox scientist|name = Example Person|field = Animal biotechnology}}\n"
         "'''Example Person''' is a scientist. Moneycontrol reported that the team cloned a bull"
-        "<ref name=\"s1\">{{cite web|url=https://news.example.test/r1|title=Report|website=Example News|date=1 May 2024}}</ref>."
-        " According to The Times, the work was a milestone<ref name=\"s2\">{{cite web|url=https://news.example.test/r2|title=More|website=Example News|date=2 May 2024}}</ref>.\n"
+        '<ref name="s1">{{cite web|url=https://news.example.test/r1|title=Report|website=Example News|date=1 May 2024}}</ref>.'
+        ' According to The Times, the work was a milestone<ref name="s2">{{cite web|url=https://news.example.test/r2|title=More|website=Example News|date=2 May 2024}}</ref>.\n'
         "==References==\n{{reflist}}\n"
     )
     report = qa_draft(profile)
@@ -1187,7 +1328,9 @@ def test_qa_flags_duplicate_approved_claims():
         ),
     ]
     report = qa_draft(profile)
-    finding = next((f for f in report.findings if f.id == "duplicate_approved_claim"), None)
+    finding = next(
+        (f for f in report.findings if f.id == "duplicate_approved_claim"), None
+    )
     assert finding is not None
     assert finding.severity == "warning"
 
@@ -1216,7 +1359,9 @@ def test_qa_flags_institutional_achievement_sources():
         )
     ]
     report = qa_draft(profile)
-    finding = next((f for f in report.findings if f.id == "institutional_achievement_source"), None)
+    finding = next(
+        (f for f in report.findings if f.id == "institutional_achievement_source"), None
+    )
     assert finding is not None
     assert finding.severity == "warning"
     assert "Institute Internal" in finding.message
@@ -1253,5 +1398,7 @@ def test_qa_flags_ambiguous_wikilinks():
     report = qa_draft(profile)
     ambig_findings = [f for f in report.findings if f.id == "ambiguous_wikilink"]
     assert len(ambig_findings) >= 1
-    assert any("Central Institute for Research on Buffaloes" in f.message for f in ambig_findings)
-
+    assert any(
+        "Central Institute for Research on Buffaloes" in f.message
+        for f in ambig_findings
+    )

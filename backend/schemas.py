@@ -1,4 +1,5 @@
 """Pydantic request/response models for the personprobe API."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
@@ -31,6 +32,7 @@ class AddSourceRequest(BaseModel):
 
 class AddNamesakeRequest(BaseModel):
     """Session-scoped same-name-different-person signature (engine input)."""
+
     profile_name: str
     display_name: str
     signature_terms: list[str] = Field(default_factory=list)
@@ -45,9 +47,9 @@ class DeleteNamesakeRequest(BaseModel):
     namesake_id: str
 
 
-
 class AssessSourceRequest(BaseModel):
     """Human editorial assessment retained with a research source."""
+
     profile_name: str
     url: str
     coverage_depth: Literal["unassessed", "passing_mention", "significant"]
@@ -58,18 +60,24 @@ class AssessSourceRequest(BaseModel):
 
 class VerifySourceLevelRequest(BaseModel):
     """Multi-level source verification request (L1 Liveness, L2 Identity, L3 Provenance)."""
+
     profile_name: str
     url: str
     level: Literal["liveness", "identity", "provenance", "all"]
     actor: Literal["human", "agent", "system"] = "human"
-    status: Optional[str] = None  # e.g., "alive", "confirmed", "wrong_person", "suspect"
+    status: Optional[str] = (
+        None  # e.g., "alive", "confirmed", "wrong_person", "suspect"
+    )
     note: Optional[str] = None
-    coverage_depth: Optional[Literal["unassessed", "passing_mention", "significant"]] = None
+    coverage_depth: Optional[
+        Literal["unassessed", "passing_mention", "significant"]
+    ] = None
     editorial_origin: Optional[str] = None
 
 
 class AddDocumentFact(BaseModel):
     """A fact the user typed from a document — has no web source, timeline only."""
+
     profile_name: str
     field: str
     text: str
@@ -77,6 +85,7 @@ class AddDocumentFact(BaseModel):
 
 class AddSourcedClaimRequest(BaseModel):
     """A fact the user read directly in a source and wants bound to it."""
+
     profile_name: str
     url: str
     field: str
@@ -87,7 +96,7 @@ class AddSourcedClaimRequest(BaseModel):
 
 class VerifyClaimRequest(BaseModel):
     claim_index: int
-    action: str   # confirm | edit | skip | approve_draft | remove_draft
+    action: str  # confirm | edit | skip | approve_draft | remove_draft
     edited_text: Optional[str] = None  # only for action=edit
     actor: Optional[Literal["human", "agent", "system"]] = "human"
     settled_quote: Optional[str] = None  # verbatim quote/snippet from source
@@ -98,11 +107,27 @@ class BatchVerifyClaimsRequest(BaseModel):
     actor: Optional[Literal["human", "agent", "system"]] = "human"
 
 
+class SetClaimQuoteItem(BaseModel):
+    claim_index: int
+    source_url: Optional[str] = None
+    quote: str = ""
+    score: Optional[float] = None
+
+
+class SetClaimQuoteRequest(BaseModel):
+    """Provisional evidence candidates for already approved claims."""
+
+    profile_name: str
+    items: list[SetClaimQuoteItem] = Field(default_factory=list)
+    actor: Literal["human", "agent", "system"] = "agent"
+
+
 class AddSourcePaste(BaseModel):
     """User pasted text from a blocked page, screenshot, or PDF."""
+
     profile_name: str
-    url: str           # the real URL (for citation) — even if we couldn't fetch it
-    pasted_text: str   # what the user copied from the page
+    url: str  # the real URL (for citation) — even if we couldn't fetch it
+    pasted_text: str  # what the user copied from the page
 
 
 class CrawlRequest(BaseModel):
@@ -129,7 +154,7 @@ class FindIdsRequest(BaseModel):
 
 class RefreshPapersRequest(BaseModel):
     profile_name: str
-    id_type: str   # orcid | semantic_scholar
+    id_type: str  # orcid | semantic_scholar
     id_value: str
     confirm: bool = False  # if True, mark as confirmed before refreshing
 
@@ -162,7 +187,7 @@ class AddAuxiliaryLeadRequest(BaseModel):
 class UpdateAuxiliaryLeadRequest(BaseModel):
     profile_name: str
     lead_id: str
-    status: Optional[str] = None       # lead | inspected | corroborated | dead_end
+    status: Optional[str] = None  # lead | inspected | corroborated | dead_end
     lead_notes: Optional[str] = None
     source_snippet: Optional[str] = None
     url: Optional[str] = None
@@ -194,7 +219,9 @@ class AddForensicInquiryRequest(BaseModel):
 
 class UpdateForensicInquiryRequest(BaseModel):
     profile_name: str
-    inquiry_id: Optional[str] = None       # open | probed | confirmed | unarchived_offline | dead_end
+    inquiry_id: Optional[str] = (
+        None  # open | probed | confirmed | unarchived_offline | dead_end
+    )
     status: Optional[str] = None
     findings_summary: Optional[str] = None
     corroborating_links: Optional[list[str]] = None
@@ -207,10 +234,12 @@ class UpdateForensicInquiryRequest(BaseModel):
 class LogInquiryFailureRequest(BaseModel):
     profile_name: str
     inquiry_id: str
-    failure_mode: str          # pre_digitization_cutoff | bot_blocked | captcha_gated | id_gated | not_found | domain_down | other
-    failure_reason: str        # Explanation of what failed
-    learned_lesson: str        # Concrete lesson / workaround for future queries
-    associated_repository_id: Optional[str] = None # Update global repository memory in atlas
+    failure_mode: str  # pre_digitization_cutoff | bot_blocked | captcha_gated | id_gated | not_found | domain_down | other
+    failure_reason: str  # Explanation of what failed
+    learned_lesson: str  # Concrete lesson / workaround for future queries
+    associated_repository_id: Optional[str] = (
+        None  # Update global repository memory in atlas
+    )
     actor: Optional[Literal["human", "agent", "system"]] = "human"
 
 
@@ -218,4 +247,3 @@ class ProbeForensicInquiryRequest(BaseModel):
     profile_name: str
     inquiry_id: Optional[str] = None
     actor: Optional[Literal["human", "agent", "system"]] = "human"
-

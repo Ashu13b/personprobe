@@ -38,7 +38,7 @@ QUERIES = [
     '"Prem Singh Yadav" "Reproductive Biotechnology"',
     '"Prem Singh Yadav" "stem cells" buffalo',
     '"Prem Singh Yadav" NAAS Hisar',
-    '"Prem Singh Yadav" SAPI Hisar'
+    '"Prem Singh Yadav" SAPI Hisar',
 ]
 
 NAME_PATTERNS = [
@@ -48,31 +48,52 @@ NAME_PATTERNS = [
     r"\bdr\.?\s*prem\s+singh\b",
     r"\bडॉ\.?\s*प्रेम\s+सिंह\s+यादव\b",
     r"\bप्रेम\s+सिंह\s+यादव\b",
-    r"\bपी\.?\s*एस\.?\s*यादव\b"
+    r"\bपी\.?\s*एस\.?\s*यादव\b",
 ]
 
 RELEVANCE_PATTERNS = [
-    r"\bbuffalo\b", r"\bclon", r"\bcirb\b", r"\bembryo", r"\bsemen\b",
-    r"\breproduct", r"\bphysiol", r"\bstem\s+cell", r"\bicar\b", r"\bmurrah\b",
-    r"\bhisar\b", r"\bhau\b", r"\bgaurav\b", r"\bभैंस\b", r"\bक्लोन\b", r"\bसीआईआरबी\b"
+    r"\bbuffalo\b",
+    r"\bclon",
+    r"\bcirb\b",
+    r"\bembryo",
+    r"\bsemen\b",
+    r"\breproduct",
+    r"\bphysiol",
+    r"\bstem\s+cell",
+    r"\bicar\b",
+    r"\bmurrah\b",
+    r"\bhisar\b",
+    r"\bhau\b",
+    r"\bgaurav\b",
+    r"\bभैंस\b",
+    r"\bक्लोन\b",
+    r"\bसीआईआरबी\b",
 ]
+
 
 def load_existing_urls() -> set[str]:
     if not SESSION_FILE.exists():
         return set()
     try:
         data = json.loads(SESSION_FILE.read_text())
-        return {canonical_url(s.get("url")) for s in data.get("profile", {}).get("sources", []) if s.get("url")}
+        return {
+            canonical_url(s.get("url"))
+            for s in data.get("profile", {}).get("sources", [])
+            if s.get("url")
+        }
     except Exception:
         return set()
+
 
 def name_matches(text: str) -> bool:
     t = text.lower()
     return any(re.search(pat, t) for pat in NAME_PATTERNS)
 
+
 def relevance_matches(text: str) -> bool:
     t = text.lower()
     return any(re.search(pat, t) for pat in RELEVANCE_PATTERNS)
+
 
 def main():
     client = MobileBrowserClient()
@@ -102,7 +123,9 @@ def main():
                 text = l.get("text", "").strip()
                 if not href.startswith("http"):
                     continue
-                if any(x in href for x in ["google.com", "gstatic.com", "google.co.in"]):
+                if any(
+                    x in href for x in ["google.com", "gstatic.com", "google.co.in"]
+                ):
                     continue
 
                 can = canonical_url(href)
@@ -111,7 +134,7 @@ def main():
                         "raw_url": href,
                         "canonical": can,
                         "search_title": text,
-                        "query": q
+                        "query": q,
                     }
 
             print(f"  Unique candidates collected so far: {len(harvested_urls)}")
@@ -120,7 +143,9 @@ def main():
             print(f"  [EXCEPTION] {e}")
             time.sleep(2)
 
-    print(f"\n[*] Total candidates collected for page inspection: {len(harvested_urls)}")
+    print(
+        f"\n[*] Total candidates collected for page inspection: {len(harvested_urls)}"
+    )
 
     # Step 2: Visit each candidate page to verify his name actually appears in the text
     for idx, (can, item) in enumerate(harvested_urls.items(), 1):
@@ -128,10 +153,19 @@ def main():
         print(f"[{idx}/{len(harvested_urls)}] Verifying {target_url} ...")
         try:
             # Skip obvious binary/large files or social logins
-            if any(bad in target_url.lower() for bad in [
-                "login", "signin", "signup", "facebook.com", "instagram.com",
-                "twitter.com", "x.com", "linkedin.com/pub/dir"
-            ]):
+            if any(
+                bad in target_url.lower()
+                for bad in [
+                    "login",
+                    "signin",
+                    "signup",
+                    "facebook.com",
+                    "instagram.com",
+                    "twitter.com",
+                    "x.com",
+                    "linkedin.com/pub/dir",
+                ]
+            ):
                 continue
 
             res = client.navigate(target_url, wait_seconds=5)
@@ -151,16 +185,20 @@ def main():
                 # Find the sentence/snippet where his name appears
                 lines = [l.strip() for l in page_text.split("\n") if l.strip()]
                 name_snippets = [l for l in lines if name_matches(l)]
-                snippet = " ... ".join(name_snippets[:3]) if name_snippets else page_title
+                snippet = (
+                    " ... ".join(name_snippets[:3]) if name_snippets else page_title
+                )
 
                 print(f"  [VERIFIED] Name found! Snippet: {snippet[:120]}...")
-                verified_candidates.append({
-                    "url": target_url,
-                    "canonical": can,
-                    "title": page_title,
-                    "snippet": snippet[:400],
-                    "query": item["query"]
-                })
+                verified_candidates.append(
+                    {
+                        "url": target_url,
+                        "canonical": can,
+                        "title": page_title,
+                        "snippet": snippet[:400],
+                        "query": item["query"],
+                    }
+                )
             else:
                 if not has_name:
                     print("  [REJECT] Name NOT found on page.")
@@ -172,9 +210,12 @@ def main():
             print(f"  [ERROR] {e}")
             time.sleep(2)
 
-    print(f"\n[DONE] Finished strict verification. Total confirmed sources with his name: {len(verified_candidates)}")
+    print(
+        f"\n[DONE] Finished strict verification. Total confirmed sources with his name: {len(verified_candidates)}"
+    )
     with open(OUTPUT_FILE, "w") as f:
         json.dump(verified_candidates, f, indent=2)
+
 
 if __name__ == "__main__":
     main()

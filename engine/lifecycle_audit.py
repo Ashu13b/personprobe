@@ -6,6 +6,7 @@ Stage 2: Source Provenance & Notability (independence, editorial origins, depth,
 Stage 3: Claim Quality & Saturation (trust score distribution, corroboration, diminishing returns)
 Stage 4: Draft Readiness & AfC Compliance (identity lead evidence, citation hygiene, draft readiness)
 """
+
 from __future__ import annotations
 
 from collections import Counter
@@ -52,24 +53,52 @@ def audit_discovery_stage(profile: PersonProfile) -> StageAuditItem:
     total_discarded = len(discarded_list)
 
     # Liveness breakdown
-    liveness_counts = Counter(getattr(s, "liveness", "unknown") for s in profile.sources)
+    liveness_counts = Counter(
+        getattr(s, "liveness", "unknown") for s in profile.sources
+    )
+    workflow_stages = Counter(
+        getattr(s, "workflow_stage", "discovered") for s in profile.sources
+    )
     alive_count = liveness_counts.get("alive", 0)
-    dead_archived = sum(1 for s in profile.sources if getattr(s, "liveness", "") == "dead" and getattr(s, "archive_url", None))
-    dead_unarchived = sum(1 for s in profile.sources if getattr(s, "liveness", "") == "dead" and not getattr(s, "archive_url", None))
+    discovered_count = workflow_stages.get("discovered", 0)
+    dead_archived = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "liveness", "") == "dead" and getattr(s, "archive_url", None)
+    )
+    dead_unarchived = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "liveness", "") == "dead" and not getattr(s, "archive_url", None)
+    )
     blocked_count = liveness_counts.get("blocked", 0)
 
     # Discarded reasons breakdown
-    discarded_reasons = Counter(getattr(d, "reason", "no_name_match") for d in discarded_list)
+    discarded_reasons = Counter(
+        getattr(d, "reason", "no_name_match") for d in discarded_list
+    )
 
     recommendations: list[str] = []
     if dead_unarchived > 0:
-        recommendations.append(f"{dead_unarchived} source(s) are dead with no Wayback archive. Archive or replace them.")
+        recommendations.append(
+            f"{dead_unarchived} source(s) are dead with no Wayback archive. Archive or replace them."
+        )
     if blocked_count > 0:
-        recommendations.append(f"{blocked_count} source(s) blocked by bot mitigation. Use the mobile scrap browser to unblock.")
+        recommendations.append(
+            f"{blocked_count} source(s) blocked by bot mitigation. Use the mobile scrap browser to unblock."
+        )
+    if discovered_count > 0:
+        recommendations.append(
+            f"{discovered_count} source(s) are only discovered. Run liveness, identity, and provenance gates in order."
+        )
     if discarded_reasons.get("homonym_risk", 0) > 0:
-        recommendations.append(f"{discarded_reasons['homonym_risk']} link(s) flagged as homonym risk. Inspect in Discarded tab.")
+        recommendations.append(
+            f"{discarded_reasons['homonym_risk']} link(s) flagged as homonym risk. Inspect in Discarded tab."
+        )
     if discarded_reasons.get("no_name_match", 0) > 0:
-        recommendations.append(f"{discarded_reasons['no_name_match']} link(s) discarded due to name match. Audit for script/name variants.")
+        recommendations.append(
+            f"{discarded_reasons['no_name_match']} link(s) discarded due to name match. Audit for script/name variants."
+        )
 
     # Status & Score
     if total_sources == 0:
@@ -79,7 +108,15 @@ def audit_discovery_stage(profile: PersonProfile) -> StageAuditItem:
     elif dead_unarchived > 0:
         status = "attention_needed"
         score = max(0.4, min(0.9, alive_count / max(1, total_sources)))
-        summary = f"{total_sources} active sources; {dead_unarchived} dead without archive."
+        summary = (
+            f"{total_sources} active sources; {dead_unarchived} dead without archive."
+        )
+    elif discovered_count > 0:
+        status = "in_progress"
+        score = max(
+            0.0, min(0.9, (total_sources - discovered_count) / max(1, total_sources))
+        )
+        summary = f"{discovered_count} discovered; {total_sources - discovered_count} sources have advanced beyond discovery."
     else:
         status = "completed" if total_sources >= 5 else "in_progress"
         score = min(1.0, total_sources / 10.0)
@@ -98,6 +135,8 @@ def audit_discovery_stage(profile: PersonProfile) -> StageAuditItem:
             "dead_archived": dead_archived,
             "dead_unarchived": dead_unarchived,
             "blocked_count": blocked_count,
+            "discovered_count": discovered_count,
+            "workflow_stages": dict(workflow_stages),
             "discarded_reasons": dict(discarded_reasons),
         },
         recommendations=recommendations,
@@ -111,7 +150,12 @@ def audit_provenance_stage(profile: PersonProfile) -> StageAuditItem:
     verified_count = len(verified_sources)
 
     # Independence and categories
-    independent_sources = [s for s in verified_sources if getattr(s, "is_independent", True) and s.reliability.value == "reliable_secondary"]
+    independent_sources = [
+        s
+        for s in verified_sources
+        if getattr(s, "is_independent", True)
+        and s.reliability.value == "reliable_secondary"
+    ]
     independent_hosts = {_host(s.url) for s in independent_sources}
     significant_origins = {
         (s.editorial_origin or _host(s.url)).strip().lower()
@@ -120,18 +164,28 @@ def audit_provenance_stage(profile: PersonProfile) -> StageAuditItem:
     }
     significant_origins.discard("")
 
-    categories = Counter(getattr(s, "provenance_category", "general_web") for s in profile.sources)
+    categories = Counter(
+        getattr(s, "provenance_category", "general_web") for s in profile.sources
+    )
     missing_slots = profile.missing_slots or []
 
     recommendations: list[str] = []
     if verified_count == 0 and total_sources > 0:
-        recommendations.append("Verify active sources to confirm they describe the subject.")
+        recommendations.append(
+            "Verify active sources to confirm they describe the subject."
+        )
     if len(independent_hosts) < 2:
-        recommendations.append(f"AfC requires at least 2 independent secondary origins (currently {len(independent_hosts)}).")
+        recommendations.append(
+            f"AfC requires at least 2 independent secondary origins (currently {len(independent_hosts)})."
+        )
     if len(significant_origins) < 2:
-        recommendations.append(f"Only {len(significant_origins)} origin(s) assessed as significant coverage. Review source depth.")
+        recommendations.append(
+            f"Only {len(significant_origins)} origin(s) assessed as significant coverage. Review source depth."
+        )
     if missing_slots:
-        recommendations.append(f"Missing key biographical slots: {', '.join(missing_slots[:4])}.")
+        recommendations.append(
+            f"Missing key biographical slots: {', '.join(missing_slots[:4])}."
+        )
 
     if verified_count == 0:
         status = "blocked" if total_sources > 0 else "in_progress"
@@ -167,10 +221,13 @@ def audit_provenance_stage(profile: PersonProfile) -> StageAuditItem:
 def audit_claims_stage(profile: PersonProfile) -> StageAuditItem:
     """Audit Stage 3: Claim extraction, verification, corroboration, and saturation."""
     total_claims = len(profile.claims)
-    unverified_claims = [c for c in profile.claims if c.verification.value == "unverified"]
+    unverified_claims = [
+        c for c in profile.claims if c.verification.value == "unverified"
+    ]
     draft_approved_claims = [c for c in profile.claims if c.draft_approved]
     research_only_claims = [
-        c for c in profile.claims
+        c
+        for c in profile.claims
         if not c.draft_approved and c.verification.value in ("confirmed", "edited")
     ]
 
@@ -180,11 +237,17 @@ def audit_claims_stage(profile: PersonProfile) -> StageAuditItem:
 
     recommendations: list[str] = []
     if len(unverified_claims) > 0:
-        recommendations.append(f"{len(unverified_claims)} claims pending verification. Review or dismiss them.")
+        recommendations.append(
+            f"{len(unverified_claims)} claims pending verification. Review or dismiss them."
+        )
     if total_claims > 0 and len(draft_approved_claims) == 0:
-        recommendations.append("No claims selected for draft yet. Approve key verified claims.")
+        recommendations.append(
+            "No claims selected for draft yet. Approve key verified claims."
+        )
     if sat_level == "saturated":
-        recommendations.append("Research is saturated; fact repetition is high. Proceed to drafting.")
+        recommendations.append(
+            "Research is saturated; fact repetition is high. Proceed to drafting."
+        )
 
     if total_claims == 0:
         status = "in_progress"
@@ -223,7 +286,10 @@ def audit_claims_stage(profile: PersonProfile) -> StageAuditItem:
 
 def audit_draft_stage(profile: PersonProfile) -> StageAuditItem:
     """Audit Stage 4: AfC compliance, wikitext generation, and blocker analysis."""
-    from adapters.wiki.draft import audit_profile  # late import: engine must not depend on draft adapters at module scope
+    from adapters.wiki.draft import (
+        audit_profile,
+    )  # late import: engine must not depend on draft adapters at module scope
+
     draft_audit = audit_profile(profile)
     ready = draft_audit.ready
     blockers = [b.model_dump() for b in draft_audit.blockers]
@@ -279,7 +345,7 @@ def audit_full_lifecycle(profile: PersonProfile) -> FullLifecycleAudit:
     avg_score = sum(s.score for s in stages) / len(stages)
 
     # Determine current lifecycle stage
-    if s1.status != "completed" and s1.score < 0.6:
+    if s1.status != "completed":
         current_stage = "discovery"
     elif s2.status != "completed":
         current_stage = "provenance"
@@ -290,7 +356,7 @@ def audit_full_lifecycle(profile: PersonProfile) -> FullLifecycleAudit:
 
     # Overall health
     has_blockers = any(s.status == "blocked" for s in stages)
-    has_attention = any(s.status == "attention_needed" for s in stages)
+    has_attention = any(s.status in {"attention_needed", "in_progress"} for s in stages)
     if has_blockers:
         overall_health = "blocked"
     elif has_attention:
@@ -299,12 +365,21 @@ def audit_full_lifecycle(profile: PersonProfile) -> FullLifecycleAudit:
         overall_health = "healthy"
 
     # Determine next best action
-    if s1.metrics.get("dead_unarchived", 0) > 0:
-        next_action = f"Archive or replace {s1.metrics['dead_unarchived']} dead source(s)."
-    elif s2.metrics.get("unverified_count", 0) > 0 and s2.metrics.get("verified_count", 0) == 0:
+    if s1.metrics.get("discovered_count", 0) > 0:
+        next_action = f"Run liveness verification for {s1.metrics['discovered_count']} discovered source(s)."
+    elif s1.metrics.get("dead_unarchived", 0) > 0:
+        next_action = (
+            f"Archive or replace {s1.metrics['dead_unarchived']} dead source(s)."
+        )
+    elif (
+        s2.metrics.get("unverified_count", 0) > 0
+        and s2.metrics.get("verified_count", 0) == 0
+    ):
         next_action = f"Verify {s2.metrics['unverified_count']} active source(s) to unlock claims."
     elif s2.metrics.get("independent_origins_count", 0) < 2:
-        next_action = "Discover and verify independent secondary news coverage to satisfy WP:GNG."
+        next_action = (
+            "Discover and verify independent secondary news coverage to satisfy WP:GNG."
+        )
     elif s3.metrics.get("unverified_claims", 0) > 0:
         next_action = f"Review {s3.metrics['unverified_claims']} pending claim(s)."
     elif s3.metrics.get("draft_approved_claims", 0) == 0:

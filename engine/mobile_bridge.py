@@ -4,6 +4,7 @@ Enables PersonProbe to route web scraping through a physical mobile carrier IP v
 bypassing Cloudflare, ResearchGate, Elsevier, and anti-bot mitigation that blocks
 cloud datacenter IPs. Zero SSH tunnels or port forwarding needed.
 """
+
 from __future__ import annotations
 
 import logging
@@ -28,6 +29,7 @@ def get_mobile_client() -> Optional[Any]:
         return _client
     try:
         from openscrape_client import MobileBrowserClient  # type: ignore
+
         client = MobileBrowserClient()
         status = client.get_status()
         if isinstance(status, dict) and status.get("status") == "ok":
@@ -50,7 +52,9 @@ def is_mobile_bridge_available() -> bool:
         return False
 
 
-def fetch_via_mobile_bridge(url: str, wait_seconds: int = 5) -> Optional[dict[str, Any]]:
+def fetch_via_mobile_bridge(
+    url: str, wait_seconds: int = 5
+) -> Optional[dict[str, Any]]:
     """Navigate and extract DOM text via the mobile scrap browser.
 
     Returns dict with {"title": str, "text": str, "url": str, "raw_html": str} or None.
@@ -59,11 +63,14 @@ def fetch_via_mobile_bridge(url: str, wait_seconds: int = 5) -> Optional[dict[st
     if not client:
         return None
     from .fetch_telemetry import timed, looks_throttled
+
     with timed("phone", url) as t:
         try:
             res = client.navigate(url, wait_seconds=wait_seconds)
             if res.get("status") == "error":
-                logger.debug("Mobile bridge navigation error for %s: %s", url, res.get("error"))
+                logger.debug(
+                    "Mobile bridge navigation error for %s: %s", url, res.get("error")
+                )
                 t.status = "error"
                 t.note = str(res.get("error"))[:120]
                 return None
@@ -75,7 +82,13 @@ def fetch_via_mobile_bridge(url: str, wait_seconds: int = 5) -> Optional[dict[st
             t.status = "ok" if text else "empty"
             walled = looks_throttled(text)
             t.throttled = captcha or walled
-            t.note = "captcha" if captcha else ("throttle text" if walled else ("empty render" if not text else ""))
+            t.note = (
+                "captcha"
+                if captcha
+                else (
+                    "throttle text" if walled else ("empty render" if not text else "")
+                )
+            )
             return {
                 "title": dom.get("title", ""),
                 "text": text,

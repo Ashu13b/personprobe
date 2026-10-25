@@ -5,6 +5,7 @@ and Institutional levels). This registry is dynamically extensible: as researche
 agents explore new states and discover open/reachable records, they can register them into
 the permanent atlas so the 100th person research is immediate.
 """
+
 from __future__ import annotations
 
 import json
@@ -36,7 +37,12 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="District Election Office & Tehsildar (Election) Record Room",
         offline_custodian="District Election Officer (Deputy Commissioner) & Tehsildar (Election)",
         offline_retrieval_method="Inspection of Historical Electoral Rolls (1952–2008) in District Election Archives; or RTI Act 2005 Sec 6(1) to SPIO Office of Chief Electoral Officer.",
-        required_identifiers=["Assembly Constituency (AC)", "Polling Station / Ward", "Father/Husband Name", "EPIC No. (if known)"],
+        required_identifiers=[
+            "Assembly Constituency (AC)",
+            "Polling Station / Ward",
+            "Father/Husband Name",
+            "EPIC No. (if known)",
+        ],
         forensic_utility_notes="Confirms physical residential domicile, age, parental names, and co-habitating family members across time.",
         is_custom=False,
     ),
@@ -58,7 +64,6 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         forensic_utility_notes="Authoritative proof of adult citizenship, living status, and constituency enrollment.",
         is_custom=False,
     ),
-
     # 2. Electricity & Discom Utilities
     PublicRecordRepository(
         category_id="dhbvn_electricity_haryana",
@@ -75,7 +80,11 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Sub-Divisional Office (SDO 'OP' Sub-Division), DHBVN",
         offline_custodian="Sub-Divisional Officer (Operations) & Executive Engineer (XEN), DHBVN",
         offline_retrieval_method="Inspection of Consumer Service Ledger (खाता बही / A&A Form) at local Sub-Division; or RTI Sec 6(1) to SPIO DHBVN requesting meter connection sanction and load verification.",
-        required_identifiers=["10-digit Account Number (CA No.)", "Meter Number", "Premises Address"],
+        required_identifiers=[
+            "10-digit Account Number (CA No.)",
+            "Meter Number",
+            "Premises Address",
+        ],
         forensic_utility_notes="Incontrovertible proof of continuous premises occupation, institutional vs private connection, and billing address history.",
         is_custom=False,
     ),
@@ -98,7 +107,6 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         forensic_utility_notes="Corroborates North Haryana postings, university residences, or ancestral properties.",
         is_custom=False,
     ),
-
     # 3. Land & Revenue Records (Jamabandi / ROR / Bhulekh)
     PublicRecordRepository(
         category_id="jamabandi_haryana_revenue",
@@ -115,7 +123,12 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Tehsil & District Record Room (सदर मालखाना), Mini Secretariat",
         offline_custodian="Tehsildar & District Revenue Officer (DRO) / Halqa Patwari / Kanungo",
         offline_retrieval_method="Application for Certified Copy (नकल दरख्वास्त) with court fee stamp in Tehsil Record Room under Punjab Land Revenue Act 1887 for Misal Bandobast (बंदोबस्त), Shajra Nasab (वंशावली), and historical Jamabandi (1950–1999).",
-        required_identifiers=["District", "Tehsil", "Village / Hadbast No.", "Owner Name (मालिक) or Khewat/Khasra No."],
+        required_identifiers=[
+            "District",
+            "Tehsil",
+            "Village / Hadbast No.",
+            "Owner Name (मालिक) or Khewat/Khasra No.",
+        ],
         forensic_utility_notes="Definitive legal proof of ancestral origin, rural village heritage, pedigree lineage, and land ownership.",
         is_custom=False,
     ),
@@ -133,7 +146,12 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Tehsil Revenue Record Room (तहसील अभिलेखागार), Uttar Pradesh",
         offline_custodian="Sub-Divisional Magistrate (SDM) / Tehsildar & Registrar Kanungo",
         offline_retrieval_method="Application for Certified Copy of Khatauni (नकल खतौनी) under UP Revenue Code 2006.",
-        required_identifiers=["District", "Tehsil", "Village (ग्राम)", "Khata / Gata / Khasra No."],
+        required_identifiers=[
+            "District",
+            "Tehsil",
+            "Village (ग्राम)",
+            "Khata / Gata / Khasra No.",
+        ],
         forensic_utility_notes="Verifies ancestral landholding, native district, and inherited agrarian titles in Uttar Pradesh.",
         is_custom=False,
     ),
@@ -173,7 +191,6 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         forensic_utility_notes="Authoritative proof of landholding and rural ancestral lineage across Maharashtra.",
         is_custom=False,
     ),
-
     # 4. Municipal & Property Tax
     PublicRecordRepository(
         category_id="ulb_haryana_property_tax",
@@ -194,7 +211,6 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         forensic_utility_notes="Validates urban home ownership, institutional campus quarters vs private bungalow, and civic dues clearance.",
         is_custom=False,
     ),
-
     # 5. Civil Registration (Birth & Death)
     PublicRecordRepository(
         category_id="crs_birth_death_registration",
@@ -210,11 +226,14 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Office of Registrar of Births and Deaths (Civil Hospital / Municipal Health Office / PHC)",
         offline_custodian="District Registrar of Births and Deaths & Civil Surgeon / Medical Officer In-Charge",
         offline_retrieval_method="Formal Application under Section 17 of the Registration of Births and Deaths Act 1969 for certified extract of Birth Register Entry; or Sub-Divisional Magistrate (SDM) delayed registration order.",
-        required_identifiers=["Date of Birth (exact or approximate year)", "Place of Birth (Hospital/Village/Ward)", "Father/Mother Name"],
+        required_identifiers=[
+            "Date of Birth (exact or approximate year)",
+            "Place of Birth (Hospital/Village/Ward)",
+            "Father/Mother Name",
+        ],
         forensic_utility_notes="Primary biological proof of birth date, maternal/paternal lineage, and civil registration legality.",
         is_custom=False,
     ),
-
     # 6. Official Gazettes
     PublicRecordRepository(
         category_id="egazette_india_central",
@@ -230,7 +249,10 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="National Archives of India (Janpath, New Delhi) & Central Secretariat Library",
         offline_custodian="Director General of Archives, National Archives of India & Controller of Publications, Civil Lines, Delhi",
         offline_retrieval_method="In-person archival research in National Archives Gazette Collection (Stack III); or RTI to CPIO Department of Publication.",
-        required_identifiers=["Year / Notification Quarter", "Ministry / Department (e.g. DARE, Agriculture, Finance)"],
+        required_identifiers=[
+            "Year / Notification Quarter",
+            "Ministry / Department (e.g. DARE, Agriculture, Finance)",
+        ],
         forensic_utility_notes="Supreme sovereign public record: appointment notifications, presidential honours, gazetted pay scales, and statutory rules.",
         is_custom=False,
     ),
@@ -248,11 +270,13 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Haryana Government Printing Press & Archives, Sector 18, Chandigarh",
         offline_custodian="Controller of Printing and Stationery, Haryana",
         offline_retrieval_method="Archival request to Printing & Stationery Department Chandigarh; or Punjab University / Haryana State Archives (Panchkula) bound gazette collection.",
-        required_identifiers=["Year / Volume", "Department (Higher Education, Agriculture, Animal Husbandry)"],
+        required_identifiers=[
+            "Year / Volume",
+            "Department (Higher Education, Agriculture, Animal Husbandry)",
+        ],
         forensic_utility_notes="Official notifications of state university degree grants, board affiliations, and provincial awards.",
         is_custom=False,
     ),
-
     # 7. Judicial & Court Dockets
     PublicRecordRepository(
         category_id="ecourts_district_national",
@@ -268,11 +292,14 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Judicial Record Room (बस्ताजात न्यायिक / Bastajat), District Court Complex",
         offline_custodian="Chief Judicial Magistrate & Superintendent, Judicial Copying Agency",
         offline_retrieval_method="Application for Certified Copy (नकल दरख्वास्त) in District Court Copying Agency with court fee stamp under High Court Rules & Orders.",
-        required_identifiers=["Case Type (Civil Suit / Criminal / Misc)", "Case Number / Year", "Party Name (Petitioner/Respondent)"],
+        required_identifiers=[
+            "Case Type (Civil Suit / Criminal / Misc)",
+            "Case Number / Year",
+            "Party Name (Petitioner/Respondent)",
+        ],
         forensic_utility_notes="Reveals civil property disputes, service matters, succession certificates, and sworn affidavits under oath.",
         is_custom=False,
     ),
-
     # 8. Academic Theses, Vidwan & Scholar Databases
     PublicRecordRepository(
         category_id="krishikosh_agricultural_repository",
@@ -288,7 +315,11 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="University Central Library Historical Theses Archive (e.g. CCSHAU Nehru Library / LUVAS Library)",
         offline_custodian="University Librarian & Dean, Postgraduate Studies",
         offline_retrieval_method="Physical reading room access request in Thesis Section (Stack Room II) with Call/Accession Number; or RTI to University SPIO for examination committee sign-off certificate.",
-        required_identifiers=["Degree (M.Sc., M.V.Sc., Ph.D.)", "Department (Animal Physiology, Biotechnology)", "Year Range"],
+        required_identifiers=[
+            "Degree (M.Sc., M.V.Sc., Ph.D.)",
+            "Department (Animal Physiology, Biotechnology)",
+            "Year Range",
+        ],
         forensic_utility_notes="Absolute peer-reviewed proof of scientific research output, faculty supervision, and academic pedigree.",
         is_custom=False,
     ),
@@ -305,11 +336,14 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="INFLIBNET Centre, Infocity, Gandhinagar, Gujarat - 382007",
         offline_custodian="Director, INFLIBNET Centre & Scientist-In-Charge (e-Content)",
         offline_retrieval_method="Direct public search via National Researcher Network or RTI to CPIO INFLIBNET.",
-        required_identifiers=["Full Academic Name", "Primary Institution", "ResearcherID / Scopus ID"],
+        required_identifiers=[
+            "Full Academic Name",
+            "Primary Institution",
+            "ResearcherID / Scopus ID",
+        ],
         forensic_utility_notes="Verified government faculty database: sanctioned projects, h-index, honors, and verified identity.",
         is_custom=False,
     ),
-
     # 9. Academic Book Publishers & Monograph Catalogs (Books & ISBNs)
     PublicRecordRepository(
         category_id="satish_serial_publishing_house",
@@ -324,7 +358,12 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="SSPH Editorial Archives, Azadpur Commercial Complex, New Delhi - 110033",
         offline_custodian="Chief Editor & Managing Director, Satish Serial Publishing House",
         offline_retrieval_method="Inspection of Historical Print Catalog / Publisher Stock Register; or Publisher direct order request.",
-        required_identifiers=["Author / Editor Name", "Book Title", "ISBN", "Subject Area"],
+        required_identifiers=[
+            "Author / Editor Name",
+            "Book Title",
+            "ISBN",
+            "Subject Area",
+        ],
         forensic_utility_notes="Authoritative peer-reviewed proof of authored textbooks, edited monographs, reference treatises, and ISBN numbers in agricultural, biotechnology, and veterinary sciences.",
         is_custom=False,
     ),
@@ -341,7 +380,11 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="ICAR-DKMA Sales & Distribution Section, Krishi Anusandhan Bhavan-I, Pusa, New Delhi - 110012",
         offline_custodian="Project Director, DKMA & Business Manager, ICAR Publications",
         offline_retrieval_method="Direct inspection in ICAR Krishi Vigyan Book Stalls / Central Library; or RTI to CPIO DKMA.",
-        required_identifiers=["Author Name", "Title / Technical Bulletin", "ICAR Institute"],
+        required_identifiers=[
+            "Author Name",
+            "Title / Technical Bulletin",
+            "ICAR Institute",
+        ],
         forensic_utility_notes="Statutory publications of Government of India agricultural research institutes: bulletins, monographs, and official technology manuals.",
         is_custom=False,
     ),
@@ -362,7 +405,6 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         forensic_utility_notes="Authoritative record of scholarly monographs in fisheries, veterinary medicine, agronomy, and animal breeding.",
         is_custom=False,
     ),
-
     # 10. Patents & Inventions
     PublicRecordRepository(
         category_id="inpass_patents_india",
@@ -378,11 +420,14 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Patent Office Technical Library, Intellectual Property Office Building (Delhi / Kolkata / Chennai / Mumbai)",
         offline_custodian="Controller General of Patents, Designs and Trade Marks (CGPDTM)",
         offline_retrieval_method="Inspection of Register of Patents under Section 72 of Patents Act 1970; or Certified Extract of Patent Register entry.",
-        required_identifiers=["Inventor Name", "Applicant Name (e.g. ICAR)", "Application / Patent Number"],
+        required_identifiers=[
+            "Inventor Name",
+            "Applicant Name (e.g. ICAR)",
+            "Application / Patent Number",
+        ],
         forensic_utility_notes="Legal proof of technological inventions, patent filings, commercial licensing, and statutory priority dates.",
         is_custom=False,
     ),
-
     # 10. Professional Councils (Medical & Legal)
     PublicRecordRepository(
         category_id="nmc_indian_medical_register",
@@ -397,7 +442,11 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="National Medical Commission Office, Pocket 14, Sector 8, Dwarka, New Delhi",
         offline_custodian="Secretary, National Medical Commission & Registrar, State Medical Council",
         offline_retrieval_method="Formal Application under NMC Act 2019 for verified certificate of registration.",
-        required_identifiers=["Registration Number", "State Medical Council", "Year of Registration"],
+        required_identifiers=[
+            "Registration Number",
+            "State Medical Council",
+            "Year of Registration",
+        ],
         forensic_utility_notes="Statutory verification of medical degrees (MBBS/MD/MS) and valid medical practice licensure.",
         is_custom=False,
     ),
@@ -415,11 +464,14 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="State Bar Council Record Room (e.g. Bar Council of Punjab & Haryana, Chandigarh)",
         offline_custodian="Secretary, State Bar Council",
         offline_retrieval_method="Inspection of Roll of Advocates under Section 17 of Advocates Act 1961.",
-        required_identifiers=["Enrollment Number (e.g. P/123/1990)", "State Bar Council", "Father Name"],
+        required_identifiers=[
+            "Enrollment Number (e.g. P/123/1990)",
+            "State Bar Council",
+            "Father Name",
+        ],
         forensic_utility_notes="Confirms legal practice enrollment, Law degree validity, and official bar membership.",
         is_custom=False,
     ),
-
     # 11. Central Pension & Service Benefits
     PublicRecordRepository(
         category_id="cpao_central_pension",
@@ -435,7 +487,10 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="CPAO Archives, Trikoot-II, Bhikaji Cama Place, New Delhi & ICAR Establishment Pension Cell",
         offline_custodian="Chief Controller of Pensions (CPAO) & Drawing & Disbursing Officer (DDO), ICAR-CIRB",
         offline_retrieval_method="RTI Act 2005 Sec 6(1) to CPIO CPAO or CPIO ICAR HQ for Pension Payment Order (PPO) number, qualifying service computation, and superannuation gratuity schedule.",
-        required_identifiers=["Pension Payment Order (PPO) No.", "PAN / Date of Retirement"],
+        required_identifiers=[
+            "Pension Payment Order (PPO) No.",
+            "PAN / Date of Retirement",
+        ],
         forensic_utility_notes="Legally binding proof of exact superannuation date, total years of government service, and final gazetted pay rank.",
         is_custom=False,
     ),
@@ -453,11 +508,15 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Office of Principal Controller of Defence Accounts (PCDA Pensions), Draupadi Ghat, Prayagraj - 211014",
         offline_custodian="Principal Controller of Defence Accounts (Pensions)",
         offline_retrieval_method="Defence Pension Claim Verification / Record Office Verification Order under Pension Regulations for the Army/Navy/Air Force.",
-        required_identifiers=["Service Number", "Rank", "Arm / Corps", "Date of Discharge / PPO No."],
+        required_identifiers=[
+            "Service Number",
+            "Rank",
+            "Arm / Corps",
+            "Date of Discharge / PPO No.",
+        ],
         forensic_utility_notes="Authoritative military career record: verification of rank, wartime deployments, decorations, and defence pension.",
         is_custom=False,
     ),
-
     # 12. Corporate & Producer Company Directorships
     PublicRecordRepository(
         category_id="mca_directors_registry",
@@ -473,7 +532,10 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_repository_name="Registrar of Companies (RoC Delhi & Haryana), 4th Floor, IFCI Tower, Nehru Place, New Delhi",
         offline_custodian="Registrar of Companies (RoC) Delhi & Haryana",
         offline_retrieval_method="Public Company Document Inspection (MCA Portal Form GNL-2) or physical RoC file inspection.",
-        required_identifiers=["Director Identification Number (DIN)", "Company Name / CIN"],
+        required_identifiers=[
+            "Director Identification Number (DIN)",
+            "Company Name / CIN",
+        ],
         forensic_utility_notes="Exposes private commercial interests, advisory board directorships in biotech startups, and Section 8 agricultural trusts.",
         is_custom=False,
     ),
@@ -560,7 +622,10 @@ def record_repository_learning(
         target.failure_count += 1
         if failure_mode and failure_mode not in target.known_failure_modes:
             target.known_failure_modes.append(failure_mode)
-        if operational_warning and operational_warning not in target.operational_warnings:
+        if (
+            operational_warning
+            and operational_warning not in target.operational_warnings
+        ):
             target.operational_warnings.append(operational_warning)
 
     # Persist in custom registry
@@ -604,21 +669,58 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
 
     # Check geographical and institutional context
     all_context = " ".join(
-        filter(None, [
-            profile.name,
-            profile.birth_place,
-            profile.affiliation,
-            profile.field,
-            profile.full_name,
-        ] + [c.text for c in profile.claims if c.text])
+        filter(
+            None,
+            [
+                profile.name,
+                profile.birth_place,
+                profile.affiliation,
+                profile.field,
+                profile.full_name,
+            ]
+            + [c.text for c in profile.claims if c.text],
+        )
     ).lower()
 
     # Detect active jurisdictions
-    is_haryana = any(k in all_context for k in ["haryana", "hisar", "rewari", "bhiwani", "karnal", "rohtak", "hau", "luvas", "cirb"])
-    is_up = any(k in all_context for k in ["uttar pradesh", "lucknow", "kanpur", "varanasi", "meerut", "agra", "ivri", "bareilly", "mathura"])
-    is_delhi = any(k in all_context for k in ["delhi", "new delhi", "pusa", "iari", "icar hq", "krishi bhavan"])
-    is_maharashtra = any(k in all_context for k in ["maharashtra", "mumbai", "pune", "nagpur", "cife"])
-    is_punjab = any(k in all_context for k in ["punjab", "ludhiana", "pau", "gadvasu", "chandigarh"])
+    is_haryana = any(
+        k in all_context
+        for k in [
+            "haryana",
+            "hisar",
+            "rewari",
+            "bhiwani",
+            "karnal",
+            "rohtak",
+            "hau",
+            "luvas",
+            "cirb",
+        ]
+    )
+    is_up = any(
+        k in all_context
+        for k in [
+            "uttar pradesh",
+            "lucknow",
+            "kanpur",
+            "varanasi",
+            "meerut",
+            "agra",
+            "ivri",
+            "bareilly",
+            "mathura",
+        ]
+    )
+    is_delhi = any(
+        k in all_context
+        for k in ["delhi", "new delhi", "pusa", "iari", "icar hq", "krishi bhavan"]
+    )
+    is_maharashtra = any(
+        k in all_context for k in ["maharashtra", "mumbai", "pune", "nagpur", "cife"]
+    )
+    is_punjab = any(
+        k in all_context for k in ["punjab", "ludhiana", "pau", "gadvasu", "chandigarh"]
+    )
 
     has_hisar = "hisar" in all_context or "cirb" in all_context or "hau" in all_context
     has_rewari = "rewari" in all_context or "nimoth" in all_context
@@ -639,31 +741,53 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             continue
         if repo.state == "Maharashtra" and not is_maharashtra:
             continue
-        if repo.district_or_city and "Hisar" in repo.district_or_city and not (has_hisar or is_haryana):
+        if (
+            repo.district_or_city
+            and "Hisar" in repo.district_or_city
+            and not (has_hisar or is_haryana)
+        ):
             continue
 
         repo_dict = repo.model_dump()
         template = repo.search_query_template or ""
         repo_dict["custom_search_query"] = (
             template.replace("{name}", profile.name)
-            .replace("{district}", "Hisar" if has_hisar else ("Rewari" if has_rewari else "Haryana"))
-            .replace("{city}", "Hisar" if has_hisar else ("Rewari" if has_rewari else ""))
+            .replace(
+                "{district}",
+                "Hisar" if has_hisar else ("Rewari" if has_rewari else "Haryana"),
+            )
+            .replace(
+                "{city}", "Hisar" if has_hisar else ("Rewari" if has_rewari else "")
+            )
             .replace("{village}", "Nimoth" if has_rewari else "")
             .replace("{institution}", profile.affiliation or "ICAR")
-            .replace("{state}", "Haryana" if is_haryana else ("Uttar Pradesh" if is_up else "India"))
+            .replace(
+                "{state}",
+                "Haryana" if is_haryana else ("Uttar Pradesh" if is_up else "India"),
+            )
             .replace("{address}", profile.birth_place or "Hisar")
         )
 
         # Categorize into digital vs offline vs id-gated
-        if repo.digitization_status in ("digitized_open_search", "retrospectively_scanned_partial"):
+        if repo.digitization_status in (
+            "digitized_open_search",
+            "retrospectively_scanned_partial",
+        ):
             online_reachable.append(repo_dict)
-        elif repo.digitization_status in ("digitized_id_required", "digitized_captcha_gated"):
+        elif repo.digitization_status in (
+            "digitized_id_required",
+            "digitized_captcha_gated",
+        ):
             id_required_portals.append(repo_dict)
         else:
             offline_archives.append(repo_dict)
 
         # If subject's birth or early career occurred before digitization cutoff, flag corresponding physical repository
-        if birth_year and repo.offline_cutoff_year and birth_year <= repo.offline_cutoff_year:
+        if (
+            birth_year
+            and repo.offline_cutoff_year
+            and birth_year <= repo.offline_cutoff_year
+        ):
             repo_dict_pre = dict(repo_dict)
             repo_dict_pre["pre_digitization_reason"] = (
                 f"Subject's milestone (c. {birth_year}) predates {repo.category_name} digitization "
@@ -671,13 +795,27 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             )
             offline_archives.append(repo_dict_pre)
 
-    primary_state = "Haryana" if is_haryana else ("Uttar Pradesh" if is_up else ("Delhi / NCR" if is_delhi else ("Maharashtra" if is_maharashtra else "National")))
+    primary_state = (
+        "Haryana"
+        if is_haryana
+        else (
+            "Uttar Pradesh"
+            if is_up
+            else (
+                "Delhi / NCR"
+                if is_delhi
+                else ("Maharashtra" if is_maharashtra else "National")
+            )
+        )
+    )
 
     return {
         "profile_name": profile.name,
         "birth_year": birth_year,
         "primary_state": primary_state,
-        "primary_districts": [d for d, flag in [("Hisar", has_hisar), ("Rewari", has_rewari)] if flag],
+        "primary_districts": [
+            d for d, flag in [("Hisar", has_hisar), ("Rewari", has_rewari)] if flag
+        ],
         "online_reachable_count": len(online_reachable),
         "id_required_count": len(id_required_portals),
         "offline_archives_count": len(offline_archives),
@@ -695,93 +833,109 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
     s_name = profile.name
 
     all_context = " ".join(
-        filter(None, [
-            profile.name,
-            profile.birth_place,
-            profile.affiliation,
-            profile.field,
-        ] + [c.text for c in profile.claims if c.text])
+        filter(
+            None,
+            [
+                profile.name,
+                profile.birth_place,
+                profile.affiliation,
+                profile.field,
+            ]
+            + [c.text for c in profile.claims if c.text],
+        )
     ).lower()
 
     # 1. Electoral Roll Domicile Inquiry
     if "electoral roll" not in " ".join(existing_anchors):
-        district = "Hisar" if "hisar" in all_context else ("Rewari" if "rewari" in all_context else "Haryana")
-        civic_inquiries.append(ForensicInquiry(
-            inquiry_id=generate_inquiry_id(),
-            fact_anchor=f"Electoral Roll & Domicile Registration in District {district} (CEO Haryana)",
-            domain="civic_electoral",
-            deductive_question=f"If {s_name} is a long-term registered voter in {district} (Haryana), which Assembly Constituency and Polling Station voter roll lists their family household?",
-            expected_paper_trails=[
-                "Election Commission of India (ECI) / CEO Haryana Assembly Constituency Electoral Roll (PDF)",
-                "Electoral Photo Identity Card (EPIC) Central Database Registration Record",
-                "Form 6 New Voter Enrollment Verification / Booth Level Officer (BLO) Inspection Report",
-            ],
-            probe_queries=[
-                f'site:ceoharyana.gov.in "{district}" "{s_name}"',
-                f'site:voters.eci.gov.in "{s_name}" "{district}"',
-                f'"Electoral Roll" "{district}" "{s_name}"',
-            ],
-            status="open",
-            actor_logged="system",
-            created_at=now_iso,
-            online_probe_status="open",
-            offline_archive_flag=True,
-            offline_archive_location=f"District Election Office & Tehsildar (Election) Record Room, Mini Secretariat, {district}",
-            offline_custodian=f"District Election Officer (Deputy Commissioner) & Tehsildar (Election), {district}",
-            offline_retrieval_method="Inspection of Pre-2009 Historical Electoral Rolls (1952–2008) in District Election Archives; or RTI Act 2005 Sec 6(1) to SPIO Office of Chief Electoral Officer.",
-        ))
+        district = (
+            "Hisar"
+            if "hisar" in all_context
+            else ("Rewari" if "rewari" in all_context else "Haryana")
+        )
+        civic_inquiries.append(
+            ForensicInquiry(
+                inquiry_id=generate_inquiry_id(),
+                fact_anchor=f"Electoral Roll & Domicile Registration in District {district} (CEO Haryana)",
+                domain="civic_electoral",
+                deductive_question=f"If {s_name} is a long-term registered voter in {district} (Haryana), which Assembly Constituency and Polling Station voter roll lists their family household?",
+                expected_paper_trails=[
+                    "Election Commission of India (ECI) / CEO Haryana Assembly Constituency Electoral Roll (PDF)",
+                    "Electoral Photo Identity Card (EPIC) Central Database Registration Record",
+                    "Form 6 New Voter Enrollment Verification / Booth Level Officer (BLO) Inspection Report",
+                ],
+                probe_queries=[
+                    f'site:ceoharyana.gov.in "{district}" "{s_name}"',
+                    f'site:voters.eci.gov.in "{s_name}" "{district}"',
+                    f'"Electoral Roll" "{district}" "{s_name}"',
+                ],
+                status="open",
+                actor_logged="system",
+                created_at=now_iso,
+                online_probe_status="open",
+                offline_archive_flag=True,
+                offline_archive_location=f"District Election Office & Tehsildar (Election) Record Room, Mini Secretariat, {district}",
+                offline_custodian=f"District Election Officer (Deputy Commissioner) & Tehsildar (Election), {district}",
+                offline_retrieval_method="Inspection of Pre-2009 Historical Electoral Rolls (1952–2008) in District Election Archives; or RTI Act 2005 Sec 6(1) to SPIO Office of Chief Electoral Officer.",
+            )
+        )
 
     # 2. Electricity / Discom Connection (DHBVN)
-    if "electricity" not in " ".join(existing_anchors) and ("hisar" in all_context or "rewari" in all_context or "cirb" in all_context):
-        civic_inquiries.append(ForensicInquiry(
-            inquiry_id=generate_inquiry_id(),
-            fact_anchor="Residential Electricity Utility Meter & Connection (DHBVN Hisar / Residential Complex)",
-            domain="utility_electricity",
-            deductive_question=f"If {s_name} maintained a residential electrical connection in Hisar, what meter ledger and Discom consumer records verify premises occupation?",
-            expected_paper_trails=[
-                "Dakshin Haryana Bijli Vitran Nigam (DHBVN) Consumer Account (CA) Ledger & Monthly Energy Bills",
-                "DHBVN Agreement & Application (A&A) Form for Domestic Electric Connection",
-                "Sub-Divisional Office (SDO 'OP') Meter Test & Installation Verification Sheet",
-            ],
-            probe_queries=[
-                f'site:dhbvn.org.in "Hisar" "{s_name}"',
-                f'"DHBVN" "Hisar" electricity "{s_name}"',
-            ],
-            status="open",
-            actor_logged="system",
-            created_at=now_iso,
-            online_probe_status="open",
-            offline_archive_flag=True,
-            offline_archive_location="Sub-Divisional Office (SDO 'OP' Sub-Division), DHBVN, Hisar",
-            offline_custodian="Sub-Divisional Officer (Operations) & Executive Engineer (XEN), DHBVN Hisar",
-            offline_retrieval_method="Inspection of Consumer Service Ledger (खाता बही) at local Sub-Division; or RTI Sec 6(1) to SPIO DHBVN requesting connection sanction and load verification.",
-        ))
+    if "electricity" not in " ".join(existing_anchors) and (
+        "hisar" in all_context or "rewari" in all_context or "cirb" in all_context
+    ):
+        civic_inquiries.append(
+            ForensicInquiry(
+                inquiry_id=generate_inquiry_id(),
+                fact_anchor="Residential Electricity Utility Meter & Connection (DHBVN Hisar / Residential Complex)",
+                domain="utility_electricity",
+                deductive_question=f"If {s_name} maintained a residential electrical connection in Hisar, what meter ledger and Discom consumer records verify premises occupation?",
+                expected_paper_trails=[
+                    "Dakshin Haryana Bijli Vitran Nigam (DHBVN) Consumer Account (CA) Ledger & Monthly Energy Bills",
+                    "DHBVN Agreement & Application (A&A) Form for Domestic Electric Connection",
+                    "Sub-Divisional Office (SDO 'OP') Meter Test & Installation Verification Sheet",
+                ],
+                probe_queries=[
+                    f'site:dhbvn.org.in "Hisar" "{s_name}"',
+                    f'"DHBVN" "Hisar" electricity "{s_name}"',
+                ],
+                status="open",
+                actor_logged="system",
+                created_at=now_iso,
+                online_probe_status="open",
+                offline_archive_flag=True,
+                offline_archive_location="Sub-Divisional Office (SDO 'OP' Sub-Division), DHBVN, Hisar",
+                offline_custodian="Sub-Divisional Officer (Operations) & Executive Engineer (XEN), DHBVN Hisar",
+                offline_retrieval_method="Inspection of Consumer Service Ledger (खाता बही) at local Sub-Division; or RTI Sec 6(1) to SPIO DHBVN requesting connection sanction and load verification.",
+            )
+        )
 
     # 3. Official Gazette of India (Central Appointment & Cadre Notifications)
     if "gazette of india" not in " ".join(existing_anchors):
-        civic_inquiries.append(ForensicInquiry(
-            inquiry_id=generate_inquiry_id(),
-            fact_anchor="The Gazette of India Central Government Notifications (ICAR / DARE Appointment & Cadre)",
-            domain="gazette_official",
-            deductive_question=f"If {s_name} served as a Group-A scientific officer in the Government of India / ICAR for 32 years, what statutory notifications exist in The Gazette of India?",
-            expected_paper_trails=[
-                "The Gazette of India (Part I, Section 2: Notifications regarding Appointments, Promotions, Leave, etc. of Officers)",
-                "Department of Agricultural Research & Education (DARE) Statutory Office Memorandum in Gazette",
-                "Government of India Press Historical Gazette Register (New Delhi)",
-            ],
-            probe_queries=[
-                f'site:egazette.gov.in "{s_name}" "ICAR" filetype:pdf',
-                f'site:egazette.gov.in "{s_name}" "Buffalo" OR "CIRB"',
-                '"Gazette of India" "Prem Singh Yadav" "ICAR"',
-            ],
-            status="open",
-            actor_logged="system",
-            created_at=now_iso,
-            online_probe_status="open",
-            offline_archive_flag=True,
-            offline_archive_location="National Archives of India, Janpath, New Delhi - 110001 & Central Secretariat Library",
-            offline_custodian="Director General of Archives, National Archives of India & Controller of Publications, Delhi",
-            offline_retrieval_method="Archival research in National Archives Gazette Collection (Stack Room III) for Pre-2008 gazette issues; or online search on e-Gazette portal for 2008–present.",
-        ))
+        civic_inquiries.append(
+            ForensicInquiry(
+                inquiry_id=generate_inquiry_id(),
+                fact_anchor="The Gazette of India Central Government Notifications (ICAR / DARE Appointment & Cadre)",
+                domain="gazette_official",
+                deductive_question=f"If {s_name} served as a Group-A scientific officer in the Government of India / ICAR for 32 years, what statutory notifications exist in The Gazette of India?",
+                expected_paper_trails=[
+                    "The Gazette of India (Part I, Section 2: Notifications regarding Appointments, Promotions, Leave, etc. of Officers)",
+                    "Department of Agricultural Research & Education (DARE) Statutory Office Memorandum in Gazette",
+                    "Government of India Press Historical Gazette Register (New Delhi)",
+                ],
+                probe_queries=[
+                    f'site:egazette.gov.in "{s_name}" "ICAR" filetype:pdf',
+                    f'site:egazette.gov.in "{s_name}" "Buffalo" OR "CIRB"',
+                    '"Gazette of India" "Prem Singh Yadav" "ICAR"',
+                ],
+                status="open",
+                actor_logged="system",
+                created_at=now_iso,
+                online_probe_status="open",
+                offline_archive_flag=True,
+                offline_archive_location="National Archives of India, Janpath, New Delhi - 110001 & Central Secretariat Library",
+                offline_custodian="Director General of Archives, National Archives of India & Controller of Publications, Delhi",
+                offline_retrieval_method="Archival research in National Archives Gazette Collection (Stack Room III) for Pre-2008 gazette issues; or online search on e-Gazette portal for 2008–present.",
+            )
+        )
 
     return civic_inquiries

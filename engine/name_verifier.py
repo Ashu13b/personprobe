@@ -4,13 +4,18 @@ Ensures that before any candidate link is ingested into a person's research sess
 1. The subject's name (or a recognized variant/script) explicitly appears in the DOM/title.
 2. Homonyms are disambiguated using field, affiliation, and subject keywords.
 """
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
 from typing import Optional
 
-from .multilingual_search import detect_languages, transliterate_name, _INDIC_PHONETIC_MAP
+from .multilingual_search import (
+    detect_languages,
+    transliterate_name,
+    _INDIC_PHONETIC_MAP,
+)
 
 
 @dataclass
@@ -20,7 +25,9 @@ class NameVerificationResult:
     snippet: str = ""
     context_matched: bool = False
     homonym_risk: bool = False
-    identity_strength: str = "weak"  # full: given name spelled out; weak: initials/surname-only
+    identity_strength: str = (
+        "weak"  # full: given name spelled out; weak: initials/surname-only
+    )
     reason: str = "no_name_match"  # matched | no_name_match | homonym_risk
 
 
@@ -38,7 +45,9 @@ def generate_name_variants(
     variants.add(cleaned)
 
     # Remove titles if present
-    base_name = re.sub(r"^(dr\.?|prof\.?|shri|smt\.?|mr\.?|ms\.?|mrs\.?)\s+", "", cleaned, flags=re.I).strip()
+    base_name = re.sub(
+        r"^(dr\.?|prof\.?|shri|smt\.?|mr\.?|ms\.?|mrs\.?)\s+", "", cleaned, flags=re.I
+    ).strip()
     variants.add(base_name)
 
     parts = base_name.split()
@@ -133,7 +142,9 @@ def verify_name_in_content(
     context_tokens: list[str] = []
     if affiliation:
         # e.g. "CIRB", "Central Institute for Research on Buffaloes", "ICAR"
-        context_tokens.extend([t for t in re.split(r"[,;()/\s]+", affiliation) if len(t) > 3])
+        context_tokens.extend(
+            [t for t in re.split(r"[,;()/\s]+", affiliation) if len(t) > 3]
+        )
         # Add acronyms (e.g. CIRB, ICAR, HAU)
         words = affiliation.split()
         if len(words) >= 2:
@@ -158,9 +169,17 @@ def verify_name_in_content(
     homonym_risk = False
     if not context_matched:
         conflict_patterns = [
-            r"\bpolitician\b", r"\bmla\b", r"\bmp\b", r"\belection\b",
-            r"\bcricketer\b", r"\bactor\b", r"\bmovie\b", r"\bbollywood\b",
-            r"\bpolice\s+officer\b", r"\bgangster\b", r"\badvocate\b"
+            r"\bpolitician\b",
+            r"\bmla\b",
+            r"\bmp\b",
+            r"\belection\b",
+            r"\bcricketer\b",
+            r"\bactor\b",
+            r"\bmovie\b",
+            r"\bbollywood\b",
+            r"\bpolice\s+officer\b",
+            r"\bgangster\b",
+            r"\badvocate\b",
         ]
         text_lower = combined_content.lower()
         if any(re.search(p, text_lower) for p in conflict_patterns):
@@ -175,7 +194,9 @@ def verify_name_in_content(
     # people share the same surname AND institutional context (co-authors at
     # the same ICAR institutes print identically). Weak matches must be
     # human adjudicated before extraction.
-    identity_strength = "weak" if _is_initials_only_variant(matched_variant or "") else "full"
+    identity_strength = (
+        "weak" if _is_initials_only_variant(matched_variant or "") else "full"
+    )
 
     return NameVerificationResult(
         matched=True,
@@ -194,11 +215,13 @@ def _is_initials_only_variant(variant: str) -> bool:
     # Devanagari initials, e.g. "पी. एस. यादव"
     if re.fullmatch(r"(?:डॉ\.?\s*)?पी\.?\s*ए?स?\.?\s*यादव", variant):
         return True
-    return bool(re.fullmatch(
-        r"(?:dr\.?|prof\.?|mr\.?|ms\.?|mrs\.?)?\s*[A-Z]\.?(?:\s*[A-Z]\.)?\s+\S+",
-        variant,
-        re.I,
-    ))
+    return bool(
+        re.fullmatch(
+            r"(?:dr\.?|prof\.?|mr\.?|ms\.?|mrs\.?)?\s*[A-Z]\.?(?:\s*[A-Z]\.)?\s+\S+",
+            variant,
+            re.I,
+        )
+    )
 
 
 def assess_namesake_risk(
@@ -221,19 +244,29 @@ def assess_namesake_risk(
         return "none", None
 
     for ns in known_namesakes:
-        hit = next((t for t in ns.signature_terms if t and t.lower() in content.lower()), None)
+        hit = next(
+            (t for t in ns.signature_terms if t and t.lower() in content.lower()), None
+        )
         if hit:
-            return "known_conflict", f"{ns.display_name}: matched signature term '{hit}'"
+            return (
+                "known_conflict",
+                f"{ns.display_name}: matched signature term '{hit}'",
+            )
 
     # A spelled-out same-surname sibling (e.g. "Pankaj Yadav" next to "P.S. Yadav")
     # in the same page is a disambiguation hazard even when the records look right.
     surname = (subject_name.split()[-1] if subject_name.strip() else "").lower()
     if surname and _is_initials_only_variant(matched_variant or ""):
-        return "possible", f"matched variant '{matched_variant}' gives only initials for a shared surname"
+        return (
+            "possible",
+            f"matched variant '{matched_variant}' gives only initials for a shared surname",
+        )
 
     if surname:
         subject_tokens = [t.lower().strip(".") for t in subject_name.split()]
-        spelled_out = re.findall(rf"\b([A-Za-z]+)\s+{re.escape(subject_name.split()[-1])}\b", content, re.I)
+        spelled_out = re.findall(
+            rf"\b([A-Za-z]+)\s+{re.escape(subject_name.split()[-1])}\b", content, re.I
+        )
         for first in spelled_out:
             first_low = first.lower()
             # same-surname sibling only if the preceding token is a given name

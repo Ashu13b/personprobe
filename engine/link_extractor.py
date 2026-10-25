@@ -1,10 +1,12 @@
 """Extract profile-shaped outbound links from a fetched page."""
+
 from __future__ import annotations
 from urllib.parse import urljoin, urlparse
 
 # Domains that strongly indicate a researcher/person profile
 _PROFILE_DOMAINS = {
-    "scholar.google.com", "scholar.google.co.in",
+    "scholar.google.com",
+    "scholar.google.co.in",
     "orcid.org",
     "researchgate.net",
     "scopus.com",
@@ -19,10 +21,22 @@ _PROFILE_DOMAINS = {
 
 # Path fragments that indicate a profile page on institutional sites
 _PROFILE_PATH_FRAGMENTS = [
-    "/faculty/", "/staff/", "/people/", "/profile/", "/researcher/",
-    "/person/", "/member/", "/author/", "/scientist/", "/academic/",
-    "/en/persons/", "/en/researchers/", "/scientists/", "/experts/",
-    "/our-team/", "/team/",
+    "/faculty/",
+    "/staff/",
+    "/people/",
+    "/profile/",
+    "/researcher/",
+    "/person/",
+    "/member/",
+    "/author/",
+    "/scientist/",
+    "/academic/",
+    "/en/persons/",
+    "/en/researchers/",
+    "/scientists/",
+    "/experts/",
+    "/our-team/",
+    "/team/",
 ]
 
 
@@ -32,6 +46,7 @@ def extract_profile_links(raw_html: str, person_name: str, base_url: str) -> lis
         return []
     try:
         from bs4 import BeautifulSoup
+
         soup = BeautifulSoup(raw_html, "html.parser")
     except Exception:
         return []
@@ -58,8 +73,12 @@ def extract_profile_links(raw_html: str, person_name: str, base_url: str) -> lis
         name_in_anchor = name_lower in anchor or (
             len(name_parts) >= 2 and all(p in anchor for p in name_parts[:2])
         )
-        url_text = (path + " " + parsed.query.lower()).replace("-", " ").replace("_", " ")
-        name_in_url = len(name_parts) >= 2 and all(p in url_text for p in name_parts[:2])
+        url_text = (
+            (path + " " + parsed.query.lower()).replace("-", " ").replace("_", " ")
+        )
+        name_in_url = len(name_parts) >= 2 and all(
+            p in url_text for p in name_parts[:2]
+        )
 
         # A profile-shaped domain/path is only a lead when the link itself is
         # person-specific. This rejects generic author indexes, company pages,

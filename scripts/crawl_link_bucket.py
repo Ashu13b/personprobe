@@ -9,6 +9,7 @@ the active PersonProbe session, and extracts further links to complete the bucke
 Usage:
     python3 scripts/crawl_link_bucket.py [--max-pages 15] [--wait 8]
 """
+
 from __future__ import annotations
 
 import json
@@ -56,8 +57,9 @@ WRONG_PERSON_ENTITIES = [
     "prof (dr) prem singh",
     "prem singh bhadouria",
     "prem prakash yadav",
-    "rameshwar yadav"
+    "rameshwar yadav",
 ]
+
 
 def load_existing_urls() -> set[str]:
     """Load all normalized URLs already in the session."""
@@ -75,18 +77,32 @@ def load_existing_urls() -> set[str]:
         print(f"[WARN] Failed to load session file: {e}")
         return set()
 
+
 def normalize_url(url: str) -> str:
     """Normalize URL by stripping tracking parameters, fragments, and trailing slashes."""
     p = urllib.parse.urlparse(url)
     clean = f"{p.scheme}://{p.netloc}{p.path}".rstrip("/")
     return clean.lower()
 
+
 def is_valid_candidate(url: str) -> bool:
     """Check if URL looks like a scientific publication, news, or institutional page."""
     u = url.lower()
-    if any(ext in u for ext in [".png", ".jpg", ".jpeg", ".gif", ".css", ".js", ".ico"]):
+    if any(
+        ext in u for ext in [".png", ".jpg", ".jpeg", ".gif", ".css", ".js", ".ico"]
+    ):
         return False
-    if any(d in u for d in ["facebook.com", "twitter.com", "instagram.com", "linkedin.com/feed", "support.google", "policies.google"]):
+    if any(
+        d in u
+        for d in [
+            "facebook.com",
+            "twitter.com",
+            "instagram.com",
+            "linkedin.com/feed",
+            "support.google",
+            "policies.google",
+        ]
+    ):
         return False
     # Target domains
     targets = [
@@ -105,9 +121,10 @@ def is_valid_candidate(url: str) -> bool:
         "bhaskar.com",
         "amarujala.com",
         "jagran.com",
-        "tribuneindia.com"
+        "tribuneindia.com",
     ]
     return any(t in u for t in targets)
+
 
 def verify_dr_yadav(text: str, title: str) -> bool:
     """Confirm text is about Dr. Prem Singh Yadav and does not belong to wrong entities."""
@@ -117,16 +134,39 @@ def verify_dr_yadav(text: str, title: str) -> bool:
         if we in t_lower:
             return False
     # Positive name signals
-    has_name = any(n in t_lower for n in [
-        "prem singh yadav", "prem s. yadav", "prem s yadav",
-        "p. s. yadav", "p.s. yadav", "p s yadav", "yadav ps", "yadav, p. s.",
-        "डॉ. प्रेम सिंह यादव", "डा. प्रेम सिंह यादव", "प्रेम सिंह यादव"
-    ])
+    has_name = any(
+        n in t_lower
+        for n in [
+            "prem singh yadav",
+            "prem s. yadav",
+            "prem s yadav",
+            "p. s. yadav",
+            "p.s. yadav",
+            "p s yadav",
+            "yadav ps",
+            "yadav, p. s.",
+            "डॉ. प्रेम सिंह यादव",
+            "डा. प्रेम सिंह यादव",
+            "प्रेम सिंह यादव",
+        ]
+    )
     # Context signals
-    has_context = any(c in t_lower for c in [
-        "cirb", "buffalo", "bubalis", "hisar", "clon", "semen", "embryo", "oocyte", "icar"
-    ])
+    has_context = any(
+        c in t_lower
+        for c in [
+            "cirb",
+            "buffalo",
+            "bubalis",
+            "hisar",
+            "clon",
+            "semen",
+            "embryo",
+            "oocyte",
+            "icar",
+        ]
+    )
     return has_name and has_context
+
 
 def api_post(path: str, payload: dict) -> dict:
     req = urllib.request.Request(
@@ -135,6 +175,7 @@ def api_post(path: str, payload: dict) -> dict:
         headers={"Content-Type": "application/json"},
     )
     return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
+
 
 def crawl(max_pages: int = 20, wait_seconds: int = 10):
     client = MobileBrowserClient()
@@ -161,7 +202,7 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
 
             time.sleep(3)
             dom = client.extract_dom(include_text=True, include_links=True)
-            text = (dom.get("content", {}).get("text", "") or "")
+            text = dom.get("content", {}).get("text", "") or ""
             title = dom.get("title", "") or ""
             links = dom.get("content", {}).get("links", []) or []
 
@@ -173,14 +214,19 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
                 if verify_dr_yadav(text, title):
                     print("  --> VERIFIED DR. YADAV WORK! Ingesting into session...")
                     try:
-                        r = api_post("/research/add-source-paste", {
-                            "profile_name": SESSION_ID,
-                            "url": url,
-                            "pasted_text": text[:15000]
-                        })
+                        r = api_post(
+                            "/research/add-source-paste",
+                            {
+                                "profile_name": SESSION_ID,
+                                "url": url,
+                                "pasted_text": text[:15000],
+                            },
+                        )
                         existing_urls.add(norm)
                         ingested_count += 1
-                        print(f"  [SUCCESS] Ingested source #{ingested_count}: {url[:70]}")
+                        print(
+                            f"  [SUCCESS] Ingested source #{ingested_count}: {url[:70]}"
+                        )
                     except Exception as ie:
                         print(f"  [WARN] Ingestion error: {ie}")
                 else:
@@ -206,10 +252,19 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
                 print("  [HEAL] Attempting auto-heal of mobile bridge...")
                 try:
                     import subprocess
+
                     subprocess.run(
-                        ["ssh", "-p", "8022", "-o", "BatchMode=yes", "u0_a509@100.72.202.86",
-                         "am startservice org.openscrape.browser/.BrowserAgentService"],
-                        capture_output=True, timeout=10
+                        [
+                            "ssh",
+                            "-p",
+                            "8022",
+                            "-o",
+                            "BatchMode=yes",
+                            "u0_a509@100.72.202.86",
+                            "am startservice org.openscrape.browser/.BrowserAgentService",
+                        ],
+                        capture_output=True,
+                        timeout=10,
                     )
                     time.sleep(5)
                 except Exception as he:
@@ -217,7 +272,9 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
             time.sleep(5)
 
     print("\n" + "=" * 60)
-    print(f"[*] Crawl finished. Visited: {len(visited)} | New sources ingested: {ingested_count}")
+    print(
+        f"[*] Crawl finished. Visited: {len(visited)} | New sources ingested: {ingested_count}"
+    )
     # Sync session
     try:
         api_post("/sessions/resume", {"session_id": SESSION_ID})
@@ -225,8 +282,10 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
     except Exception as se:
         print(f"[*] Session sync error: {se}")
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-pages", type=int, default=15)
     parser.add_argument("--wait", type=int, default=10)

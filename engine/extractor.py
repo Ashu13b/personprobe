@@ -1,4 +1,5 @@
 """Extract structured claims from sources, each bound to a citation URL."""
+
 from __future__ import annotations
 import json
 from .models import Source, Claim, PersonProfile, SourceReliability, VerificationState
@@ -6,22 +7,30 @@ from .llm import LLMProvider
 
 # The Wikipedia slots we expect a sourced value for (publication handled separately)
 WIKI_SLOTS = [
-    "full_name", "birth_date", "birth_place", "nationality",
-    "affiliation", "position", "field", "education", "known_for", "award",
+    "full_name",
+    "birth_date",
+    "birth_place",
+    "nationality",
+    "affiliation",
+    "position",
+    "field",
+    "education",
+    "known_for",
+    "award",
 ]
 
 # What kind of source typically fills each slot
 SLOT_SOURCE_HINTS: dict[str, str] = {
-    "birth_date":   "news article, obituary, or institutional bio",
-    "birth_place":  "news article or institutional bio",
-    "nationality":  "institutional bio or news",
-    "affiliation":  "institution website (faculty/staff page)",
-    "position":     "institution website (faculty/staff page)",
-    "field":        "institution website or research profile",
-    "education":    "institution website or CV/bio page",
-    "known_for":    "news article or research profile",
-    "award":        "press release, news, or institution website",
-    "full_name":    "institution website or official document",
+    "birth_date": "news article, obituary, or institutional bio",
+    "birth_place": "news article or institutional bio",
+    "nationality": "institutional bio or news",
+    "affiliation": "institution website (faculty/staff page)",
+    "position": "institution website (faculty/staff page)",
+    "field": "institution website or research profile",
+    "education": "institution website or CV/bio page",
+    "known_for": "news article or research profile",
+    "award": "press release, news, or institution website",
+    "full_name": "institution website or official document",
 }
 
 
@@ -42,6 +51,7 @@ def find_missing_slots(profile: PersonProfile, claims: list[Claim]) -> list[str]
     if profile.full_name:
         filled.add("full_name")
     return [s for s in WIKI_SLOTS if s not in filled]
+
 
 SYSTEM = """\
 Extract structured facts about a person from a source for a Wikipedia article.
@@ -67,13 +77,15 @@ date_context rules (critical):
 - NEVER infer or guess a date from context. "received the award" → no date_context."""
 
 
-def _validate_and_filter_claims(claims: list[Claim], profile: PersonProfile) -> list[Claim]:
+def _validate_and_filter_claims(
+    claims: list[Claim], profile: PersonProfile
+) -> list[Claim]:
     import re
-    
+
     def get_year(text: str | None) -> int | None:
         if not text:
             return None
-        m = re.search(r'\b(1[89]\d\d|20\d\d)\b', text)
+        m = re.search(r"\b(1[89]\d\d|20\d\d)\b", text)
         return int(m.group(1)) if m else None
 
     # Find the earliest year from non-birth claims in the profile or in the new claims
@@ -92,8 +104,24 @@ def _validate_and_filter_claims(claims: list[Claim], profile: PersonProfile) -> 
     earliest_other_year = min(all_other_years) if all_other_years else None
 
     animal_kws = {
-        "cloned", "cloning", "animal", "buffalo", "calf", "cow", "bull", "sheep", "goat",
-        "offspring", "garima", "samrupa", "ganga", "dolly", "litter", "breed", "species", "surrogate"
+        "cloned",
+        "cloning",
+        "animal",
+        "buffalo",
+        "calf",
+        "cow",
+        "bull",
+        "sheep",
+        "goat",
+        "offspring",
+        "garima",
+        "samrupa",
+        "ganga",
+        "dolly",
+        "litter",
+        "breed",
+        "species",
+        "surrogate",
     }
 
     result = []
@@ -102,7 +130,7 @@ def _validate_and_filter_claims(claims: list[Claim], profile: PersonProfile) -> 
             text_lower = c.text.lower()
             # Check for animal cloning keywords
             has_animal_kw = any(kw in text_lower for kw in animal_kws)
-            
+
             # Check for logical date inconsistency
             birth_year = get_year(c.date_context) or get_year(c.text)
             is_inconsistent = False
@@ -122,7 +150,7 @@ def _validate_and_filter_claims(claims: list[Claim], profile: PersonProfile) -> 
             elif is_inconsistent:
                 # If logically inconsistent and no animal keywords, discard it as a faulty birth date
                 continue
-                
+
         result.append(c)
     return result
 
@@ -156,8 +184,11 @@ def filter_person_snippets(text: str, person_name: str, window: int = 3) -> str:
     return "\n---\n".join(extracted_blocks)[:1200]
 
 
-def extract_claims(profile: PersonProfile, sources: list[Source], llm: LLMProvider) -> list[Claim]:
+def extract_claims(
+    profile: PersonProfile, sources: list[Source], llm: LLMProvider
+) -> list[Claim]:
     from .llm import LocalProvider, NullProvider, StubProvider
+
     if isinstance(llm, (StubProvider, NullProvider, LocalProvider)):
         # Rule-based providers fabricate plausible claim prose from snippets.
         # Never inject that into a session; a human adds facts via add-document-fact.
@@ -168,7 +199,9 @@ def extract_claims(profile: PersonProfile, sources: list[Source], llm: LLMProvid
     source_map = {s.url: classify_source_provenance(s, profile.name) for s in sources}
 
     # prioritise RS sources, then process all with a source
-    ordered = sorted(sources, key=lambda s: s.reliability != SourceReliability.reliable_secondary)
+    ordered = sorted(
+        sources, key=lambda s: s.reliability != SourceReliability.reliable_secondary
+    )
 
     for source in ordered[:8]:  # cap to avoid token overrun
         # Skip sources flagged as the wrong person
@@ -192,7 +225,8 @@ def extract_claims(profile: PersonProfile, sources: list[Source], llm: LLMProvid
         context_line = " | ".join(filter(None, [profile.field, profile.affiliation]))
         prompt = (
             f"Person: {profile.name}"
-            + (f" ({context_line})" if context_line else "") + "\n"
+            + (f" ({context_line})" if context_line else "")
+            + "\n"
             f"Source URL: {source.url}\n"
             f"Publisher: {source.publisher}\n"
             f"Content: {content[:1200]}"

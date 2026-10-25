@@ -3,26 +3,81 @@
 Academic DOI sources are validated by author_check; this module handles
 web, news, and profile sources where we only have a snippet and title.
 """
+
 from __future__ import annotations
 from .models import Source
 
 # Fields that strongly indicate a different well-known person with the same name
 _WRONG_PERSON_SIGNALS = [
-    "politician", "member of parliament", "member of legislative", "lok sabha", "vidhan sabha",
-    "elections", "candidate", "constituency", "polling", "party", "bjp", "inc", "bsp", "samajwadi",
-    "actor", "actress", "singer", "musician", "spotify", "deezer", "soundcloud", "album", "artist",
-    "cricketer", "footballer", "minister", "chief minister", "governor", "judge", "justice",
-    "director general", "inspector general", "police", "honda", "sales executive", "tutor", "urbanpro",
+    "politician",
+    "member of parliament",
+    "member of legislative",
+    "lok sabha",
+    "vidhan sabha",
+    "elections",
+    "candidate",
+    "constituency",
+    "polling",
+    "party",
+    "bjp",
+    "inc",
+    "bsp",
+    "samajwadi",
+    "actor",
+    "actress",
+    "singer",
+    "musician",
+    "spotify",
+    "deezer",
+    "soundcloud",
+    "album",
+    "artist",
+    "cricketer",
+    "footballer",
+    "minister",
+    "chief minister",
+    "governor",
+    "judge",
+    "justice",
+    "director general",
+    "inspector general",
+    "police",
+    "honda",
+    "sales executive",
+    "tutor",
+    "urbanpro",
 ]
 
 _ACADEMIC_FETCHED_BY = {"semantic_scholar"}
-_DOI_PATTERNS = ["doi.org", "pubmed", "ncbi.nlm", "springer", "plos",
-                 "tandfonline", "wiley", "elsevier", "mdpi", "frontiersin"]
+_DOI_PATTERNS = [
+    "doi.org",
+    "pubmed",
+    "ncbi.nlm",
+    "springer",
+    "plos",
+    "tandfonline",
+    "wiley",
+    "elsevier",
+    "mdpi",
+    "frontiersin",
+]
 
 # Domains that exist to redirect elsewhere — a final URL on a different domain
 # is the expected outcome, not a wrong-page trap.
-_SHORTENERS = {"t.co", "bit.ly", "goo.gl", "tinyurl.com", "ow.ly", "bit.do",
-               "rb.gy", "dlvr.it", "trib.al", "lnkd.in", "shorturl.at", "rebrand.ly"}
+_SHORTENERS = {
+    "t.co",
+    "bit.ly",
+    "goo.gl",
+    "tinyurl.com",
+    "ow.ly",
+    "bit.do",
+    "rb.gy",
+    "dlvr.it",
+    "trib.al",
+    "lnkd.in",
+    "shorturl.at",
+    "rebrand.ly",
+}
 
 
 _PRESENTATION_SUBDOMAINS = ("www.", "m.", "mobile.", "amp.")
@@ -30,11 +85,12 @@ _PRESENTATION_SUBDOMAINS = ("www.", "m.", "mobile.", "amp.")
 
 def _redirect_norm(url: str) -> tuple[str, str]:
     from urllib.parse import urlparse
+
     p = urlparse(url)
     host = p.netloc.lower()
     for prefix in _PRESENTATION_SUBDOMAINS:
         if host.startswith(prefix):
-            host = host[len(prefix):]
+            host = host[len(prefix) :]
             break
     path = p.path.rstrip("/") or "/"
     # AMP pages are the same article; normalize the /amp suffix away.
@@ -65,15 +121,41 @@ def is_meaningful_redirect(url: str, final_url: str) -> bool:
 
 
 _INDIC_NAME_MAP = {
-    "prem": "प्रेम", "singh": "सिंह", "yadav": "यादव", "kumar": "कुमार",
-    "sharma": "शर्मा", "verma": "वर्मा", "gupta": "गुप्ता", "lal": "लाल",
-    "rao": "राव", "reddy": "रेड्डी", "patel": "पटेल", "mishra": "मिश्रा",
-    "joshi": "जोशी", "nair": "नायर", "das": "दास", "sen": "सेन",
+    "prem": "प्रेम",
+    "singh": "सिंह",
+    "yadav": "यादव",
+    "kumar": "कुमार",
+    "sharma": "शर्मा",
+    "verma": "वर्मा",
+    "gupta": "गुप्ता",
+    "lal": "लाल",
+    "rao": "राव",
+    "reddy": "रेड्डी",
+    "patel": "पटेल",
+    "mishra": "मिश्रा",
+    "joshi": "जोशी",
+    "nair": "नायर",
+    "das": "दास",
+    "sen": "सेन",
 }
 
 _INDIC_CONTEXT_TERMS = [
-    "वैज्ञानिक", "अनुसंधान", "शोध", "संस्थान", "क्लोन", "क्लोनिंग", "हिसार", "सीआईआरबी",
-    "कृषि", "बायोटेक्नोलॉजी", "बायो", "प्रोफेसर", "डॉक्टर", "डॉ.", "गौरव", "मुर्रा",
+    "वैज्ञानिक",
+    "अनुसंधान",
+    "शोध",
+    "संस्थान",
+    "क्लोन",
+    "क्लोनिंग",
+    "हिसार",
+    "सीआईआरबी",
+    "कृषि",
+    "बायोटेक्नोलॉजी",
+    "बायो",
+    "प्रोफेसर",
+    "डॉक्टर",
+    "डॉ.",
+    "गौरव",
+    "मुर्रा",
 ]
 
 
@@ -121,7 +203,7 @@ def flag_source(source: Source, person_name: str, field: str, affiliation: str) 
         return "relevant"
     if name_found:
         return "uncertain"  # name present but no field/affiliation context
-    return "uncertain"      # name not found in snippet (could still be right page)
+    return "uncertain"  # name not found in snippet (could still be right page)
 
 
 def flag_sources(

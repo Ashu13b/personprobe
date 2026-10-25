@@ -1,4 +1,5 @@
 """Multi-strategy URL fetcher with fallbacks for blocked sources."""
+
 from __future__ import annotations
 import ipaddress
 import re
@@ -7,8 +8,12 @@ import requests
 from urllib.parse import quote_plus, urlparse
 from .mobile_bridge import is_mobile_bridge_available, fetch_via_mobile_bridge
 
-HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"}
-BOT_HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"}  # for APIs that want bot UA
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+}
+BOT_HEADERS = {
+    "User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"
+}  # for APIs that want bot UA
 TIMEOUT = 10
 MAX_FETCH_BYTES = 5 * 1024 * 1024  # 5 MB maximum response body
 
@@ -17,7 +22,9 @@ MAX_FETCH_BYTES = 5 * 1024 * 1024  # 5 MB maximum response body
 BOT_WALL_RE = re.compile(
     r"captcha|cf-browser-verification|just a moment|access denied|"
     r"unusual activity|please verify|verify you are human|enable javascript|"
-    r"403 forbidden", re.I)
+    r"403 forbidden",
+    re.I,
+)
 
 
 def is_safe_public_url(url: str) -> bool:
@@ -34,7 +41,13 @@ def is_safe_public_url(url: str) -> bool:
             return False
         try:
             ip = ipaddress.ip_address(hostname_lower)
-            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            if (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_reserved
+                or ip.is_multicast
+            ):
                 return False
             return True
         except ValueError:
@@ -45,7 +58,13 @@ def is_safe_public_url(url: str) -> bool:
             for family, _, _, _, sockaddr in addr_info:
                 ip_str = sockaddr[0]
                 ip = ipaddress.ip_address(ip_str)
-                if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+                if (
+                    ip.is_private
+                    or ip.is_loopback
+                    or ip.is_link_local
+                    or ip.is_reserved
+                    or ip.is_multicast
+                ):
                     return False
         except socket.gaierror:
             pass
@@ -63,10 +82,15 @@ def check_liveness(url: str) -> tuple[str, str | None]:
     """
     if not is_safe_public_url(url):
         return "unknown", None
-    from .fetch_telemetry import timed
+    from .fetch_telemetry import record, retry_allowed, timed
+
+    if not retry_allowed(url):
+        return "blocked", None
     try:
         with timed("http", url) as t:
-            resp = requests.get(url, headers=HEADERS, timeout=12, allow_redirects=True, stream=True)
+            resp = requests.get(
+                url, headers=HEADERS, timeout=12, allow_redirects=True, stream=True
+            )
             final_url = getattr(resp, "url", url)
             if final_url != url and not is_safe_public_url(final_url):
                 t.status = "unsafe-redirect"
@@ -83,10 +107,21 @@ def check_liveness(url: str) -> tuple[str, str | None]:
         if is_mobile_bridge_available():
             try:
                 res = fetch_via_mobile_bridge(url, wait_seconds=3)
-                if res and not res.get("has_captcha") and len(res.get("text", "")) > 100:
+                if (
+                    res
+                    and not res.get("has_captcha")
+                    and len(res.get("text", "")) > 100
+                ):
                     return "alive", None
             except Exception:
                 pass
+        record(
+            "http",
+            url,
+            status=code,
+            throttled=True,
+            note="bot_wall_mobile_retry_failed",
+        )
         return "blocked", None
     if 200 <= code < 400:
         return "alive", None
@@ -96,8 +131,12 @@ def check_liveness(url: str) -> tuple[str, str | None]:
 def get_wayback_url(url: str) -> str | None:
     """Return the closest Wayback snapshot URL for a dead page, or None."""
     try:
-        resp = requests.get("https://archive.org/wayback/available",
-                            params={"url": url}, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            "https://archive.org/wayback/available",
+            params={"url": url},
+            headers=HEADERS,
+            timeout=10,
+        )
         snapshot = resp.json().get("archived_snapshots", {}).get("closest", {})
         snap_url = snapshot.get("url") or None
         if snap_url and "/*/" in snap_url:
@@ -108,13 +147,23 @@ def get_wayback_url(url: str) -> str | None:
 
 
 class FetchResult:
-    def __init__(self, url: str, text: str, method: str, blocked: bool = False, raw_html: str = "", final_url: str = ""):
+    def __init__(
+        self,
+        url: str,
+        text: str,
+        method: str,
+        blocked: bool = False,
+        raw_html: str = "",
+        final_url: str = "",
+    ):
         self.url = url
-        self.text = text          # extracted text content (paragraphs only)
+        self.text = text  # extracted text content (paragraphs only)
         self.raw_html = raw_html  # full HTML — for link extraction in crawler
-        self.method = method      # direct | wayback | orcid | blocked
-        self.blocked = blocked    # True = needs user paste or screenshot
-        self.final_url = final_url  # URL the page really loaded at (after redirects), "" if unknown
+        self.method = method  # direct | wayback | orcid | blocked
+        self.blocked = blocked  # True = needs user paste or screenshot
+        self.final_url = (
+            final_url  # URL the page really loaded at (after redirects), "" if unknown
+        )
 
 
 # The remote browser is mounted at /browser on the unified server (port 3890);
@@ -172,7 +221,9 @@ def fetch_url(url: str) -> FetchResult:
         text, raw_html, final_url = result
         # Check if direct fetch got an empty bot wall
         if not (BOT_WALL_RE.search(text[:500]) and len(text) < 300):
-            return FetchResult(url, text, method="direct", raw_html=raw_html, final_url=final_url)
+            return FetchResult(
+                url, text, method="direct", raw_html=raw_html, final_url=final_url
+            )
 
     # 2. OpenScrape Mobile Browser Bridge fallback (physical mobile IP unblocks bot-walls)
     if is_mobile_bridge_available():
@@ -200,6 +251,7 @@ def fetch_url(url: str) -> FetchResult:
 
     # 5. Headless stealth browser
     from .fetcher_browser import fetch_with_browser
+
     browser_result = fetch_with_browser(url)
     if not browser_result.blocked:
         return browser_result
@@ -218,7 +270,9 @@ def _direct_fetch(url: str) -> tuple[str, str, str] | None:
     if not is_safe_public_url(url):
         return None
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=TIMEOUT, allow_redirects=True, stream=True)
+        resp = requests.get(
+            url, headers=HEADERS, timeout=TIMEOUT, allow_redirects=True, stream=True
+        )
         if resp.status_code in (401, 403, 407, 429):
             return None
         resp.raise_for_status()
@@ -253,6 +307,7 @@ def _pdf_extract(data: bytes) -> str:
         from pdfminer.high_level import extract_text_to_fp
         from pdfminer.layout import LAParams
         import io
+
         out = io.StringIO()
         extract_text_to_fp(io.BytesIO(data), out, laparams=LAParams())
         text = out.getvalue().strip()
@@ -264,6 +319,7 @@ def _pdf_extract(data: bytes) -> str:
     try:
         import io
         from pypdf import PdfReader
+
         reader = PdfReader(io.BytesIO(data))
         pages = [p.extract_text() or "" for p in reader.pages[:20]]
         text = "\n".join(pages).strip()
@@ -279,7 +335,8 @@ def _wayback_fetch(url: str) -> str | None:
         # Check if Wayback has a snapshot
         avail = requests.get(
             f"https://archive.org/wayback/available?url={quote_plus(url)}",
-            headers=HEADERS, timeout=TIMEOUT,
+            headers=HEADERS,
+            timeout=TIMEOUT,
         )
         avail.raise_for_status()
         snapshot = avail.json().get("archived_snapshots", {}).get("closest", {})
@@ -334,11 +391,17 @@ def _orcid_to_text(data: dict) -> str:
         lines.append(f"Biography: {bio['content']}")
 
     # Employments
-    employments = data.get("activities-summary", {}).get("employments", {}).get("affiliation-group", [])
+    employments = (
+        data.get("activities-summary", {})
+        .get("employments", {})
+        .get("affiliation-group", [])
+    )
     for emp in employments[:3]:
         summaries = emp.get("summaries", [])
         for s in summaries:
-            org = s.get("employment-summary", {}).get("organization", {}).get("name", "")
+            org = (
+                s.get("employment-summary", {}).get("organization", {}).get("name", "")
+            )
             role = s.get("employment-summary", {}).get("role-title", "")
             if org or role:
                 lines.append(f"Employment: {role} at {org}".strip(" at"))
@@ -358,10 +421,15 @@ def _orcid_to_text(data: dict) -> str:
 def _extract_text(html: str) -> str:
     try:
         from bs4 import BeautifulSoup
+
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup(["script", "style", "nav", "footer", "header"]):
             tag.decompose()
-        paras = [p.get_text(" ", strip=True) for p in soup.find_all("p") if len(p.get_text()) > 60]
+        paras = [
+            p.get_text(" ", strip=True)
+            for p in soup.find_all("p")
+            if len(p.get_text()) > 60
+        ]
         return "\n".join(paras[:20])
     except Exception:
         return html[:2000]

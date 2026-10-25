@@ -15,27 +15,32 @@ SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json
 
 TARGET_QUERIES = [
     # 1. Ph.D. Dissertation at CCS HAU (1991)
-    ('inq-be0a1d7d', '"Prem Singh Yadav" "HAU" "1991" OR "thesis" OR "dissertation"'),
-    ('inq-be0a1d7d', '"P.S. Yadav" "Animal Production Physiology" "HAU"'),
-    ('inq-be0a1d7d', '"P.S. Yadav" "CCSHAU" OR "HAU" "1991"'),
-    ('inq-be0a1d7d', 'site:krishikosh.egranth.ac.in "Prem Singh Yadav" "1991"'),
-
+    ("inq-be0a1d7d", '"Prem Singh Yadav" "HAU" "1991" OR "thesis" OR "dissertation"'),
+    ("inq-be0a1d7d", '"P.S. Yadav" "Animal Production Physiology" "HAU"'),
+    ("inq-be0a1d7d", '"P.S. Yadav" "CCSHAU" OR "HAU" "1991"'),
+    ("inq-be0a1d7d", 'site:krishikosh.egranth.ac.in "Prem Singh Yadav" "1991"'),
     # 2. Selection to ARS & Pay Level 14 Principal Scientist
-    ('inq-c4ae3398', '"Prem Singh Yadav" "Agricultural Research Service" OR "ARS" ICAR'),
-    ('inq-c4ae3398', '"P.S. Yadav" "Principal Scientist" "Pay Level 14" OR "Level-14" CIRB'),
-    ('inq-c4ae3398', '"P.S. Yadav" "ARS" "scientist" "CIRB" "1993" OR "1992" OR "1994"'),
-
+    (
+        "inq-c4ae3398",
+        '"Prem Singh Yadav" "Agricultural Research Service" OR "ARS" ICAR',
+    ),
+    (
+        "inq-c4ae3398",
+        '"P.S. Yadav" "Principal Scientist" "Pay Level 14" OR "Level-14" CIRB',
+    ),
+    (
+        "inq-c4ae3398",
+        '"P.S. Yadav" "ARS" "scientist" "CIRB" "1993" OR "1992" OR "1994"',
+    ),
     # 3. Residential quarters at ICAR-CIRB Sirsa Road Campus
-    ('inq-8adb7c15', '"Prem Singh Yadav" "Type-V" OR "Residential" "CIRB" "Hisar"'),
-    ('inq-8adb7c15', '"P.S. Yadav" "CIRB Campus" "Sirsa Road" Hisar'),
-
+    ("inq-8adb7c15", '"Prem Singh Yadav" "Type-V" OR "Residential" "CIRB" "Hisar"'),
+    ("inq-8adb7c15", '"P.S. Yadav" "CIRB Campus" "Sirsa Road" Hisar'),
     # 4. The Gazette of India Notifications (ICAR / DARE Appointment)
-    ('inq-8e4d0c53', 'site:egazette.gov.in "Prem Singh Yadav"'),
-    ('inq-8e4d0c53', '"Gazette of India" "Prem Singh Yadav" "ICAR"'),
-
+    ("inq-8e4d0c53", 'site:egazette.gov.in "Prem Singh Yadav"'),
+    ("inq-8e4d0c53", '"Gazette of India" "Prem Singh Yadav" "ICAR"'),
     # 5. Domicile & Electoral Roll in Hisar
-    ('inq-afb8942f', 'site:ceoharyana.gov.in "Prem Singh" "Hisar"'),
-    ('inq-afb8942f', '"Prem Singh Yadav" "Hisar" "electoral roll" OR "voter"'),
+    ("inq-afb8942f", 'site:ceoharyana.gov.in "Prem Singh" "Hisar"'),
+    ("inq-afb8942f", '"Prem Singh Yadav" "Hisar" "electoral roll" OR "voter"'),
 ]
 
 
@@ -56,12 +61,14 @@ def main():
     inquiries = profile.get("forensic_inquiries", [])
     inq_map = {i["inquiry_id"]: i for i in inquiries}
 
-    print(f"[*] Starting targeted forensic probing for {len(TARGET_QUERIES)} queries...")
+    print(
+        f"[*] Starting targeted forensic probing for {len(TARGET_QUERIES)} queries..."
+    )
 
     discovered_by_inquiry = {}
 
     for idx, (inq_id, query) in enumerate(TARGET_QUERIES):
-        print(f"\n[{idx+1}/{len(TARGET_QUERIES)}] ({inq_id}) Query: {query}")
+        print(f"\n[{idx + 1}/{len(TARGET_QUERIES)}] ({inq_id}) Query: {query}")
         search_url = "https://www.google.com/search?q=" + urllib.parse.quote(query)
 
         try:
@@ -82,7 +89,15 @@ def main():
                 text = link.get("text", "").strip()
                 if not href.startswith("http"):
                     continue
-                if any(bad in href for bad in ["google.com", "youtube.com/channel", "support.google", "accounts.google"]):
+                if any(
+                    bad in href
+                    for bad in [
+                        "google.com",
+                        "youtube.com/channel",
+                        "support.google",
+                        "accounts.google",
+                    ]
+                ):
                     continue
                 candidate_links.append((href, text))
 
@@ -112,10 +127,14 @@ def main():
                 inq_map[inq_id]["status"] = "confirmed"
                 inq_map[inq_id]["online_probe_status"] = "confirmed"
                 updated_count += 1
-            print(f"[+] Inquiry {inq_id} now has {len(existing_links)} links, status={inq_map[inq_id]['status']}")
+            print(
+                f"[+] Inquiry {inq_id} now has {len(existing_links)} links, status={inq_map[inq_id]['status']}"
+            )
 
     save_session(session_data)
-    print(f"\n[*] Finished. Updated {updated_count} inquiries with newly discovered primary evidence.")
+    print(
+        f"\n[*] Finished. Updated {updated_count} inquiries with newly discovered primary evidence."
+    )
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 """Notability scoring — informational only, never blocks draft generation."""
+
 from __future__ import annotations
 import time
 import requests
@@ -13,7 +14,9 @@ _S2_TTL_SECONDS = 600
 _s2_cache: dict[str, tuple[float, dict]] = {}
 
 
-def score_notability(name: str, sources: list[Source], claims: list | None = None) -> NotabilityResult:
+def score_notability(
+    name: str, sources: list[Source], claims: list | None = None
+) -> NotabilityResult:
     """Return a conservative coverage signal, never an acceptance prediction.
 
     A source counts only when it is independent secondary coverage, has been
@@ -31,10 +34,12 @@ def score_notability(name: str, sources: list[Source], claims: list | None = Non
         normalize_url(claim.source_url)
         for claim in (claims or [])
         if claim.source_url
-        and claim.verification in {VerificationState.confirmed, VerificationState.edited}
+        and claim.verification
+        in {VerificationState.confirmed, VerificationState.edited}
     }
     candidates = [
-        source for source in classified_sources
+        source
+        for source in classified_sources
         if normalize_url(source.url) in confirmed_urls
         and source.human_verified
         and source.is_independent
@@ -45,11 +50,17 @@ def score_notability(name: str, sources: list[Source], claims: list | None = Non
 
     def editorial_key(source: Source) -> str:
         explicit = (source.editorial_origin or "").strip().lower()
-        return explicit or (urlsplit(source.url).hostname or "").lower().removeprefix("www.")
+        return explicit or (urlsplit(source.url).hostname or "").lower().removeprefix(
+            "www."
+        )
 
     candidate_outlets = {editorial_key(source) for source in candidates}
     candidate_outlets.discard("")
-    outlets = {editorial_key(source) for source in candidates if source.coverage_depth == "significant"}
+    outlets = {
+        editorial_key(source)
+        for source in candidates
+        if source.coverage_depth == "significant"
+    }
     outlets.discard("")
     rs_count = len(outlets)
     candidate_count = len(candidate_outlets)
@@ -57,13 +68,17 @@ def score_notability(name: str, sources: list[Source], claims: list | None = Non
     # Authored works remain useful identity/research context, but publication
     # volume does not itself satisfy academic notability and adds no score.
     authored_count = sum(
-        1 for source in classified_sources
+        1
+        for source in classified_sources
         if source.provenance_category == "authored_publication"
         and normalize_url(source.url) in confirmed_urls
     )
     wp_prof_signals = (
-        [f"{authored_count} confirmed authored publications (context only; not a notability criterion)"]
-        if authored_count else []
+        [
+            f"{authored_count} confirmed authored publications (context only; not a notability criterion)"
+        ]
+        if authored_count
+        else []
     )
 
     score = round(min(rs_count / 3, 1.0), 2)
@@ -114,9 +129,15 @@ def _semantic_scholar_signals(name: str) -> dict:
 
 def _fetch_semantic_scholar(name: str) -> dict:
     try:
-        resp = requests.get(f"{S2_API}/author/search",
-            params={"query": name, "fields": "citationCount,paperCount,hIndex", "limit": 1},
-            timeout=8)
+        resp = requests.get(
+            f"{S2_API}/author/search",
+            params={
+                "query": name,
+                "fields": "citationCount,paperCount,hIndex",
+                "limit": 1,
+            },
+            timeout=8,
+        )
         resp.raise_for_status()
         authors = resp.json().get("data", [])
         if not authors:

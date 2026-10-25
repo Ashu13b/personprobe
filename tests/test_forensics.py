@@ -1,4 +1,5 @@
 """Tests for the Forensic Investigation Engine: Pivots, Auxiliary Leads, and Sweeps."""
+
 from engine.models import PersonProfile, InvestigationPivot, AuxiliaryLead
 from engine.forensics import (
     seed_default_pivots,
@@ -73,36 +74,45 @@ def test_forensic_routes():
     pivot_id = first_pivot["pivot_id"]
 
     # 2. POST /forensics/leads (add an auxiliary lead)
-    lead_resp = client.post("/forensics/leads", json={
-        "profile_name": profile.name,
-        "pivot_id": pivot_id,
-        "title": "NDRI Annual Report 2017 Staff Roster",
-        "url": "https://ndri.res.in/reports/2017.pdf",
-        "category": "annual_report",
-        "lead_notes": "Verify scientist grade and sanctioned laboratory staff",
-        "actor": "human",
-    })
+    lead_resp = client.post(
+        "/forensics/leads",
+        json={
+            "profile_name": profile.name,
+            "pivot_id": pivot_id,
+            "title": "NDRI Annual Report 2017 Staff Roster",
+            "url": "https://ndri.res.in/reports/2017.pdf",
+            "category": "annual_report",
+            "lead_notes": "Verify scientist grade and sanctioned laboratory staff",
+            "actor": "human",
+        },
+    )
     assert lead_resp.status_code == 200
     lead_data = lead_resp.json()
     assert lead_data["ok"] is True
     lead_id = lead_data["lead"]["lead_id"]
 
     # 3. PATCH /forensics/leads/{lead_id} (mark corroborated)
-    patch_resp = client.patch(f"/forensics/leads/{lead_id}", json={
-        "profile_name": profile.name,
-        "lead_id": lead_id,
-        "status": "corroborated",
-        "source_snippet": "Dr Forensic Subject listed as Principal Scientist, Division of Animal Biotech",
-    })
+    patch_resp = client.patch(
+        f"/forensics/leads/{lead_id}",
+        json={
+            "profile_name": profile.name,
+            "lead_id": lead_id,
+            "status": "corroborated",
+            "source_snippet": "Dr Forensic Subject listed as Principal Scientist, Division of Animal Biotech",
+        },
+    )
     assert patch_resp.status_code == 200
     assert patch_resp.json()["lead"]["status"] == "corroborated"
 
     # 4. POST /forensics/sweep (generate automated public record query leads)
-    sweep_resp = client.post("/forensics/sweep", json={
-        "profile_name": profile.name,
-        "pivot_id": pivot_id,
-        "actor": "agent",
-    })
+    sweep_resp = client.post(
+        "/forensics/sweep",
+        json={
+            "profile_name": profile.name,
+            "pivot_id": pivot_id,
+            "actor": "agent",
+        },
+    )
     assert sweep_resp.status_code == 200
     assert sweep_resp.json()["new_leads_count"] >= 2
 
@@ -152,7 +162,9 @@ def test_forensic_inquiries_api():
     store._save_session(profile)
 
     # 1. POST /forensics/inquiries/generate
-    gen_resp = client.post("/forensics/inquiries/generate", json={"profile_name": profile.name})
+    gen_resp = client.post(
+        "/forensics/inquiries/generate", json={"profile_name": profile.name}
+    )
     assert gen_resp.status_code == 200
     gen_data = gen_resp.json()
     assert gen_data["ok"] is True
@@ -162,51 +174,70 @@ def test_forensic_inquiries_api():
     inquiry_id = gen_data["inquiries"][0]["inquiry_id"]
 
     # 2. PATCH /forensics/inquiries/{inquiry_id}
-    patch_resp = client.patch(f"/forensics/inquiries/{inquiry_id}", json={
-        "profile_name": profile.name,
-        "status": "confirmed",
-        "findings_summary": "Located convocation entry in CCS HAU library catalogue archive.",
-        "actor": "human",
-    })
+    patch_resp = client.patch(
+        f"/forensics/inquiries/{inquiry_id}",
+        json={
+            "profile_name": profile.name,
+            "status": "confirmed",
+            "findings_summary": "Located convocation entry in CCS HAU library catalogue archive.",
+            "actor": "human",
+        },
+    )
     assert patch_resp.status_code == 200
     assert patch_resp.json()["ok"] is True
-    updated = next(i for i in patch_resp.json()["inquiries"] if i["inquiry_id"] == inquiry_id)
+    updated = next(
+        i for i in patch_resp.json()["inquiries"] if i["inquiry_id"] == inquiry_id
+    )
     assert updated["status"] == "confirmed"
     assert "CCS HAU library" in updated["findings_summary"]
 
     # 3. POST /forensics/inquiries (custom hypothesis)
-    custom_resp = client.post("/forensics/inquiries", json={
-        "profile_name": profile.name,
-        "fact_anchor": "Awarded ICAR Jawaharlal Nehru Award in 1992",
-        "domain": "academic_degree",
-        "deductive_question": "If awarded JN Award in 1992, what ICAR citation booklet exists?",
-        "expected_paper_trails": ["ICAR Foundation Day Awardees Booklet 1992"],
-        "probe_queries": ['"Jawaharlal Nehru Award" "1992" "Prem Singh Yadav"'],
-        "actor": "human",
-    })
+    custom_resp = client.post(
+        "/forensics/inquiries",
+        json={
+            "profile_name": profile.name,
+            "fact_anchor": "Awarded ICAR Jawaharlal Nehru Award in 1992",
+            "domain": "academic_degree",
+            "deductive_question": "If awarded JN Award in 1992, what ICAR citation booklet exists?",
+            "expected_paper_trails": ["ICAR Foundation Day Awardees Booklet 1992"],
+            "probe_queries": ['"Jawaharlal Nehru Award" "1992" "Prem Singh Yadav"'],
+            "actor": "human",
+        },
+    )
     assert custom_resp.status_code == 200
     assert custom_resp.json()["ok"] is True
-    assert any(i["fact_anchor"] == "Awarded ICAR Jawaharlal Nehru Award in 1992" for i in custom_resp.json()["inquiries"])
+    assert any(
+        i["fact_anchor"] == "Awarded ICAR Jawaharlal Nehru Award in 1992"
+        for i in custom_resp.json()["inquiries"]
+    )
 
     # 4. POST /forensics/inquiries/{inquiry_id}/probe
-    probe_resp = client.post(f"/forensics/inquiries/{inquiry_id}/probe", json={
-        "profile_name": profile.name,
-        "actor": "agent",
-    })
+    probe_resp = client.post(
+        f"/forensics/inquiries/{inquiry_id}/probe",
+        json={
+            "profile_name": profile.name,
+            "actor": "agent",
+        },
+    )
     assert probe_resp.status_code == 200
     assert probe_resp.json()["ok"] is True
 
     # 4b. POST /forensics/inquiries/probe-all
-    probe_all_resp = client.post("/forensics/inquiries/probe-all", json={
-        "profile_name": profile.name,
-        "actor": "human",
-    })
+    probe_all_resp = client.post(
+        "/forensics/inquiries/probe-all",
+        json={
+            "profile_name": profile.name,
+            "actor": "human",
+        },
+    )
     assert probe_all_resp.status_code == 200
     assert probe_all_resp.json()["ok"] is True
     assert "inquiries" in probe_all_resp.json()
 
     # 5. DELETE /forensics/inquiries/{inquiry_id}
-    del_resp = client.delete(f"/forensics/inquiries/{inquiry_id}", params={"profile_name": profile.name})
+    del_resp = client.delete(
+        f"/forensics/inquiries/{inquiry_id}", params={"profile_name": profile.name}
+    )
     assert del_resp.status_code == 200
     assert not any(i["inquiry_id"] == inquiry_id for i in del_resp.json()["inquiries"])
 
@@ -217,7 +248,9 @@ def test_forensic_inquiries_api():
     assert atlas_resp.json()["total_repositories"] >= 8
 
     # 7. GET /forensics/atlas/matrix
-    matrix_resp = client.get("/forensics/atlas/matrix", params={"profile_name": profile.name})
+    matrix_resp = client.get(
+        "/forensics/atlas/matrix", params={"profile_name": profile.name}
+    )
     assert matrix_resp.status_code == 200
     assert matrix_resp.json()["ok"] is True
     matrix = matrix_resp.json()["matrix"]
@@ -225,7 +258,9 @@ def test_forensic_inquiries_api():
     assert "offline_archives" in matrix
 
     # 8. POST /forensics/inquiries/expand-civic
-    civic_resp = client.post("/forensics/inquiries/expand-civic", json={"profile_name": profile.name})
+    civic_resp = client.post(
+        "/forensics/inquiries/expand-civic", json={"profile_name": profile.name}
+    )
     assert civic_resp.status_code == 200
     assert civic_resp.json()["ok"] is True
     assert civic_resp.json()["added_count"] >= 1
@@ -257,17 +292,25 @@ def test_forensic_inquiries_api():
 
     # Check that atlas now includes the newly registered repository
     atlas_updated = client.get("/forensics/atlas").json()
-    assert any(r["category_id"] == "test_punjab_plrs_registry" for r in atlas_updated["repositories"])
+    assert any(
+        r["category_id"] == "test_punjab_plrs_registry"
+        for r in atlas_updated["repositories"]
+    )
 
     # 10. DELETE /forensics/atlas/repository/{category_id}
-    del_repo_resp = client.delete("/forensics/atlas/repository/test_punjab_plrs_registry")
+    del_repo_resp = client.delete(
+        "/forensics/atlas/repository/test_punjab_plrs_registry"
+    )
     assert del_repo_resp.status_code == 200
     assert del_repo_resp.json()["ok"] is True
     assert del_repo_resp.json()["deleted_id"] == "test_punjab_plrs_registry"
 
     # Confirm deleted
     atlas_after_del = client.get("/forensics/atlas").json()
-    assert not any(r["category_id"] == "test_punjab_plrs_registry" for r in atlas_after_del["repositories"])
+    assert not any(
+        r["category_id"] == "test_punjab_plrs_registry"
+        for r in atlas_after_del["repositories"]
+    )
 
     # 11. POST /forensics/inquiries/log-failure (Learn from Mistakes and Failures)
     target_inq = profile.forensic_inquiries[0]
@@ -290,7 +333,10 @@ def test_forensic_inquiries_api():
 
     # Verify repository in Atlas accumulated the learned failure mode and warning
     repo_atlas = client.get("/forensics/atlas").json()
-    krishi_repo = next(r for r in repo_atlas["repositories"] if r["category_id"] == "krishikosh_agricultural_repository")
+    krishi_repo = next(
+        r
+        for r in repo_atlas["repositories"]
+        if r["category_id"] == "krishikosh_agricultural_repository"
+    )
     assert "pre_digitization_cutoff" in krishi_repo["known_failure_modes"]
     assert krishi_repo["failure_count"] >= 1
-

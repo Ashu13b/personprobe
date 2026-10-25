@@ -1,4 +1,5 @@
 """In-memory + disk session store and shared helpers for the personprobe API."""
+
 from __future__ import annotations
 
 import json
@@ -74,7 +75,9 @@ def _resolve_profile(name_or_id: str) -> PersonProfile | None:
                 data = _load_session_file(path)
                 if data and "profile" in data:
                     profile = PersonProfile(**data["profile"])
-                    wiki_status = data.get("wiki_status", {"status": "clear", "url": None, "note": None})
+                    wiki_status = data.get(
+                        "wiki_status", {"status": "clear", "url": None, "note": None}
+                    )
                     sid = _ensure_session_id(profile)
                     _sessions[sid] = profile
                     _wiki_statuses[sid] = wiki_status
@@ -84,7 +87,8 @@ def _resolve_profile(name_or_id: str) -> PersonProfile | None:
             raise HTTPException(
                 409,
                 f"Multiple sessions are named '{name_or_id}'. Same-named people cannot "
-                f"be told apart by name — resume by session id instead.")
+                f"be told apart by name — resume by session id instead.",
+            )
         return matches[0]
 
 
@@ -104,6 +108,7 @@ def _apply_provenance(profile: PersonProfile) -> None:
 
 def _save_session(name_or_id: str | PersonProfile) -> None:
     import tempfile
+
     with _lock:
         if isinstance(name_or_id, PersonProfile):
             profile = name_or_id
@@ -117,12 +122,16 @@ def _save_session(name_or_id: str | PersonProfile) -> None:
         _wiki_statuses.setdefault(sid, {"status": "clear", "url": None, "note": None})
         data = {
             "profile": json.loads(profile.model_dump_json()),
-            "wiki_status": _wiki_statuses.get(sid, {"status": "clear", "url": None, "note": None}),
+            "wiki_status": _wiki_statuses.get(
+                sid, {"status": "clear", "url": None, "note": None}
+            ),
             "saved_at": datetime.now(timezone.utc).isoformat(),
         }
         target_path = _session_path(sid)
         content = json.dumps(data, indent=2, ensure_ascii=False)
-        temp_fd, temp_path = tempfile.mkstemp(dir=SESSIONS_DIR, prefix=f".{sid}-", suffix=".tmp")
+        temp_fd, temp_path = tempfile.mkstemp(
+            dir=SESSIONS_DIR, prefix=f".{sid}-", suffix=".tmp"
+        )
         try:
             with os.fdopen(temp_fd, "w", encoding="utf-8") as f:
                 f.write(content)
@@ -146,6 +155,7 @@ def _push_to_browser(url: str) -> bool:
     """Navigate the human browser_server to url. Returns True if browser is running."""
     try:
         from browser_server import _dispatch, _running
+
         if not _running:
             return False
         _dispatch("navigate", url=url)
@@ -178,13 +188,21 @@ def _activate_session(profile: PersonProfile, wiki_status: dict) -> PersonProfil
     from engine.researcher_ids import extract_ids_from_sources, validated_new_ids
 
     with _lock:
-        flag_sources(profile.sources, profile.name, profile.field or "", profile.affiliation or "")
+        flag_sources(
+            profile.sources,
+            profile.name,
+            profile.field or "",
+            profile.affiliation or "",
+        )
         profile.missing_slots = find_missing_slots(profile, profile.claims)
         new_ids = {
-            t: v for t, v in extract_ids_from_sources(profile.sources).items()
+            t: v
+            for t, v in extract_ids_from_sources(profile.sources).items()
             if t not in profile.researcher_ids
         }
-        for id_type, id_val in validated_new_ids(new_ids, profile.name, profile.affiliation).items():
+        for id_type, id_val in validated_new_ids(
+            new_ids, profile.name, profile.affiliation
+        ).items():
             profile.researcher_ids[id_type] = id_val
         _apply_provenance(profile)
         sid = _ensure_session_id(profile)
@@ -195,7 +213,9 @@ def _activate_session(profile: PersonProfile, wiki_status: dict) -> PersonProfil
 
 def _find_session_on_disk(pred) -> tuple[dict, Path] | None:
     """Return the first session file whose profile satisfies pred, if any."""
-    for path in sorted(SESSIONS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+    for path in sorted(
+        SESSIONS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
+    ):
         data = _load_session_file(path)
         if not data:
             continue
@@ -207,6 +227,7 @@ def _find_session_on_disk(pred) -> tuple[dict, Path] | None:
 def _check_doi_sources(sources: list, person_name: str, affiliation: str) -> None:
     """In-place: run author check on every source whose URL contains a DOI."""
     from engine.author_check import check_doi_authors, extract_doi
+
     for source in sources:
         doi = extract_doi(source.url)
         if not doi:
@@ -216,5 +237,7 @@ def _check_doi_sources(sources: list, person_name: str, affiliation: str) -> Non
         source.author_match_name = result["matched_author"]
         source.author_match_affiliation = result["matched_affiliation"]
         source.all_paper_authors = result["all_authors"]
-        if result.get("paper_title") and (source.title == source.url or not source.title):
+        if result.get("paper_title") and (
+            source.title == source.url or not source.title
+        ):
             source.title = result["paper_title"]

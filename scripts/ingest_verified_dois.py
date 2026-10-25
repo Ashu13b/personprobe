@@ -26,6 +26,7 @@ CONFIRMED_DOIS = [
     "10.48165/ijar.2022.43.1.4",
 ]
 
+
 def api_post(path: str, payload: dict) -> dict:
     req = urllib.request.Request(
         API_BASE + path,
@@ -34,9 +35,12 @@ def api_post(path: str, payload: dict) -> dict:
     )
     return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
 
+
 def fetch_doi_metadata(doi: str) -> dict | None:
     url = f"https://api.crossref.org/works/{urllib.parse.quote(doi)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "personprobe/1.0 (mailto:agent@personprobe.local)"})
+    req = urllib.request.Request(
+        url, headers={"User-Agent": "personprobe/1.0 (mailto:agent@personprobe.local)"}
+    )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read().decode())
@@ -63,14 +67,22 @@ def fetch_doi_metadata(doi: str) -> dict | None:
         print(f"  [WARN] Crossref lookup failed for {doi}: {e}")
         return None
 
+
 def main():
-    session_file = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
+    session_file = (
+        Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
+    )
     existing_urls = set()
     if session_file.exists():
         sdata = json.loads(session_file.read_text())
-        existing_urls = {s.get("url", "").lower().rstrip("/") for s in sdata.get("profile", {}).get("sources", [])}
+        existing_urls = {
+            s.get("url", "").lower().rstrip("/")
+            for s in sdata.get("profile", {}).get("sources", [])
+        }
 
-    print(f"[*] Checking {len(CONFIRMED_DOIS)} DOIs against {len(existing_urls)} existing session URLs...")
+    print(
+        f"[*] Checking {len(CONFIRMED_DOIS)} DOIs against {len(existing_urls)} existing session URLs..."
+    )
     ingested = 0
 
     for doi in CONFIRMED_DOIS:
@@ -94,11 +106,14 @@ def main():
 
         print(f"[*] Ingesting: {meta['title'][:60]} ({doi})...")
         try:
-            res = api_post("/research/add-source-paste", {
-                "profile_name": SESSION_ID,
-                "url": meta["doi_url"],
-                "pasted_text": pasted_text
-            })
+            res = api_post(
+                "/research/add-source-paste",
+                {
+                    "profile_name": SESSION_ID,
+                    "url": meta["doi_url"],
+                    "pasted_text": pasted_text,
+                },
+            )
             existing_urls.add(doi_url.lower())
             ingested += 1
             print(f"    [OK] Ingested. Source ID: {res.get('source', {}).get('id')}")
@@ -113,6 +128,7 @@ def main():
         print("[*] Session synchronized.")
     except Exception as se:
         print(f"[*] Sync error: {se}")
+
 
 if __name__ == "__main__":
     main()

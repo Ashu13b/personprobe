@@ -8,6 +8,7 @@ Handles:
 - AMP path & parameter stripping (/amp/, /amp_articleshow/, ?amp)
 - Scheme (http/https) and trailing slash normalization
 """
+
 from __future__ import annotations
 
 import re
@@ -25,11 +26,20 @@ DOMAIN_ALIAS_MAP: dict[str, str] = {
     "m.amarujala.com": "amarujala.com",
     "m.ndtv.com": "ndtv.com",
     "m.hindustantimes.com": "hindustantimes.com",
-    "m.thehindu.com": "thehindu.com"
+    "m.thehindu.com": "thehindu.com",
 }
 
 TRACKING_PARAM_PREFIXES: tuple[str, ...] = (
-    "utm_", "_tp", "fbclid", "gclid", "ref", "source", "amp", "srsltid", "ved", "usqp"
+    "utm_",
+    "_tp",
+    "fbclid",
+    "gclid",
+    "ref",
+    "source",
+    "amp",
+    "srsltid",
+    "ved",
+    "usqp",
 )
 
 
@@ -70,14 +80,18 @@ def canonical_url(url: str | None) -> str:
             params = urllib.parse.parse_qsl(p.query)
             for k, v in params:
                 k_low = k.lower()
-                if not any(k_low.startswith(prefix) for prefix in TRACKING_PARAM_PREFIXES):
+                if not any(
+                    k_low.startswith(prefix) for prefix in TRACKING_PARAM_PREFIXES
+                ):
                     clean_params.append((k, v))
         except Exception:
             pass
     query_str = urllib.parse.urlencode(clean_params)
 
     # Normalize AMP path variants
-    clean_path = path.replace("/amp/", "/").replace("/amp_articleshow/", "/articleshow/")
+    clean_path = path.replace("/amp/", "/").replace(
+        "/amp_articleshow/", "/articleshow/"
+    )
     if clean_path.endswith("/amp"):
         clean_path = clean_path[:-4]
 

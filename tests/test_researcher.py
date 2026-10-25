@@ -15,10 +15,13 @@ def _result(url: str) -> Source:
 
 
 def test_disambiguator_drops_institutional_stopwords():
-    assert _disambiguator(
-        "ICAR - Central Institute for Research on Buffaloes (CIRB), Hisar",
-        "Animal biotechnology",
-    ) == "ICAR Buffaloes"
+    assert (
+        _disambiguator(
+            "ICAR - Central Institute for Research on Buffaloes (CIRB), Hisar",
+            "Animal biotechnology",
+        )
+        == "ICAR Buffaloes"
+    )
     assert _disambiguator("University of California", "Physics") == "California"
     assert _disambiguator(None, "Computational biology") == "Computational biology"
 
@@ -26,7 +29,10 @@ def test_disambiguator_drops_institutional_stopwords():
 def test_news_sweep_issues_site_restricted_and_hindi_queries():
     def fake_search(query: str):
         if "site:ndtv.com" in query:
-            return [_result("https://www.ndtv.com/a"), _result("https://www.ndtv.com/b")]
+            return [
+                _result("https://www.ndtv.com/a"),
+                _result("https://www.ndtv.com/b"),
+            ]
         return [_result("https://example.test/other")]
 
     with patch("engine.researcher._search_web", side_effect=fake_search):
@@ -61,7 +67,6 @@ def test_news_sweep_respects_limit():
     assert calls["n"] == 3
 
 
-
 def test_targeted_award_search_never_falls_back_to_education_queries():
     queries = []
 
@@ -82,6 +87,7 @@ def test_targeted_award_search_never_falls_back_to_education_queries():
     assert any("पुरस्कार" in query for query in queries)
     assert not any("alumni graduation" in query for query in queries)
 
+
 def test_try_browser_server_probes_unified_mount_first(monkeypatch):
     from engine import fetcher
     from engine.fetcher import _try_browser_server
@@ -91,8 +97,10 @@ def test_try_browser_server_probes_unified_mount_first(monkeypatch):
     class FakeResp:
         def __init__(self, body):
             self._body = body
+
         def json(self):
             return self._body
+
         def ok(self):
             return True
 
@@ -105,11 +113,18 @@ def test_try_browser_server_probes_unified_mount_first(monkeypatch):
         if url.endswith("/navigate"):
             return FakeResp({"url": "https://example.test/x", "title": "X"})
         if url.endswith("/content"):
-            return FakeResp({"url": "https://example.test/x", "text": "A real rendered article." * 20})
+            return FakeResp(
+                {
+                    "url": "https://example.test/x",
+                    "text": "A real rendered article." * 20,
+                }
+            )
         raise AssertionError(f"unexpected url {url}")
 
     monkeypatch.setattr(fetcher.requests, "get", fake_get)
-    monkeypatch.setattr(fetcher.requests, "post", lambda *a, **kw: FakeResp({"url": "x", "title": "X"}))
+    monkeypatch.setattr(
+        fetcher.requests, "post", lambda *a, **kw: FakeResp({"url": "x", "title": "X"})
+    )
 
     result = _try_browser_server("https://example.test/x")
 
@@ -124,6 +139,7 @@ def test_try_browser_server_returns_none_when_no_browser_running(monkeypatch):
 
     def fake_get(url, **kw):
         return type("R", (), {"json": lambda self: {"running": False}})()
+
     monkeypatch.setattr(fetcher.requests, "get", fake_get)
 
     assert fetcher._try_browser_server("https://example.test/x") is None
@@ -133,11 +149,13 @@ def test_junk_source_url_filter():
     from engine.researcher import is_junk_source_url
 
     assert is_junk_source_url(
-        "https://www.tribuneindia.com/sortd-service/imaginary/v22-01/jpg/large/high?url=x")
+        "https://www.tribuneindia.com/sortd-service/imaginary/v22-01/jpg/large/high?url=x"
+    )
     assert is_junk_source_url("https://example.com/photo.jpg")
+    assert not is_junk_source_url("https://www.icmr.gov.in/former-director-generals")
     assert not is_junk_source_url(
-        "https://www.icmr.gov.in/former-director-generals")
-    assert not is_junk_source_url("https://timesofindia.indiatimes.com/city/nagpur/gmc-host-event")
+        "https://timesofindia.indiatimes.com/city/nagpur/gmc-host-event"
+    )
 
 
 def test_pick_author_id_returns_none_when_nothing_validates(monkeypatch):
@@ -149,7 +167,9 @@ def test_pick_author_id_returns_none_when_nothing_validates(monkeypatch):
     ]
 
     class _Papers:
-        def raise_for_status(self): pass
+        def raise_for_status(self):
+            pass
+
         def json(self):
             return {"data": [{"externalIds": {"DOI": "10.1/x"}}]}
 

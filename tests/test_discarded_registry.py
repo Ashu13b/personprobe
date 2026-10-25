@@ -1,4 +1,5 @@
 """Tests for the Discarded Sources Registry and Canonical Deduplication."""
+
 from engine.models import PersonProfile, Source
 from engine.discarded_registry import (
     record_discarded,
@@ -28,14 +29,27 @@ def test_record_discarded_canonical_dedup():
 def test_is_known_or_discarded():
     profile = PersonProfile(
         name="Test Subject",
-        sources=[Source(url="https://example.com/live-source", title="Live", publisher="Test")],
+        sources=[
+            Source(
+                url="https://example.com/live-source", title="Live", publisher="Test"
+            )
+        ],
     )
-    record_discarded(profile, "https://example.com/discarded-link?utm_source=google", reason="homonym_risk")
+    record_discarded(
+        profile,
+        "https://example.com/discarded-link?utm_source=google",
+        reason="homonym_risk",
+    )
 
     assert is_known_or_discarded(profile, "https://example.com/live-source") is True
-    assert is_known_or_discarded(profile, "https://www.example.com/live-source/") is True
+    assert (
+        is_known_or_discarded(profile, "https://www.example.com/live-source/") is True
+    )
     assert is_known_or_discarded(profile, "http://example.com/discarded-link") is True
-    assert is_known_or_discarded(profile, "https://example.com/unknown-fresh-link") is False
+    assert (
+        is_known_or_discarded(profile, "https://example.com/unknown-fresh-link")
+        is False
+    )
 
 
 def test_get_known_and_discarded_canonical_urls():

@@ -9,6 +9,7 @@ SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 CANDIDATES_FILE = Path("/tmp/awards_and_repos_candidates.json")
 
+
 def main():
     if not CANDIDATES_FILE.exists() or not SESSION_FILE.exists():
         print("Missing candidates or session file.")
@@ -45,7 +46,9 @@ def main():
             title = "1st clone male Murrah buffalo turns 3 - Times of India"
         elif "epubs.icar.org.in" in url:
             publisher = "Indian Council of Agricultural Research (ICAR ePubs)"
-            editorial_origin = "Peer-reviewed journal (Journal of Livestock Biodiversity)"
+            editorial_origin = (
+                "Peer-reviewed journal (Journal of Livestock Biodiversity)"
+            )
             title = "Buffalo cell immortalization: Research and conservation for a sustainable future"
         elif "researchgate.net" in url:
             publisher = "Current Science / ResearchGate"
@@ -61,11 +64,15 @@ def main():
             "title": title,
             "snippet": f"Harvested reference for {title}. Corroborating Dr. P. S. Yadav and CIRB reproductive biotechnology milestones.",
             "publisher": publisher,
-            "date": "2018-12-14" if "timesofindia" in url else "2024" if "epubs" in url else "",
+            "date": "2018-12-14"
+            if "timesofindia" in url
+            else "2024"
+            if "epubs" in url
+            else "",
             "editorial_origin": editorial_origin,
             "human_verified": True,
             "liveness": "alive",
-            "research_notes": f"Discovered via targeted institutional search for {c.get('query')}"
+            "research_notes": f"Discovered via targeted institutional search for {c.get('query')}",
         }
 
         new_sources.append(source_obj)
@@ -79,6 +86,7 @@ def main():
             json.dump(data, f, indent=2, ensure_ascii=False)
         print(f"[*] Total session sources updated to {len(profile['sources'])}.")
         deduplicate()
+
 
 if __name__ == "__main__":
     main()

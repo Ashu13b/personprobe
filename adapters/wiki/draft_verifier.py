@@ -6,6 +6,7 @@ requests first, remote-browser page render as an adjudicator) and the parsoid
 preview render. It deliberately lives outside `wiki.draft.py` so generation and
 verification stay separate concerns.
 """
+
 from __future__ import annotations
 
 import re
@@ -18,6 +19,7 @@ from engine.provenance import normalize_url
 
 class DraftLink(BaseModel):
     """One external URL referenced by the draft, with a live check result."""
+
     url: str
     label: str
     archived: bool = False
@@ -53,9 +55,11 @@ def extract_draft_links(wikitext: str) -> list[DraftLink]:
         close = _REF_CLOSE.search(wikitext, match.end())
         if not close:
             continue
-        inner = wikitext[match.end():close.start()].replace("{{!}}", "\x00")
-        fields = {m.group(1).lower(): m.group(2).strip().replace("\x00", "|")
-                  for m in _CITE_FIELD.finditer(inner)}
+        inner = wikitext[match.end() : close.start()].replace("{{!}}", "\x00")
+        fields = {
+            m.group(1).lower(): m.group(2).strip().replace("\x00", "|")
+            for m in _CITE_FIELD.finditer(inner)
+        }
         url = fields.get("archive-url") or fields.get("url")
         if url:
             add(url, fields.get("title") or "", bool(fields.get("archive-url")))
@@ -95,10 +99,14 @@ def check_draft_links(
         else:
             try:
                 import sys
+
                 bs = sys.modules.get("browser_server")
                 if bs and getattr(bs, "_running", False):
                     verdict = bs._dispatch(
-                        "link_status_page", urls=uncertain, timeout=max(60.0, 20 * len(uncertain)))
+                        "link_status_page",
+                        urls=uncertain,
+                        timeout=max(60.0, 20 * len(uncertain)),
+                    )
                     results.update(verdict)
             except Exception:
                 pass
@@ -114,7 +122,9 @@ def _check_links_via_requests(urls: list[str]) -> dict[str, dict]:
         if not is_safe_public_url(url):
             return {"status": "unknown", "status_code": None, "final_url": url}
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=10, allow_redirects=True, stream=True)
+            resp = requests.get(
+                url, headers=HEADERS, timeout=10, allow_redirects=True, stream=True
+            )
             code = resp.status_code
             final = resp.url
             resp.close()
@@ -123,7 +133,9 @@ def _check_links_via_requests(urls: list[str]) -> dict[str, dict]:
         if code in (404, 410):
             status = "dead"
         elif code in (401, 403, 429):
-            status = "ok" if "web.archive.org" in url or "doi.org/" in url else "blocked"
+            status = (
+                "ok" if "web.archive.org" in url or "doi.org/" in url else "blocked"
+            )
         elif code == 498 and "web.archive.org" in url:
             status = "ok"
         elif 200 <= code < 400:
@@ -148,7 +160,11 @@ def render_preview(wikitext: str) -> str:
     resp = requests.post(
         "https://en.wikipedia.org/api/rest_v1/transform/wikitext/to/html",
         json={"wikitext": wikitext, "body_only": True, "stash": False},
-        headers={"Content-Type": "application/json", "Accept": "text/html", **BOT_HEADERS},
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "text/html",
+            **BOT_HEADERS,
+        },
         timeout=30,
     )
     resp.raise_for_status()
@@ -156,13 +172,18 @@ def render_preview(wikitext: str) -> str:
     html = html.replace('href="./', 'href="https://en.wikipedia.org/wiki/')
     html = html.replace('href="/wiki/', 'href="https://en.wikipedia.org/wiki/')
     html = html.replace('href="/w/', 'href="https://en.wikipedia.org/w/')
-    html = html.replace('src="//upload.wikimedia.org/', 'src="https://upload.wikimedia.org/')
-    html = html.replace('srcset="//upload.wikimedia.org/', 'srcset="https://upload.wikimedia.org/')
+    html = html.replace(
+        'src="//upload.wikimedia.org/', 'src="https://upload.wikimedia.org/'
+    )
+    html = html.replace(
+        'srcset="//upload.wikimedia.org/', 'srcset="https://upload.wikimedia.org/'
+    )
     return html
 
 
 class DraftWikilink(BaseModel):
     """An internal Wikipedia link referenced in the draft text."""
+
     target: str
     label: str
     status: str = "unknown"  # ok | disambiguation | missing | unknown
@@ -200,7 +221,15 @@ def extract_draft_wikilinks(wikitext: str) -> list[DraftWikilink]:
     """
     links: list[DraftWikilink] = []
     seen: set[str] = set()
-    skip_prefixes = ("category:", "file:", "image:", "help:", "template:", "draft:", "wikipedia:")
+    skip_prefixes = (
+        "category:",
+        "file:",
+        "image:",
+        "help:",
+        "template:",
+        "draft:",
+        "wikipedia:",
+    )
 
     for m in _WIKILINK_RE.finditer(wikitext):
         raw_target = m.group(1).strip()
@@ -214,7 +243,9 @@ def extract_draft_wikilinks(wikitext: str) -> list[DraftWikilink]:
             continue
         seen.add(norm_target)
         canonical = KNOWN_ACRONYM_CANONICAL.get(norm_target)
-        links.append(DraftWikilink(target=norm_target, label=label, canonical_target=canonical))
+        links.append(
+            DraftWikilink(target=norm_target, label=label, canonical_target=canonical)
+        )
     return links
 
 
@@ -230,7 +261,7 @@ def check_draft_wikilinks(targets: list[str]) -> dict[str, dict]:
 
     results: dict[str, dict] = {}
     for i in range(0, len(targets), 50):
-        chunk = targets[i:i + 50]
+        chunk = targets[i : i + 50]
         pipe_titles = "|".join(chunk)
         try:
             resp = requests.get(
@@ -278,7 +309,8 @@ def check_draft_wikilinks(targets: list[str]) -> dict[str, dict]:
                     results[orig_target] = {
                         "status": "disambiguation" if is_disambig else "ok",
                         "canonical_target": canonical,
-                        "description": desc or ("Disambiguation page" if is_disambig else None),
+                        "description": desc
+                        or ("Disambiguation page" if is_disambig else None),
                     }
         except Exception:
             for t in chunk:
@@ -289,4 +321,3 @@ def check_draft_wikilinks(targets: list[str]) -> dict[str, dict]:
                         "canonical_target": canonical,
                     }
     return results
-

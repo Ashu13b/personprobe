@@ -4,6 +4,7 @@ Detects when web searches and claim extraction have reached saturation
 (diminishing returns where newly discovered links and queries repeat
 already-known facts and syndicated wire reports).
 """
+
 from __future__ import annotations
 
 import re
@@ -15,10 +16,49 @@ from .models import Claim, PersonProfile, ClaimCluster, ResearchSaturation
 
 
 _STOPWORDS = {
-    "a", "an", "the", "in", "on", "at", "of", "to", "for", "with", "by", "from",
-    "and", "or", "as", "is", "was", "were", "are", "be", "been", "being", "have",
-    "has", "had", "dr", "prof", "mr", "mrs", "ms", "under", "led", "team", "first",
-    "also", "which", "that", "this", "these", "those", "about", "after", "before",
+    "a",
+    "an",
+    "the",
+    "in",
+    "on",
+    "at",
+    "of",
+    "to",
+    "for",
+    "with",
+    "by",
+    "from",
+    "and",
+    "or",
+    "as",
+    "is",
+    "was",
+    "were",
+    "are",
+    "be",
+    "been",
+    "being",
+    "have",
+    "has",
+    "had",
+    "dr",
+    "prof",
+    "mr",
+    "mrs",
+    "ms",
+    "under",
+    "led",
+    "team",
+    "first",
+    "also",
+    "which",
+    "that",
+    "this",
+    "these",
+    "those",
+    "about",
+    "after",
+    "before",
 }
 
 _YEAR_RE = re.compile(r"\b(19\d{2}|20\d{2})\b")
@@ -35,7 +75,7 @@ def _ngrams(tokens: list[str], n: int = 2) -> set[str]:
     """Generate word n-grams."""
     if len(tokens) < n:
         return set()
-    return {" ".join(tokens[i:i+n]) for i in range(len(tokens) - n + 1)}
+    return {" ".join(tokens[i : i + n]) for i in range(len(tokens) - n + 1)}
 
 
 def calculate_claim_similarity(claim_a: Claim, claim_b: Claim) -> float:
@@ -82,7 +122,13 @@ def calculate_claim_similarity(claim_a: Claim, claim_b: Claim) -> float:
     # Field match bonus
     field_bonus = 0.15 if (claim_a.field and claim_a.field == claim_b.field) else 0.0
 
-    combined = (0.35 * token_jaccard) + (0.25 * containment) + (0.15 * bigram_jaccard) + year_score + field_bonus
+    combined = (
+        (0.35 * token_jaccard)
+        + (0.25 * containment)
+        + (0.15 * bigram_jaccard)
+        + year_score
+        + field_bonus
+    )
     return max(0.0, min(1.0, combined))
 
 
@@ -91,7 +137,7 @@ def cluster_claims(claims: Sequence[Claim]) -> list[ClaimCluster]:
     if not claims:
         return []
 
-    clusters: list[list[int]] = [] # list of lists of claim indices
+    clusters: list[list[int]] = []  # list of lists of claim indices
     assigned = [False] * len(claims)
 
     for i, claim in enumerate(claims):
@@ -153,7 +199,8 @@ def analyze_research_saturation(profile: PersonProfile) -> ResearchSaturation:
 
     repetition_rate = (
         round((total_claims - unique_facts) / total_claims, 2)
-        if total_claims > 0 else 0.0
+        if total_claims > 0
+        else 0.0
     )
 
     # Syndication analysis: sources sharing editorial origins or hostnames
@@ -168,8 +215,7 @@ def analyze_research_saturation(profile: PersonProfile) -> ResearchSaturation:
 
     syndicated_source_count = sum(count - 1 for count in origins.values() if count > 1)
     syndication_rate = (
-        round(syndicated_source_count / len(sources), 2)
-        if sources else 0.0
+        round(syndicated_source_count / len(sources), 2) if sources else 0.0
     )
 
     # Multi-component saturation calculation:
@@ -186,7 +232,13 @@ def analyze_research_saturation(profile: PersonProfile) -> ResearchSaturation:
     # 4. Syndication signal: 0.10 for high media syndication
     syndication_score = min(syndication_rate * 1.5, 1.0) * 0.10
 
-    total_score = round(min(1.0, source_breadth_score + repetition_score + slot_score + syndication_score), 2)
+    total_score = round(
+        min(
+            1.0,
+            source_breadth_score + repetition_score + slot_score + syndication_score,
+        ),
+        2,
+    )
 
     if total_score >= 0.75 or (len(sources) >= 12 and repetition_rate >= 0.35):
         level = "saturated"
@@ -209,8 +261,14 @@ def analyze_research_saturation(profile: PersonProfile) -> ResearchSaturation:
         )
 
     # Filter corroborated clusters (clusters with > 1 corroborating source or repeated claims)
-    corroborated = [c for c in clusters if c.repetition_count > 1 or len(c.corroborating_sources) > 1]
-    corroborated.sort(key=lambda c: (len(c.corroborating_sources), c.repetition_count), reverse=True)
+    corroborated = [
+        c
+        for c in clusters
+        if c.repetition_count > 1 or len(c.corroborating_sources) > 1
+    ]
+    corroborated.sort(
+        key=lambda c: (len(c.corroborating_sources), c.repetition_count), reverse=True
+    )
 
     return ResearchSaturation(
         score=total_score,

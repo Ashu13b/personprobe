@@ -5,6 +5,7 @@ expanding searches into the subject's native country language and script
 (e.g., Hindi/Devanagari for Indian subjects, French, German, Spanish, Russian, etc.)
 so that local and regional secondary coverage is not missed.
 """
+
 from __future__ import annotations
 
 # ── Language Detection by Nationality / Name ──────────────────────────────────
@@ -154,20 +155,42 @@ _LOCALIZED_SLOT_TERMS: dict[str, dict[str, list[str]]] = {
 
 _COUNTRY_NEWS_OUTLETS: dict[str, list[str]] = {
     "hi": [
-        "amarujala.com", "bhaskar.com", "jagran.com", "punjabkesari.com",
-        "patrika.com", "etvbharat.com", "kisantak.in", "navbharattimes.indiatimes.com",
+        "amarujala.com",
+        "bhaskar.com",
+        "jagran.com",
+        "punjabkesari.com",
+        "patrika.com",
+        "etvbharat.com",
+        "kisantak.in",
+        "navbharattimes.indiatimes.com",
     ],
     "fr": [
-        "lemonde.fr", "lefigaro.fr", "liberation.fr", "france24.com", "leparisien.fr",
+        "lemonde.fr",
+        "lefigaro.fr",
+        "liberation.fr",
+        "france24.com",
+        "leparisien.fr",
     ],
     "de": [
-        "spiegel.de", "zeit.de", "faz.net", "sueddeutsche.de", "welt.de",
+        "spiegel.de",
+        "zeit.de",
+        "faz.net",
+        "sueddeutsche.de",
+        "welt.de",
     ],
     "es": [
-        "elpais.com", "elmundo.es", "abc.es", "lanacion.com.ar", "eluniversal.com.mx",
+        "elpais.com",
+        "elmundo.es",
+        "abc.es",
+        "lanacion.com.ar",
+        "eluniversal.com.mx",
     ],
     "ru": [
-        "tass.ru", "ria.ru", "rbc.ru", "kommersant.ru", "vedomosti.ru",
+        "tass.ru",
+        "ria.ru",
+        "rbc.ru",
+        "kommersant.ru",
+        "vedomosti.ru",
     ],
 }
 
@@ -196,13 +219,17 @@ def transliterate_name(name: str, target_lang: str) -> str | None:
     """Attempt transliteration of a romanized name into native script."""
     if target_lang == "hi":
         tokens = [t.lower().strip(".,") for t in name.split()]
-        devanagari_tokens = [_INDIC_PHONETIC_MAP.get(t) for t in tokens if t in _INDIC_PHONETIC_MAP]
+        devanagari_tokens = [
+            _INDIC_PHONETIC_MAP.get(t) for t in tokens if t in _INDIC_PHONETIC_MAP
+        ]
         if len(devanagari_tokens) >= 2 or len(devanagari_tokens) == len(tokens):
             return " ".join(t for t in devanagari_tokens if t)
     return None
 
 
-def get_regional_news_outlets(nationality: str | None, name: str | None = None) -> list[str]:
+def get_regional_news_outlets(
+    nationality: str | None, name: str | None = None
+) -> list[str]:
     """Return list of top regional/vernacular press domains for the subject's region."""
     langs = detect_languages(nationality, name)
     outlets: list[str] = []

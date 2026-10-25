@@ -1,4 +1,5 @@
 """Gather sources for a person: Semantic Scholar + Google CSE + DuckDuckGo + user-provided URLs."""
+
 from __future__ import annotations
 import os
 import re
@@ -10,22 +11,45 @@ S2_API = "https://api.semanticscholar.org/graph/v1"
 GOOGLE_CSE_URL = "https://www.googleapis.com/customsearch/v1"
 
 _NEWS_OUTLETS = (
-    "timesofindia.indiatimes.com", "ndtv.com", "tribuneindia.com",
-    "amarujala.com", "thehindu.com", "indianexpress.com",
-    "hindustantimes.com", "business-standard.com", "theprint.in",
-    "news18.com", "jagran.com", "punjabkesari.com",
-    "bhaskar.com", "patrika.com", "etvbharat.com", "kisantak.in",
+    "timesofindia.indiatimes.com",
+    "ndtv.com",
+    "tribuneindia.com",
+    "amarujala.com",
+    "thehindu.com",
+    "indianexpress.com",
+    "hindustantimes.com",
+    "business-standard.com",
+    "theprint.in",
+    "news18.com",
+    "jagran.com",
+    "punjabkesari.com",
+    "bhaskar.com",
+    "patrika.com",
+    "etvbharat.com",
+    "kisantak.in",
 )
 
 _DISAMBIG_STOPWORDS = {
-    "university", "institute", "college", "research", "central", "department",
-    "division", "center", "centre", "school", "faculty", "for", "and", "the",
+    "university",
+    "institute",
+    "college",
+    "research",
+    "central",
+    "department",
+    "division",
+    "center",
+    "centre",
+    "school",
+    "faculty",
+    "for",
+    "and",
+    "the",
 }
 
 
 _JUNK_URL_RE = re.compile(
-    r"/sortd-service/"                       # e-paper image-render endpoints
-    r"|\.(jpg|jpeg|png|webp|gif)([?#]|$)",   # direct image assets
+    r"/sortd-service/"  # e-paper image-render endpoints
+    r"|\.(jpg|jpeg|png|webp|gif)([?#]|$)",  # direct image assets
     re.I,
 )
 
@@ -41,7 +65,9 @@ def _disambiguator(affiliation: str | None, field: str | None) -> str:
         if not src:
             continue
         tokens = [t.strip("()") for t in src.replace("-", " ").split()]
-        tokens = [t for t in tokens if len(t) > 3 and t.lower() not in _DISAMBIG_STOPWORDS]
+        tokens = [
+            t for t in tokens if len(t) > 3 and t.lower() not in _DISAMBIG_STOPWORDS
+        ]
         if tokens:
             return " ".join(tokens[:2])
     return ""
@@ -56,13 +82,16 @@ def _sweep_news(
 ) -> list[Source]:
     """Site-restricted searches across major national & regional outlets plus multilingual queries."""
     from .multilingual_search import build_bilingual_queries, get_regional_news_outlets
+
     disambig = _disambiguator(affiliation, field)
     all_outlets: list[str] = list(_NEWS_OUTLETS)
     for regional in get_regional_news_outlets(nationality, person_name):
         if regional not in all_outlets:
             all_outlets.append(regional)
 
-    queries = [f'"{person_name}" {disambig} site:{outlet}'.strip() for outlet in all_outlets]
+    queries = [
+        f'"{person_name}" {disambig} site:{outlet}'.strip() for outlet in all_outlets
+    ]
     # Add bilingual / vernacular queries for native language press discovery
     bilingual_queries = build_bilingual_queries(
         name=person_name,
@@ -102,7 +131,13 @@ def fetch_auto_sources(
     sources.extend(_google_cse(name, field, affiliation))
     sources.extend(_duckduckgo_html(name, field, affiliation))
     # News/biography search — name + one disambiguator to avoid wrong-person results
-    disambig = (affiliation or "").split()[0] if affiliation else (field or "").split()[0] if field else ""
+    disambig = (
+        (affiliation or "").split()[0]
+        if affiliation
+        else (field or "").split()[0]
+        if field
+        else ""
+    )
     bio_query = f'"{name}" {disambig}'.strip()
     bio_sources = _search_web(bio_query)
     seen = {s.url for s in sources}
@@ -120,28 +155,42 @@ def fetch_url_source(url: str, person_name: str = "") -> tuple[Source, bool]:
     If blocked=True, caller should ask user to paste text or upload screenshot."""
     from .fetcher import fetch_url
     from .link_extractor import extract_profile_links
+
     result = fetch_url(url)
 
     if result.blocked:
         return Source(
-            url=url, title=url, publisher=_extract_publisher(url),
+            url=url,
+            title=url,
+            publisher=_extract_publisher(url),
             reliability=SourceReliability.primary,
-            snippet="", user_provided=True,
+            snippet="",
+            user_provided=True,
         ), True
 
     try:
         from bs4 import BeautifulSoup
-        soup = BeautifulSoup(result.text[:10000], "html.parser") if "<html" in result.text[:200] else None
+
+        soup = (
+            BeautifulSoup(result.text[:10000], "html.parser")
+            if "<html" in result.text[:200]
+            else None
+        )
         title = (soup.title.string or "").strip() if (soup and soup.title) else url
     except Exception:
         title = url
 
-    profile_links = extract_profile_links(result.raw_html, person_name, url) if person_name else []
+    profile_links = (
+        extract_profile_links(result.raw_html, person_name, url) if person_name else []
+    )
 
     source = Source(
-        url=url, title=title, publisher=_extract_publisher(url),
+        url=url,
+        title=title,
+        publisher=_extract_publisher(url),
         reliability=SourceReliability.primary,  # classifier will re-tag
-        snippet=result.text[:400], user_provided=True,
+        snippet=result.text[:400],
+        user_provided=True,
         profile_links=profile_links,
     )
 
@@ -149,17 +198,23 @@ def fetch_url_source(url: str, person_name: str = "") -> tuple[Source, bool]:
     # snippet-only checks undercount pages whose name sits deeper in the text.
     if person_name:
         from .name_verifier import verify_name_in_content
+
         nv = verify_name_in_content(
-            person_name, result.text[:200_000], title=title,
+            person_name,
+            result.text[:200_000],
+            title=title,
         )
         source.name_hit_in_body = nv.matched
         source.name_hit_variant = nv.variant
 
     if result.final_url:
         from .relevance import is_meaningful_redirect
+
         if is_meaningful_redirect(url, result.final_url):
             source.redirected_to = result.final_url
-            source.relevance_flag = "uncertain"  # human/LLM decides; kept out of "relevant"
+            source.relevance_flag = (
+                "uncertain"  # human/LLM decides; kept out of "relevant"
+            )
 
     return source, False
 
@@ -167,18 +222,29 @@ def fetch_url_source(url: str, person_name: str = "") -> tuple[Source, bool]:
 def fetch_url_source_with_paste(url: str, pasted_text: str) -> Source:
     """Build a Source from user-pasted text for a blocked URL."""
     return Source(
-        url=url, title=_extract_publisher(url), publisher=_extract_publisher(url),
+        url=url,
+        title=_extract_publisher(url),
+        publisher=_extract_publisher(url),
         reliability=SourceReliability.primary,
-        snippet=pasted_text[:400], user_provided=True,
+        snippet=pasted_text[:400],
+        user_provided=True,
     )
 
 
-def _semantic_scholar(name: str, affiliation: str | None = None) -> tuple[list[Source], str | None]:
+def _semantic_scholar(
+    name: str, affiliation: str | None = None
+) -> tuple[list[Source], str | None]:
     """Returns (sources, author_id)."""
     try:
-        resp = requests.get(f"{S2_API}/author/search",
-            params={"query": name, "fields": "name,affiliations,paperCount,citationCount", "limit": 5},
-            timeout=10)
+        resp = requests.get(
+            f"{S2_API}/author/search",
+            params={
+                "query": name,
+                "fields": "name,affiliations,paperCount,citationCount",
+                "limit": 5,
+            },
+            timeout=10,
+        )
         resp.raise_for_status()
         candidates = resp.json().get("data", [])
     except Exception:
@@ -192,9 +258,11 @@ def _semantic_scholar(name: str, affiliation: str | None = None) -> tuple[list[S
         return [], None
 
     try:
-        papers_resp = requests.get(f"{S2_API}/author/{author_id}/papers",
+        papers_resp = requests.get(
+            f"{S2_API}/author/{author_id}/papers",
             params={"fields": "title,year,externalIds,citationCount,venue", "limit": 8},
-            timeout=10)
+            timeout=10,
+        )
         papers_resp.raise_for_status()
         papers = papers_resp.json().get("data", [])
     except Exception:
@@ -203,16 +271,22 @@ def _semantic_scholar(name: str, affiliation: str | None = None) -> tuple[list[S
     sources = []
     for paper in papers:
         doi = paper.get("externalIds", {}).get("DOI")
-        url = f"https://doi.org/{doi}" if doi else f"https://www.semanticscholar.org/paper/{paper.get('paperId', '')}"
-        sources.append(Source(
-            url=url,
-            title=paper.get("title", ""),
-            publisher=paper.get("venue") or "Academic publication",
-            reliability=SourceReliability.reliable_secondary,
-            snippet=f"Published {paper.get('year', 'unknown year')}, cited {paper.get('citationCount', 0)} times.",
-            date=str(paper.get("year")) if paper.get("year") else None,
-            fetched_by="semantic_scholar",
-        ))
+        url = (
+            f"https://doi.org/{doi}"
+            if doi
+            else f"https://www.semanticscholar.org/paper/{paper.get('paperId', '')}"
+        )
+        sources.append(
+            Source(
+                url=url,
+                title=paper.get("title", ""),
+                publisher=paper.get("venue") or "Academic publication",
+                reliability=SourceReliability.reliable_secondary,
+                snippet=f"Published {paper.get('year', 'unknown year')}, cited {paper.get('citationCount', 0)} times.",
+                date=str(paper.get("year")) if paper.get("year") else None,
+                fetched_by="semantic_scholar",
+            )
+        )
     return sources, author_id
 
 
@@ -231,11 +305,15 @@ def _pick_author_id(candidates: list[dict], name: str, affiliation: str) -> str 
 
     # Score candidates: affiliation keyword match in S2 affiliation data
     def affil_score(candidate: dict) -> int:
-        text = " ".join(a.get("name", "") for a in candidate.get("affiliations", [])).lower()
+        text = " ".join(
+            a.get("name", "") for a in candidate.get("affiliations", [])
+        ).lower()
         return sum(1 for kw in affil_kw if kw in text)
 
     # Sort: affiliation matches first, then by paper count (more = more likely right person)
-    ranked = sorted(candidates, key=lambda c: (affil_score(c), c.get("paperCount", 0)), reverse=True)
+    ranked = sorted(
+        candidates, key=lambda c: (affil_score(c), c.get("paperCount", 0)), reverse=True
+    )
 
     for candidate in ranked:
         cid = candidate.get("authorId")
@@ -243,8 +321,11 @@ def _pick_author_id(candidates: list[dict], name: str, affiliation: str) -> str 
             continue
         # Quick validation: fetch a few papers and CrossRef-check the first DOI
         try:
-            pr = requests.get(f"{S2_API}/author/{cid}/papers",
-                params={"fields": "externalIds", "limit": 5}, timeout=8)
+            pr = requests.get(
+                f"{S2_API}/author/{cid}/papers",
+                params={"fields": "externalIds", "limit": 5},
+                timeout=8,
+            )
             pr.raise_for_status()
             papers = pr.json().get("data", [])
         except Exception:
@@ -272,9 +353,16 @@ def _google_cse(name: str, field: str | None, affiliation: str | None) -> list[S
 
     query = " ".join(filter(None, [f'"{name}"', field, affiliation]))
     try:
-        resp = requests.get(GOOGLE_CSE_URL, params={
-            "key": key, "cx": cx, "q": query, "num": 10,
-        }, timeout=10)
+        resp = requests.get(
+            GOOGLE_CSE_URL,
+            params={
+                "key": key,
+                "cx": cx,
+                "q": query,
+                "num": 10,
+            },
+            timeout=10,
+        )
         resp.raise_for_status()
         items = resp.json().get("items", [])
     except Exception:
@@ -285,18 +373,22 @@ def _google_cse(name: str, field: str | None, affiliation: str | None) -> list[S
         url = item.get("link", "")
         if not url:
             continue
-        sources.append(Source(
-            url=url,
-            title=item.get("title", url),
-            publisher=_extract_publisher(url),
-            reliability=SourceReliability.primary,  # classifier will re-tag
-            snippet=item.get("snippet", "")[:400],
-            fetched_by="google_search",
-        ))
+        sources.append(
+            Source(
+                url=url,
+                title=item.get("title", url),
+                publisher=_extract_publisher(url),
+                reliability=SourceReliability.primary,  # classifier will re-tag
+                snippet=item.get("snippet", "")[:400],
+                fetched_by="google_search",
+            )
+        )
     return sources
 
 
-def _duckduckgo_html(name: str, field: str | None, affiliation: str | None) -> list[Source]:
+def _duckduckgo_html(
+    name: str, field: str | None, affiliation: str | None
+) -> list[Source]:
     """DuckDuckGo web search via ddgs library — fallback when Google CSE is not configured."""
     if os.environ.get("GOOGLE_CSE_KEY"):
         return []  # skip if Google is available
@@ -304,6 +396,7 @@ def _duckduckgo_html(name: str, field: str | None, affiliation: str | None) -> l
     query = " ".join(filter(None, [f'"{name}"', field, affiliation]))
     try:
         from ddgs import DDGS
+
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=10))
     except Exception:
@@ -315,20 +408,23 @@ def _duckduckgo_html(name: str, field: str | None, affiliation: str | None) -> l
         title = r.get("title", "")
         snippet = r.get("body", "")
         if url and title:
-            sources.append(Source(
-                url=url,
-                title=title,
-                publisher=_extract_publisher(url),
-                reliability=SourceReliability.primary,
-                snippet=snippet[:400],
-                fetched_by="duckduckgo",
-            ))
+            sources.append(
+                Source(
+                    url=url,
+                    title=title,
+                    publisher=_extract_publisher(url),
+                    reliability=SourceReliability.primary,
+                    snippet=snippet[:400],
+                    fetched_by="duckduckgo",
+                )
+            )
     return sources
 
 
 def _extract_publisher(url: str) -> str:
     try:
         from urllib.parse import urlparse
+
         host = urlparse(url).netloc
         return host.replace("www.", "")
     except Exception:
@@ -338,14 +434,14 @@ def _extract_publisher(url: str) -> str:
 # ── Targeted slot search ───────────────────────────────────────────────────────
 
 _SLOT_QUERIES: dict[str, str] = {
-    "birth_date":  '"{name}" born',
+    "birth_date": '"{name}" born',
     "birth_place": '"{name}" born place',
-    "education":   '"{name}" education degree PhD',
-    "position":    '"{name}" scientist professor director',
-    "award":       '"{name}" award prize fellow',
-    "known_for":   '"{name}" research work contributions',
+    "education": '"{name}" education degree PhD',
+    "position": '"{name}" scientist professor director',
+    "award": '"{name}" award prize fellow',
+    "known_for": '"{name}" research work contributions',
     "nationality": '"{name}" biography',
-    "full_name":   '"{name}" profile bio',
+    "full_name": '"{name}" profile bio',
     "affiliation": '"{name}" department institute',
 }
 
@@ -356,30 +452,45 @@ def _search_web(query: str) -> list[Source]:
     cx = os.environ.get("GOOGLE_CSE_CX")
     if key and cx:
         try:
-            resp = requests.get(GOOGLE_CSE_URL, params={"key": key, "cx": cx, "q": query, "num": 8}, timeout=10)
+            resp = requests.get(
+                GOOGLE_CSE_URL,
+                params={"key": key, "cx": cx, "q": query, "num": 8},
+                timeout=10,
+            )
             resp.raise_for_status()
             items = resp.json().get("items", [])
-            return [Source(
-                url=item["link"], title=item.get("title", item["link"]),
-                publisher=_extract_publisher(item["link"]),
-                reliability=SourceReliability.primary,
-                snippet=item.get("snippet", "")[:400],
-                fetched_by="google_search",
-            ) for item in items if item.get("link")]
+            return [
+                Source(
+                    url=item["link"],
+                    title=item.get("title", item["link"]),
+                    publisher=_extract_publisher(item["link"]),
+                    reliability=SourceReliability.primary,
+                    snippet=item.get("snippet", "")[:400],
+                    fetched_by="google_search",
+                )
+                for item in items
+                if item.get("link")
+            ]
         except Exception:
             pass
 
     try:
         from ddgs import DDGS
+
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=8))
-        return [Source(
-            url=r["href"], title=r.get("title", r["href"]),
-            publisher=_extract_publisher(r["href"]),
-            reliability=SourceReliability.primary,
-            snippet=r.get("body", "")[:400],
-            fetched_by="duckduckgo",
-        ) for r in results if r.get("href")]
+        return [
+            Source(
+                url=r["href"],
+                title=r.get("title", r["href"]),
+                publisher=_extract_publisher(r["href"]),
+                reliability=SourceReliability.primary,
+                snippet=r.get("body", "")[:400],
+                fetched_by="duckduckgo",
+            )
+            for r in results
+            if r.get("href")
+        ]
     except Exception:
         return []
 
@@ -394,6 +505,7 @@ def targeted_slot_search(
 ) -> list[Source]:
     """Search web using multiple iterative queries for a specific slot, including bilingual native script expansion."""
     from .multilingual_search import build_bilingual_queries
+
     queries = build_bilingual_queries(
         name=person_name,
         nationality=nationality,
@@ -417,18 +529,29 @@ def targeted_slot_search(
 
 # ── Institution crawl ──────────────────────────────────────────────────────────
 
+
 def _find_institution_url(affiliation: str) -> str | None:
     """Search for the official website of an institution."""
     sources = _search_web(f"{affiliation} official website")
-    institutional_tlds = (".edu", ".ac.", ".res.in", ".gov", ".edu.in", ".ac.in", ".org")
+    institutional_tlds = (
+        ".edu",
+        ".ac.",
+        ".res.in",
+        ".gov",
+        ".edu.in",
+        ".ac.in",
+        ".org",
+    )
     for s in sources:
         if any(tld in s.url for tld in institutional_tlds):
             from urllib.parse import urlparse
+
             p = urlparse(s.url)
             return f"{p.scheme}://{p.netloc}"
     # Fallback: first result's base URL
     if sources:
         from urllib.parse import urlparse
+
         p = urlparse(sources[0].url)
         return f"{p.scheme}://{p.netloc}"
     return None
@@ -441,6 +564,7 @@ def fetch_institution_sources(person_name: str, affiliation: str) -> list[Source
         return []
 
     from .crawler import crawl
+
     graph = crawl(
         seed_urls=[institution_url],
         person_name=person_name,
@@ -449,8 +573,7 @@ def fetch_institution_sources(person_name: str, affiliation: str) -> list[Source
         max_depth=2,
     )
     relevant = [
-        s for s in graph.to_sources(None)
-        if graph.relevance_hits.get(s.url, 0) > 0
+        s for s in graph.to_sources(None) if graph.relevance_hits.get(s.url, 0) > 0
     ]
     for s in relevant:
         s.fetched_by = "crawl"

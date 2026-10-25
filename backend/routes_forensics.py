@@ -1,4 +1,5 @@
 """API routes for Forensic Investigation: Pivots, Auxiliary Leads, and Public Records Sweeps."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -16,7 +17,14 @@ from backend.schemas import (
     LogInquiryFailureRequest,
 )
 from . import store
-from engine.models import InvestigationPivot, AuxiliaryLead, Source, VerificationLogEntry, ForensicInquiry, PublicRecordRepository
+from engine.models import (
+    InvestigationPivot,
+    AuxiliaryLead,
+    Source,
+    VerificationLogEntry,
+    ForensicInquiry,
+    PublicRecordRepository,
+)
 from engine.forensics import (
     generate_pivot_id,
     generate_lead_id,
@@ -60,7 +68,9 @@ def get_forensics_summary(profile_name: str) -> dict:
 
     pivots_count = len(profile.investigation_pivots)
     leads_count = len(profile.auxiliary_leads)
-    corroborated_leads = sum(1 for lead in profile.auxiliary_leads if lead.status == "corroborated")
+    corroborated_leads = sum(
+        1 for lead in profile.auxiliary_leads if lead.status == "corroborated"
+    )
     inquiries_count = len(profile.forensic_inquiries)
 
     return {
@@ -76,7 +86,6 @@ def get_forensics_summary(profile_name: str) -> dict:
             "inquiries_count": inquiries_count,
         },
     }
-
 
 
 @forensics_router.post("/pivots")
@@ -112,13 +121,18 @@ def delete_pivot(pivot_id: str, profile_name: str) -> dict:
     """Remove an investigation pivot."""
     profile = store._get_profile(profile_name)
     before_len = len(profile.investigation_pivots)
-    profile.investigation_pivots = [p for p in profile.investigation_pivots if p.pivot_id != pivot_id]
+    profile.investigation_pivots = [
+        p for p in profile.investigation_pivots if p.pivot_id != pivot_id
+    ]
 
     if len(profile.investigation_pivots) == before_len:
         raise HTTPException(404, f"Pivot {pivot_id} not found")
 
     store._save_session(profile)
-    return {"ok": True, "pivots": [p.model_dump() for p in profile.investigation_pivots]}
+    return {
+        "ok": True,
+        "pivots": [p.model_dump() for p in profile.investigation_pivots],
+    }
 
 
 @forensics_router.post("/leads")
@@ -232,14 +246,33 @@ def promote_lead_to_source(lead_id: str, req: PromoteLeadToSourceRequest) -> dic
             "already_existed": True,
         }
 
-    domain_trust = "high" if any(
-        k in url_clean.lower()
-        for k in [".gov.in", ".res.in", ".ac.in", ".edu", "sciencedirect", "springer", "wiley", "theprint.in", "nature.com"]
-    ) else "medium"
+    domain_trust = (
+        "high"
+        if any(
+            k in url_clean.lower()
+            for k in [
+                ".gov.in",
+                ".res.in",
+                ".ac.in",
+                ".edu",
+                "sciencedirect",
+                "springer",
+                "wiley",
+                "theprint.in",
+                "nature.com",
+            ]
+        )
+        else "medium"
+    )
 
-    provenance = "institutional_bio" if (".gov" in url_clean or ".res" in url_clean) else "general_web"
+    provenance = (
+        "institutional_bio"
+        if (".gov" in url_clean or ".res" in url_clean)
+        else "general_web"
+    )
 
     import urllib.parse
+
     parsed_host = urllib.parse.urlparse(url_clean).netloc or "Institutional Web"
 
     new_source = Source(
@@ -272,7 +305,6 @@ def promote_lead_to_source(lead_id: str, req: PromoteLeadToSourceRequest) -> dic
         ],
     )
 
-
     profile.sources.append(new_source)
     target_lead.promoted_source_id = new_source.url
     target_lead.status = "corroborated"
@@ -287,13 +319,14 @@ def promote_lead_to_source(lead_id: str, req: PromoteLeadToSourceRequest) -> dic
     }
 
 
-
 @forensics_router.delete("/leads/{lead_id}")
 def delete_auxiliary_lead(lead_id: str, profile_name: str) -> dict:
     """Remove an auxiliary lead."""
     profile = store._get_profile(profile_name)
     before_len = len(profile.auxiliary_leads)
-    profile.auxiliary_leads = [l for l in profile.auxiliary_leads if l.lead_id != lead_id]
+    profile.auxiliary_leads = [
+        l for l in profile.auxiliary_leads if l.lead_id != lead_id
+    ]
 
     if len(profile.auxiliary_leads) == before_len:
         raise HTTPException(404, f"Lead {lead_id} not found")
@@ -313,7 +346,9 @@ def run_forensic_sweep(req: RunForensicSweepRequest) -> dict:
 
     target_pivots = profile.investigation_pivots
     if req.pivot_id:
-        target_pivots = [p for p in profile.investigation_pivots if p.pivot_id == req.pivot_id]
+        target_pivots = [
+            p for p in profile.investigation_pivots if p.pivot_id == req.pivot_id
+        ]
         if not target_pivots:
             raise HTTPException(404, f"Pivot {req.pivot_id} not found")
 
@@ -463,11 +498,16 @@ def delete_inquiry(inquiry_id: str, profile_name: str) -> dict:
     """Remove a forensic inquiry."""
     profile = store._get_profile(profile_name)
     before_len = len(profile.forensic_inquiries)
-    profile.forensic_inquiries = [i for i in profile.forensic_inquiries if i.inquiry_id != inquiry_id]
+    profile.forensic_inquiries = [
+        i for i in profile.forensic_inquiries if i.inquiry_id != inquiry_id
+    ]
     if len(profile.forensic_inquiries) == before_len:
         raise HTTPException(404, f"Inquiry {inquiry_id} not found")
     store._save_session(profile)
-    return {"ok": True, "inquiries": [i.model_dump() for i in profile.forensic_inquiries]}
+    return {
+        "ok": True,
+        "inquiries": [i.model_dump() for i in profile.forensic_inquiries],
+    }
 
 
 @forensics_router.post("/inquiries/{inquiry_id}/probe")
@@ -524,19 +564,34 @@ def probe_all_inquiries(req: dict) -> dict:
         matched_urls = list(inq.corroborating_links)
         for s in profile.sources:
             s_text = (s.title + " " + (s.snippet or "")).lower()
-            if "nasf" in anchor_lower and ("srf" in s_text or "nasf" in s_text or "recruitment" in s_text):
+            if "nasf" in anchor_lower and (
+                "srf" in s_text or "nasf" in s_text or "recruitment" in s_text
+            ):
                 if s.url not in matched_urls:
                     matched_urls.append(s.url)
-            elif "nanaji deshmukh" in anchor_lower and ("nanaji" in s_text or "book of records" in s_text):
+            elif "nanaji deshmukh" in anchor_lower and (
+                "nanaji" in s_text or "book of records" in s_text
+            ):
                 if s.url not in matched_urls:
                     matched_urls.append(s.url)
-            elif "superannuation" in anchor_lower and ("retired" in s_text or "superannuat" in s_text):
+            elif "superannuation" in anchor_lower and (
+                "retired" in s_text or "superannuat" in s_text
+            ):
                 if s.url not in matched_urls:
                     matched_urls.append(s.url)
-            elif "germany" in anchor_lower and ("germany" in s_text or "neustadt" in s_text or "mariensee" in s_text or "daad" in s_text):
+            elif "germany" in anchor_lower and (
+                "germany" in s_text
+                or "neustadt" in s_text
+                or "mariensee" in s_text
+                or "daad" in s_text
+            ):
                 if s.url not in matched_urls:
                     matched_urls.append(s.url)
-            elif "agrinnovate" in anchor_lower and ("agrinnovate" in s_text or "extender" in s_text or "novel industries" in s_text):
+            elif "agrinnovate" in anchor_lower and (
+                "agrinnovate" in s_text
+                or "extender" in s_text
+                or "novel industries" in s_text
+            ):
                 if s.url not in matched_urls and len(matched_urls) < 4:
                     matched_urls.append(s.url)
 
@@ -629,6 +684,3 @@ def remove_custom_repository(category_id: str) -> dict:
         "deleted_id": category_id,
         "total_repositories": len(atlas),
     }
-
-
-

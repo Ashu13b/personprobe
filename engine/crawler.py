@@ -7,6 +7,7 @@ Each fetched page is a node. From it we extract:
 
 We build outward to depth=3, capping at max_nodes total.
 """
+
 from __future__ import annotations
 import re
 import time
@@ -31,25 +32,27 @@ class SourceNode:
     publisher: str
     depth: int
     outlinks: list[str] = field(default_factory=list)
-    entities: list[str] = field(default_factory=list)   # named orgs/people found
-    dois: list[str] = field(default_factory=list)        # DOIs found in text
+    entities: list[str] = field(default_factory=list)  # named orgs/people found
+    dois: list[str] = field(default_factory=list)  # DOIs found in text
 
 
 @dataclass
 class SourceGraph:
-    nodes: dict[str, SourceNode] = field(default_factory=dict)   # url → node
-    relevance_hits: dict[str, int] = field(default_factory=dict) # url → mention count
+    nodes: dict[str, SourceNode] = field(default_factory=dict)  # url → node
+    relevance_hits: dict[str, int] = field(default_factory=dict)  # url → mention count
 
     def to_sources(self, classifier_fn) -> list[Source]:
         sources = []
         for url, node in self.nodes.items():
-            sources.append(Source(
-                url=url,
-                title=node.title,
-                publisher=node.publisher,
-                reliability=SourceReliability.primary,  # classifier will re-tag
-                snippet=node.text[:400],
-            ))
+            sources.append(
+                Source(
+                    url=url,
+                    title=node.title,
+                    publisher=node.publisher,
+                    reliability=SourceReliability.primary,  # classifier will re-tag
+                    snippet=node.text[:400],
+                )
+            )
         return sources
 
 
@@ -103,7 +106,9 @@ def crawl(
         if depth < max_depth:
             # Follow links whose anchor text or URL suggests relevance
             for link in links[:30]:
-                if link not in visited and _is_relevant_link(link, html, person_name, keywords):
+                if link not in visited and _is_relevant_link(
+                    link, html, person_name, keywords
+                ):
                     queue.append((link, depth + 1))
 
             # Temporal variants — if this PDF mentions the person, try adjacent years
@@ -167,7 +172,7 @@ def _extract_dois(text: str) -> list[str]:
 def _extract_entities(text: str) -> list[str]:
     """Extract capitalized multi-word phrases likely to be named entities."""
     # Simple heuristic: 2-4 consecutive capitalized words
-    pattern = r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b'
+    pattern = r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})\b"
     candidates = re.findall(pattern, text)
     # Filter to likely org/person names (not start of sentences)
     seen = set()
@@ -192,21 +197,55 @@ def _count_mentions(text: str, person_name: str, keywords: list[str]) -> int:
     return int(count)
 
 
-def _is_relevant_link(link: str, page_html: str, person_name: str, keywords: list[str]) -> bool:
+def _is_relevant_link(
+    link: str, page_html: str, person_name: str, keywords: list[str]
+) -> bool:
     """Heuristic: is this link worth following?"""
     link_lower = link.lower()
     name_parts = [p.lower() for p in person_name.split()]
 
     # Skip navigation, static, and social links
     skip_patterns = [
-        "login", "signup", "register", "cart", "shop", "privacy", "terms",
-        "cookie", "sitemap", "rss", "feed", ".jpg", ".png", ".zip", ".gif",
-        "facebook.com", "twitter.com", "instagram.com", "youtube.com",
-        "screen-reader", "about-cirb", "iso-certificate", "organizational",
-        "message-from", "vision-20", "cadre-strength", "sub-campus",
-        "divisions-units", "animal-health-section", "other-units",
-        "/page/", "?page=", "tag/", "category/", "author/",
-        "contact", "careers", "tenders", "rti-", "circulars",
+        "login",
+        "signup",
+        "register",
+        "cart",
+        "shop",
+        "privacy",
+        "terms",
+        "cookie",
+        "sitemap",
+        "rss",
+        "feed",
+        ".jpg",
+        ".png",
+        ".zip",
+        ".gif",
+        "facebook.com",
+        "twitter.com",
+        "instagram.com",
+        "youtube.com",
+        "screen-reader",
+        "about-cirb",
+        "iso-certificate",
+        "organizational",
+        "message-from",
+        "vision-20",
+        "cadre-strength",
+        "sub-campus",
+        "divisions-units",
+        "animal-health-section",
+        "other-units",
+        "/page/",
+        "?page=",
+        "tag/",
+        "category/",
+        "author/",
+        "contact",
+        "careers",
+        "tenders",
+        "rti-",
+        "circulars",
     ]
     if any(p in link_lower for p in skip_patterns):
         return False
@@ -241,7 +280,15 @@ def _is_relevant_link(link: str, page_html: str, person_name: str, keywords: lis
 
 def _entity_worth_searching(entity: str, person_name: str) -> bool:
     """Skip entities that are just the person's name or too generic."""
-    skip = {"India", "Indian", "New Delhi", "United States", "University", "Institute", "Research"}
+    skip = {
+        "India",
+        "Indian",
+        "New Delhi",
+        "United States",
+        "University",
+        "Institute",
+        "Research",
+    }
     if entity in skip:
         return False
     if person_name.lower() in entity.lower():
@@ -254,8 +301,13 @@ def _search_entity(entity: str, person_name: str) -> list[str]:
     try:
         resp = requests.get(
             "https://api.duckduckgo.com/",
-            params={"q": f'"{entity}" "{person_name}"', "format": "json", "no_html": "1"},
-            headers=HEADERS, timeout=TIMEOUT,
+            params={
+                "q": f'"{entity}" "{person_name}"',
+                "format": "json",
+                "no_html": "1",
+            },
+            headers=HEADERS,
+            timeout=TIMEOUT,
         )
         resp.raise_for_status()
         data = resp.json()
@@ -275,14 +327,14 @@ def _temporal_variants(url: str) -> list[str]:
 
     Example: .../annual-report-2026.pdf → [...2025.pdf, ...2024.pdf, ...2023.pdf]
     """
-    match = re.search(r'(20\d\d|19\d\d)', url)
+    match = re.search(r"(20\d\d|19\d\d)", url)
     if not match:
         return []
     year = int(match.group(1))
     variants = []
     for delta in range(1, 4):
         prior = year - delta
-        variants.append(url[:match.start()] + str(prior) + url[match.end():])
+        variants.append(url[: match.start()] + str(prior) + url[match.end() :])
     return variants
 
 

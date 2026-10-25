@@ -15,6 +15,7 @@ API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
 
+
 def api_post(path: str, payload: dict) -> dict:
     req = urllib.request.Request(
         API_BASE + path,
@@ -23,14 +24,19 @@ def api_post(path: str, payload: dict) -> dict:
     )
     return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
 
+
 def load_existing_urls() -> set[str]:
     if not SESSION_FILE.exists():
         return set()
     try:
         data = json.loads(SESSION_FILE.read_text())
-        return {s.get("url", "").lower().rstrip("/") for s in data.get("profile", {}).get("sources", [])}
+        return {
+            s.get("url", "").lower().rstrip("/")
+            for s in data.get("profile", {}).get("sources", [])
+        }
     except Exception:
         return set()
+
 
 def main():
     client = MobileBrowserClient()
@@ -53,7 +59,7 @@ def main():
 
     ingested = 0
     for idx, pub_url in enumerate(target_pubs):
-        print(f"\n[{idx+1}/{len(target_pubs)}] Navigating: {pub_url[:70]}...")
+        print(f"\n[{idx + 1}/{len(target_pubs)}] Navigating: {pub_url[:70]}...")
         try:
             res = client.navigate(pub_url, wait_seconds=8)
             if res.get("status") == "error":
@@ -63,7 +69,7 @@ def main():
             time.sleep(3)
             dom = client.extract_dom(include_text=True, include_links=False)
             title = dom.get("title", "")
-            text = (dom.get("content", {}).get("text", "") or "")
+            text = dom.get("content", {}).get("text", "") or ""
 
             print(f"  Title: {title[:65]}")
             print(f"  Text length: {len(text)}")
@@ -75,11 +81,14 @@ def main():
             )
 
             try:
-                r = api_post("/research/add-source-paste", {
-                    "profile_name": SESSION_ID,
-                    "url": pub_url,
-                    "pasted_text": pasted_text
-                })
+                r = api_post(
+                    "/research/add-source-paste",
+                    {
+                        "profile_name": SESSION_ID,
+                        "url": pub_url,
+                        "pasted_text": pasted_text,
+                    },
+                )
                 existing_urls.add(pub_url.lower())
                 ingested += 1
                 print(f"  [SUCCESS] Ingested #{ingested}: {pub_url[:65]}")
@@ -92,12 +101,15 @@ def main():
             print(f"  [EXCEPTION] {e}")
             time.sleep(5)
 
-    print(f"\n[DONE] Finished harvesting ResearchGate. Ingested {ingested} new publications.")
+    print(
+        f"\n[DONE] Finished harvesting ResearchGate. Ingested {ingested} new publications."
+    )
     try:
         api_post("/sessions/resume", {"session_id": SESSION_ID})
         print("[*] Session synchronized.")
     except Exception as se:
         print(f"[*] Session sync error: {se}")
+
 
 if __name__ == "__main__":
     main()

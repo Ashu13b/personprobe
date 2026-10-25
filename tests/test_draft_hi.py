@@ -1,5 +1,12 @@
 """Unit tests for deterministic Hindi draft generator."""
-from engine.models import PersonProfile, Source, Claim, VerificationState, SourceReliability
+
+from engine.models import (
+    PersonProfile,
+    Source,
+    Claim,
+    VerificationState,
+    SourceReliability,
+)
 from adapters.wiki.draft_hi import render_hindi_draft
 from adapters.wiki.draft import audit_profile
 

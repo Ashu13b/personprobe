@@ -1,4 +1,5 @@
 """Research, source, and claim routes."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
@@ -7,19 +8,39 @@ from . import store
 
 from . import pipelines
 from .schemas import (
-    IdentifyRequest, ResearchRequest, AddSourceRequest, AddDocumentFact,
-    AddSourcedClaimRequest, VerifyClaimRequest, BatchVerifyClaimsRequest, AddSourcePaste, CrawlRequest,
-    TargetedSearchRequest, FindIdsRequest, RefreshPapersRequest, AssessSourceRequest,
-    VerifySourceLevelRequest, AddNamesakeRequest,
+    IdentifyRequest,
+    ResearchRequest,
+    AddSourceRequest,
+    AddDocumentFact,
+    AddSourcedClaimRequest,
+    VerifyClaimRequest,
+    BatchVerifyClaimsRequest,
+    AddSourcePaste,
+    CrawlRequest,
+    TargetedSearchRequest,
+    FindIdsRequest,
+    RefreshPapersRequest,
+    AssessSourceRequest,
+    VerifySourceLevelRequest,
+    AddNamesakeRequest,
+    SetClaimQuoteRequest,
 )
 
 from engine.models import (
-    PersonProfile, Claim, VerificationState, SourceReliability,
-    log_source_verification, log_claim_verification, KnownNamesake,
+    PersonProfile,
+    Claim,
+    VerificationState,
+    SourceReliability,
+    log_source_verification,
+    log_claim_verification,
+    KnownNamesake,
 )
 from engine.researcher import (
-    fetch_auto_sources, fetch_url_source, fetch_url_source_with_paste,
-    fetch_institution_sources, targeted_slot_search,
+    fetch_auto_sources,
+    fetch_url_source,
+    fetch_url_source_with_paste,
+    fetch_institution_sources,
+    targeted_slot_search,
 )
 from engine.classifier import classify_sources
 from engine.notability import score_notability
@@ -45,9 +66,14 @@ from adapters.wiki.wiki_check import check_existing_page
 research_router = APIRouter()
 
 
-def _namesake_check(profile, content: str, title: str = "", matched_variant: str | None = None):
+def _namesake_check(
+    profile, content: str, title: str = "", matched_variant: str | None = None
+):
     """Session-scoped namesake screen: known_conflict drops the source, possible flags it."""
-    return assess_namesake_risk(f"{title}\n{content}", profile.name, profile.known_namesakes, matched_variant)
+    return assess_namesake_risk(
+        f"{title}\n{content}", profile.name, profile.known_namesakes, matched_variant
+    )
+
 
 @research_router.post("/identify")
 def identify(req: IdentifyRequest) -> dict:
@@ -61,6 +87,7 @@ def identify(req: IdentifyRequest) -> dict:
     identity = []
     try:
         from engine.identifier import find_candidates
+
         identity = find_candidates(req.name, hints)
     except Exception:
         identity = []
@@ -68,7 +95,12 @@ def identify(req: IdentifyRequest) -> dict:
     web = []
     try:
         from engine.researcher import _google_cse, _duckduckgo_html
-        web = _google_cse(req.name, req.field, req.affiliation) or _duckduckgo_html(req.name, req.field, req.affiliation) or []
+
+        web = (
+            _google_cse(req.name, req.field, req.affiliation)
+            or _duckduckgo_html(req.name, req.field, req.affiliation)
+            or []
+        )
     except Exception:
         web = []
 
@@ -90,7 +122,13 @@ def identify(req: IdentifyRequest) -> dict:
         for c in identity
     ]
     results += [
-        {"kind": "web", "title": s.title, "url": s.url, "snippet": s.snippet, "publisher": s.publisher}
+        {
+            "kind": "web",
+            "title": s.title,
+            "url": s.url,
+            "snippet": s.snippet,
+            "publisher": s.publisher,
+        }
         for s in web[:5]
     ]
 
@@ -100,7 +138,12 @@ def identify(req: IdentifyRequest) -> dict:
     wiki_status = None
     try:
         from adapters.wiki.wiki_check import check_existing_page, check_title_for
-        title = check_title_for(req.name, identity[0].wikipedia_url) if identity and identity[0].wikipedia_url else req.name
+
+        title = (
+            check_title_for(req.name, identity[0].wikipedia_url)
+            if identity and identity[0].wikipedia_url
+            else req.name
+        )
         wiki_status = check_existing_page(title).model_dump()
     except Exception:
         wiki_status = None
@@ -111,18 +154,28 @@ def identify(req: IdentifyRequest) -> dict:
 def _find_resumable_session(req: ResearchRequest) -> PersonProfile | None:
     """Check in-memory store and disk for an existing session with matching identity."""
     existing = next(
-        (p for p in store._sessions.values()
-         if store._identity_matches({"name": p.name, "wikidata_id": p.wikidata_id},
-                                    req.name, req.wikidata_id)),
-        None)
+        (
+            p
+            for p in store._sessions.values()
+            if store._identity_matches(
+                {"name": p.name, "wikidata_id": p.wikidata_id},
+                req.name,
+                req.wikidata_id,
+            )
+        ),
+        None,
+    )
     if existing is None:
         hit = store._find_session_on_disk(
-            lambda d: store._identity_matches(d, req.name, req.wikidata_id))
+            lambda d: store._identity_matches(d, req.name, req.wikidata_id)
+        )
         if hit is not None:
             data, path = hit
             profile = PersonProfile(**data["profile"])
             existing = store._activate_session(
-                profile, data.get("wiki_status", {"status": "clear", "url": None, "note": None}))
+                profile,
+                data.get("wiki_status", {"status": "clear", "url": None, "note": None}),
+            )
             sid = store._ensure_session_id(existing)
             store._save_session(sid)
             id_path = store._session_path(sid)
@@ -131,7 +184,9 @@ def _find_resumable_session(req: ResearchRequest) -> PersonProfile | None:
     return existing
 
 
-def _enrich_and_flag_sources(sources: list, name: str, field: str = "", affiliation: str = "") -> list:
+def _enrich_and_flag_sources(
+    sources: list, name: str, field: str = "", affiliation: str = ""
+) -> list:
     """Enrich sources with classification, DOI verification, and relevance flags."""
     if not sources:
         return sources
@@ -149,7 +204,9 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
 
     found_ids = extract_ids_from_sources(sources)
     new_ids = {t: v for t, v in found_ids.items() if t not in profile.researcher_ids}
-    for id_type, id_val in validated_new_ids(new_ids, req.name, req.affiliation).items():
+    for id_type, id_val in validated_new_ids(
+        new_ids, req.name, req.affiliation
+    ).items():
         profile.researcher_ids[id_type] = id_val
 
     if req.affiliation:
@@ -157,7 +214,9 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
         existing_urls = {s.url for s in sources}
         sources.extend(s for s in institution_sources if s.url not in existing_urls)
 
-    sources = _enrich_and_flag_sources(sources, req.name, req.field or "", req.affiliation or "")
+    sources = _enrich_and_flag_sources(
+        sources, req.name, req.field or "", req.affiliation or ""
+    )
     profile.sources = [s for s in sources if s.relevance_flag != "likely_wrong"]
     profile.claims = []
     profile.notability = score_notability(req.name, [])
@@ -178,17 +237,21 @@ def research_start(req: ResearchRequest) -> dict:
         sid = store._ensure_session_id(existing)
         return {
             "wiki_status": store._wiki_statuses.get(sid),
-            "notability": existing.notability.model_dump() if existing.notability else None,
+            "notability": existing.notability.model_dump()
+            if existing.notability
+            else None,
             "profile": existing.model_dump(),
             "resumed": True,
         }
 
     from adapters.wiki.wiki_check import check_title_for
+
     wiki_status = check_existing_page(check_title_for(req.name, req.wikipedia_url))
 
     photo_url = req.photo_url
     if not photo_url and req.wikidata_id:
         from engine.identifier import fetch_wikidata_photo_by_id
+
         photo_url = fetch_wikidata_photo_by_id(req.wikidata_id)
 
     profile = PersonProfile(
@@ -216,6 +279,7 @@ def research_start(req: ResearchRequest) -> dict:
         "profile": profile.model_dump(),
         "resumed": False,
     }
+
 
 @research_router.post("/research/add-source")
 def add_source(req: AddSourceRequest) -> dict:
@@ -248,23 +312,43 @@ def add_source(req: AddSourceRequest) -> dict:
         blocked = False
     else:
         source, blocked = fetch_url_source(url, profile.name)
-    [source] = _enrich_and_flag_sources([source], profile.name, profile.field or "", profile.affiliation or "")
+    [source] = _enrich_and_flag_sources(
+        [source], profile.name, profile.field or "", profile.affiliation or ""
+    )
     source.liveness = "blocked" if blocked else "alive"
 
-    risk, risk_note = _namesake_check(profile, source.snippet or "", source.title or "", source.identity_note)
+    risk, risk_note = _namesake_check(
+        profile, source.snippet or "", source.title or "", source.identity_note
+    )
     if risk == "known_conflict":
-        record_discarded(profile, url, reason="namesake", title=source.title, snippet=source.snippet, name_checked=profile.name)
-        raise HTTPException(409, {"message": "Source text matches a session-known namesake; not attached.", "note": risk_note})
+        record_discarded(
+            profile,
+            url,
+            reason="namesake",
+            title=source.title,
+            snippet=source.snippet,
+            name_checked=profile.name,
+        )
+        raise HTTPException(
+            409,
+            {
+                "message": "Source text matches a session-known namesake; not attached.",
+                "note": risk_note,
+            },
+        )
     if risk == "possible":
         source.identity_status = "suspect"
         source.identity_note = risk_note
 
     # Extract researcher IDs from the new URL (e.g. user pastes an ORCID link)
     new_ids = {
-        t: v for t, v in extract_ids_from_sources([source]).items()
+        t: v
+        for t, v in extract_ids_from_sources([source]).items()
         if t not in profile.researcher_ids
     }
-    for id_type, id_val in validated_new_ids(new_ids, profile.name, profile.affiliation).items():
+    for id_type, id_val in validated_new_ids(
+        new_ids, profile.name, profile.affiliation
+    ).items():
         profile.researcher_ids[id_type] = id_val
 
     if url in profile.rejected_sources:
@@ -301,7 +385,7 @@ def add_document_fact(req: AddDocumentFact) -> dict:
     claim = Claim(
         text=req.text,
         field=req.field,
-        source_url=None,          # no web source
+        source_url=None,  # no web source
         verification=VerificationState.unverified,
         user_provided=True,
         auto_source_attempted=False,
@@ -320,7 +404,9 @@ def add_sourced_claim(req: AddSourcedClaimRequest) -> dict:
     """
     profile = store._get_profile(req.profile_name)
     if not any(s.url == req.url for s in profile.sources):
-        raise HTTPException(400, "Source URL is not in this session; add the source first.")
+        raise HTTPException(
+            400, "Source URL is not in this session; add the source first."
+        )
     claim = Claim(
         text=req.text,
         field=req.field,
@@ -331,6 +417,7 @@ def add_sourced_claim(req: AddSourcedClaimRequest) -> dict:
     )
     source = next(s for s in profile.sources if s.url == req.url)
     from engine.provenance import evaluate_claim_trust
+
     claim = evaluate_claim_trust(claim, source, profile)
     profile.claims.append(claim)
     profile.missing_slots = find_missing_slots(profile, profile.claims)
@@ -397,10 +484,18 @@ def verify_claim(name: str, req: VerifyClaimRequest) -> dict:
             summary=f"Claim skipped by {actor.title()}",
         )
     elif req.action == "approve_draft":
-        source = next((source for source in profile.sources if source.url == claim.source_url), None)
-        if source is None or not (source.human_verified or source.identity_status == "confirmed"):
+        source = next(
+            (source for source in profile.sources if source.url == claim.source_url),
+            None,
+        )
+        if source is None or not (
+            source.human_verified or source.identity_status == "confirmed"
+        ):
             raise HTTPException(400, "Draft claims require a verified source")
-        if claim.verification in {VerificationState.unverified, VerificationState.skipped}:
+        if claim.verification in {
+            VerificationState.unverified,
+            VerificationState.skipped,
+        }:
             claim.verification = VerificationState.confirmed
             claim.verified_by = actor
         claim.draft_approved = True
@@ -418,10 +513,18 @@ def verify_claim(name: str, req: VerifyClaimRequest) -> dict:
             details={"draft_text": claim.draft_text},
         )
     elif req.action == "edit_draft_text" and req.edited_text:
-        source = next((source for source in profile.sources if source.url == claim.source_url), None)
-        if source is None or not (source.human_verified or source.identity_status == "confirmed"):
+        source = next(
+            (source for source in profile.sources if source.url == claim.source_url),
+            None,
+        )
+        if source is None or not (
+            source.human_verified or source.identity_status == "confirmed"
+        ):
             raise HTTPException(400, "Draft claims require a verified source")
-        if claim.verification in {VerificationState.unverified, VerificationState.skipped}:
+        if claim.verification in {
+            VerificationState.unverified,
+            VerificationState.skipped,
+        }:
             claim.verification = VerificationState.confirmed
             claim.verified_by = actor
         claim.draft_text = req.edited_text
@@ -465,7 +568,11 @@ def batch_verify_claims(name: str, req: BatchVerifyClaimsRequest) -> dict:
     if req.action == "approve_all_usable":
         for claim in profile.claims:
             if claim.verification == VerificationState.unverified:
-                source = sources_by_url.get(normalize_url(claim.source_url)) if claim.source_url else None
+                source = (
+                    sources_by_url.get(normalize_url(claim.source_url))
+                    if claim.source_url
+                    else None
+                )
                 if (
                     source
                     and (source.human_verified or source.identity_status == "confirmed")
@@ -478,14 +585,28 @@ def batch_verify_claims(name: str, req: BatchVerifyClaimsRequest) -> dict:
                     claim.draft_approved = True
                     claim.draft_text = claim.text
                     claim.draft_approved_by = actor
-                    log_claim_verification(claim, "draft", actor, "batch_approve", "passed", f"Batch approved by {actor.title()}")
+                    log_claim_verification(
+                        claim,
+                        "draft",
+                        actor,
+                        "batch_approve",
+                        "passed",
+                        f"Batch approved by {actor.title()}",
+                    )
                     count += 1
     elif req.action == "confirm_all":
         for claim in profile.claims:
             if claim.verification == VerificationState.unverified:
                 claim.verification = VerificationState.confirmed
                 claim.verified_by = actor
-                log_claim_verification(claim, "claim", actor, "batch_confirm", "passed", f"Batch confirmed by {actor.title()}")
+                log_claim_verification(
+                    claim,
+                    "claim",
+                    actor,
+                    "batch_confirm",
+                    "passed",
+                    f"Batch confirmed by {actor.title()}",
+                )
                 count += 1
     elif req.action == "skip_unverified":
         for claim in profile.claims:
@@ -494,7 +615,14 @@ def batch_verify_claims(name: str, req: BatchVerifyClaimsRequest) -> dict:
                 claim.verified_by = actor
                 claim.draft_approved = False
                 claim.draft_text = None
-                log_claim_verification(claim, "claim", actor, "batch_skip", "rejected", f"Batch skipped by {actor.title()}")
+                log_claim_verification(
+                    claim,
+                    "claim",
+                    actor,
+                    "batch_skip",
+                    "rejected",
+                    f"Batch skipped by {actor.title()}",
+                )
                 count += 1
     else:
         raise HTTPException(400, f"Unsupported batch action: {req.action}")
@@ -508,7 +636,9 @@ def add_source_paste(req: AddSourcePaste) -> dict:
     """User pasted text from a blocked page (or typed from a screenshot/PDF)."""
     profile = store._get_profile(req.profile_name)
     source = fetch_url_source_with_paste(req.url, req.pasted_text)
-    [source] = _enrich_and_flag_sources([source], profile.name, profile.field or "", profile.affiliation or "")
+    [source] = _enrich_and_flag_sources(
+        [source], profile.name, profile.field or "", profile.affiliation or ""
+    )
     source.human_verified = True
     new_claims = extract_claims(profile, [source], store.llm())
     profile.sources.append(source)
@@ -566,8 +696,18 @@ def deep_crawl(req: CrawlRequest) -> dict:
                 name_checked=profile.name,
             )
             excluded.add(c_url)
-        elif _namesake_check(profile, s.snippet or "", s.title or "")[0] == "known_conflict":
-            record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
+        elif (
+            _namesake_check(profile, s.snippet or "", s.title or "")[0]
+            == "known_conflict"
+        ):
+            record_discarded(
+                profile,
+                s.url,
+                reason="namesake",
+                title=s.title,
+                snippet=s.snippet,
+                name_checked=profile.name,
+            )
             excluded.add(c_url)
         elif graph.relevance_hits.get(s.url, 0) > 0:
             if v_res.identity_strength == "weak":
@@ -627,8 +767,18 @@ def targeted_search_endpoint(req: TargetedSearchRequest) -> dict:
                 name_checked=profile.name,
             )
             excluded.add(c_url)
-        elif _namesake_check(profile, s.snippet or "", s.title or "")[0] == "known_conflict":
-            record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
+        elif (
+            _namesake_check(profile, s.snippet or "", s.title or "")[0]
+            == "known_conflict"
+        ):
+            record_discarded(
+                profile,
+                s.url,
+                reason="namesake",
+                title=s.title,
+                snippet=s.snippet,
+                name_checked=profile.name,
+            )
             excluded.add(c_url)
         else:
             if v_res.identity_strength == "weak":
@@ -637,13 +787,29 @@ def targeted_search_endpoint(req: TargetedSearchRequest) -> dict:
             candidate_filtered.append(s)
             excluded.add(c_url)
 
-    new_sources = _enrich_and_flag_sources(candidate_filtered, profile.name, profile.field or "", profile.affiliation or "")
+    new_sources = _enrich_and_flag_sources(
+        candidate_filtered, profile.name, profile.field or "", profile.affiliation or ""
+    )
     accepted = []
     for s in new_sources:
         if s.reliability.value in ("self_published", "unreliable"):
-            record_discarded(profile, s.url, reason="unreliable", title=s.title, snippet=s.snippet, name_checked=profile.name)
+            record_discarded(
+                profile,
+                s.url,
+                reason="unreliable",
+                title=s.title,
+                snippet=s.snippet,
+                name_checked=profile.name,
+            )
         elif s.relevance_flag != "relevant":
-            record_discarded(profile, s.url, reason="off_topic", title=s.title, snippet=s.snippet, name_checked=profile.name)
+            record_discarded(
+                profile,
+                s.url,
+                reason="off_topic",
+                title=s.title,
+                snippet=s.snippet,
+                name_checked=profile.name,
+            )
         else:
             accepted.append(s)
     new_sources = accepted
@@ -709,8 +875,20 @@ def auto_enrich_endpoint(body: dict) -> dict:
                     name_checked=profile.name,
                 )
                 excluded.add(c_url)
-            elif _namesake_check(profile, s.snippet or "", s.title or "", v_res.variant)[0] == "known_conflict":
-                record_discarded(profile, s.url, reason="namesake", title=s.title, snippet=s.snippet, name_checked=profile.name)
+            elif (
+                _namesake_check(profile, s.snippet or "", s.title or "", v_res.variant)[
+                    0
+                ]
+                == "known_conflict"
+            ):
+                record_discarded(
+                    profile,
+                    s.url,
+                    reason="namesake",
+                    title=s.title,
+                    snippet=s.snippet,
+                    name_checked=profile.name,
+                )
                 excluded.add(c_url)
             else:
                 if v_res.identity_strength == "weak":
@@ -721,11 +899,23 @@ def auto_enrich_endpoint(body: dict) -> dict:
 
         new_sources = candidates_to_process[: max_sources - len(added_sources)]
         if new_sources:
-            new_sources = _enrich_and_flag_sources(new_sources, profile.name, profile.field or "", profile.affiliation or "")
+            new_sources = _enrich_and_flag_sources(
+                new_sources,
+                profile.name,
+                profile.field or "",
+                profile.affiliation or "",
+            )
             accepted = []
             for s in new_sources:
                 if s.reliability.value in ("self_published", "unreliable"):
-                    record_discarded(profile, s.url, reason="unreliable", title=s.title, snippet=s.snippet, name_checked=profile.name)
+                    record_discarded(
+                        profile,
+                        s.url,
+                        reason="unreliable",
+                        title=s.title,
+                        snippet=s.snippet,
+                        name_checked=profile.name,
+                    )
                 else:
                     accepted.append(s)
             new_sources = accepted
@@ -754,13 +944,19 @@ def auto_enrich_endpoint(body: dict) -> dict:
 def article_proposal(body: dict) -> dict:
     """Existing-article mode: compare confirmed claims against the live article
     and emit a structured edit proposal (covered vs candidate additions)."""
-    from adapters.wiki.article_compare import build_article_proposal, fetch_article_text, title_from_url
+    from adapters.wiki.article_compare import (
+        build_article_proposal,
+        fetch_article_text,
+        title_from_url,
+    )
 
     profile = store._get_profile(body["profile_name"])
     sid = store._ensure_session_id(profile)
     status = store._wiki_statuses.get(sid) or store._wiki_statuses.get(profile.name, {})
     if status.get("status") != "exists":
-        raise HTTPException(400, "Article comparison is only available when an article already exists.")
+        raise HTTPException(
+            400, "Article comparison is only available when an article already exists."
+        )
     url = status.get("url")
     if not url:
         raise HTTPException(400, "No article URL recorded for this session.")
@@ -773,6 +969,7 @@ def article_proposal(body: dict) -> dict:
 
     proposal = build_article_proposal(profile, title, url, article_text)
     return {"proposal": proposal.model_dump()}
+
 
 @research_router.get("/session/namesakes")
 def list_namesakes(profile_name: str) -> dict:
@@ -799,6 +996,7 @@ def verify_source(body: dict) -> dict:
     new_claims: list = []
     if verified:
         from datetime import datetime, timezone
+
         source.confirmed_for_extraction_by = actor
         source.confirmed_for_extraction_at = datetime.now(timezone.utc).isoformat()
         if actor == "human":
@@ -806,8 +1004,17 @@ def verify_source(body: dict) -> dict:
 
         # L1: Liveness + Wayback fallback at the moment of confirmation.
         from engine.fetcher import check_liveness
+
         source.liveness, source.archive_url = check_liveness(url)
-        liveness_verdict = "passed" if source.liveness == "alive" else ("warning" if source.archive_url else "rejected")
+        from engine.workflow import advance_source_stage
+
+        if source.liveness == "alive":
+            advance_source_stage(source, "retrieved")
+        liveness_verdict = (
+            "passed"
+            if source.liveness == "alive"
+            else ("warning" if source.archive_url else "rejected")
+        )
         log_source_verification(
             source,
             level="liveness",
@@ -821,6 +1028,7 @@ def verify_source(body: dict) -> dict:
         # L2: Identity confirmation & extraction authorization
         source.identity_status = "confirmed"
         source.identity_by = actor
+        advance_source_stage(source, "identity_checked")
         log_source_verification(
             source,
             level="identity",
@@ -846,13 +1054,20 @@ def verify_source(body: dict) -> dict:
 
     if verified and source.relevance_flag == "likely_wrong":
         source.extraction_status = "likely_wrong"
-        source.extraction_note = "Source flagged as likely a different person. No claims extracted."
+        source.extraction_note = (
+            "Source flagged as likely a different person. No claims extracted."
+        )
     elif verified:
         norm_target = normalize_url(url)
         new_claims = []
-        existing_for_url = [c for c in profile.claims if c.source_url and normalize_url(c.source_url) == norm_target]
+        existing_for_url = [
+            c
+            for c in profile.claims
+            if c.source_url and normalize_url(c.source_url) == norm_target
+        ]
         if not existing_for_url:
             from engine.llm import StubProvider, NullProvider, LocalProvider
+
             llm_inst = store.llm()
             extracted = extract_claims(profile, [source], llm_inst)
             if extracted:
@@ -870,12 +1085,16 @@ def verify_source(body: dict) -> dict:
                 profile.missing_slots = find_missing_slots(profile, profile.claims)
                 new_claims = extracted
                 source.extraction_status = "extracted"
-                source.extraction_note = f"{len(extracted)} claims extracted from this source."
+                source.extraction_note = (
+                    f"{len(extracted)} claims extracted from this source."
+                )
             else:
                 if isinstance(llm_inst, (StubProvider, NullProvider, LocalProvider)):
                     source.extraction_status = "stub_mode"
                     source.extraction_note = "LLM in rule/stub mode — to prevent fabrication, claims are not auto-extracted. Use '+ Add Sourced Claim' to add facts from this source."
-                elif not source.snippet and (not source.title or source.title == source.url):
+                elif not source.snippet and (
+                    not source.title or source.title == source.url
+                ):
                     source.extraction_status = "thin_content"
                     source.extraction_note = "Page content was too short or lacked verifiable biographical statements."
                 else:
@@ -884,7 +1103,9 @@ def verify_source(body: dict) -> dict:
         else:
             new_claims = existing_for_url
             source.extraction_status = "extracted"
-            source.extraction_note = f"Source verified ({len(existing_for_url)} claims in session)."
+            source.extraction_note = (
+                f"Source verified ({len(existing_for_url)} claims in session)."
+            )
 
     profile.notability = score_notability(profile.name, profile.sources, profile.claims)
     store._save_session(profile)
@@ -910,18 +1131,34 @@ def verify_source_level(req: VerifySourceLevelRequest) -> dict:
             source.liveness = req.status
         else:
             from engine.fetcher import check_liveness
+
             source.liveness, source.archive_url = check_liveness(source.url)
-        verdict = "passed" if source.liveness == "alive" else ("warning" if source.archive_url else "rejected")
+        verdict = (
+            "passed"
+            if source.liveness == "alive"
+            else ("warning" if source.archive_url else "rejected")
+        )
         log_source_verification(
             source,
             level="liveness",
             actor=req.actor,
             action="verify_liveness",
             verdict=verdict,
-            summary=f"Liveness verified as '{source.liveness}' by {req.actor.title()}" + (f": {req.note}" if req.note else ""),
-            details={"liveness": source.liveness, "archive_url": source.archive_url, "note": req.note},
+            summary=f"Liveness verified as '{source.liveness}' by {req.actor.title()}"
+            + (f": {req.note}" if req.note else ""),
+            details={
+                "liveness": source.liveness,
+                "archive_url": source.archive_url,
+                "note": req.note,
+            },
         )
+        if source.liveness == "alive":
+            from engine.workflow import advance_source_stage
+
+            advance_source_stage(source, "retrieved")
     elif req.level == "identity":
+        if source.workflow_stage != "retrieved":
+            raise HTTPException(400, "Run liveness verification first")
         status = req.status or "confirmed"
         source.identity_status = status
         source.identity_note = req.note
@@ -934,39 +1171,58 @@ def verify_source_level(req: VerifySourceLevelRequest) -> dict:
                 actor=req.actor,
                 action="reject_person",
                 verdict="rejected",
-                summary=f"Subject rejected as wrong person / namesake by {req.actor.title()}" + (f": {req.note}" if req.note else ""),
+                summary=f"Subject rejected as wrong person / namesake by {req.actor.title()}"
+                + (f": {req.note}" if req.note else ""),
                 details={"reason": req.note},
             )
         elif status == "suspect":
             # suspect keeps human_verified unraised: needs a human re-look before extraction
-            source.relevance_flag = "uncertain" if source.relevance_flag == "likely_wrong" else source.relevance_flag
+            source.relevance_flag = (
+                "uncertain"
+                if source.relevance_flag == "likely_wrong"
+                else source.relevance_flag
+            )
             log_source_verification(
                 source,
                 level="identity",
                 actor=req.actor,
                 action="flag_suspect_identity",
                 verdict="warning",
-                summary=f"Identity flagged suspect by {req.actor.title()}" + (f": {req.note}" if req.note else ""),
+                summary=f"Identity flagged suspect by {req.actor.title()}"
+                + (f": {req.note}" if req.note else ""),
                 details={"reason": req.note},
             )
         else:
             from datetime import datetime, timezone
+
             source.confirmed_for_extraction_by = req.actor
             source.confirmed_for_extraction_at = datetime.now(timezone.utc).isoformat()
             if req.actor == "human":
                 source.human_verified = True
             source.identity_status = "confirmed"
-            source.relevance_flag = "relevant" if source.relevance_flag == "likely_wrong" else source.relevance_flag
+            source.relevance_flag = (
+                "relevant"
+                if source.relevance_flag == "likely_wrong"
+                else source.relevance_flag
+            )
             log_source_verification(
                 source,
                 level="identity",
                 actor=req.actor,
                 action="confirm_person_and_extract",
                 verdict="passed",
-                summary=f"Subject identity confirmed and claim extraction authorized by {req.actor.title()}" + (f": {req.note}" if req.note else ""),
+                summary=f"Subject identity confirmed and claim extraction authorized by {req.actor.title()}"
+                + (f": {req.note}" if req.note else ""),
                 details={"note": req.note},
             )
+            from engine.workflow import advance_source_stage
+
+            advance_source_stage(source, "identity_checked")
     elif req.level == "provenance":
+        if source.workflow_stage != "identity_checked":
+            raise HTTPException(
+                400, "Confirm source identity before assessing provenance"
+            )
         if req.coverage_depth:
             source.coverage_depth = req.coverage_depth
         if req.editorial_origin:
@@ -980,14 +1236,21 @@ def verify_source_level(req: VerifySourceLevelRequest) -> dict:
             action="assess_provenance",
             verdict="passed",
             summary=f"Provenance assessed by {req.actor.title()}",
-            details={"coverage_depth": source.coverage_depth, "editorial_origin": source.editorial_origin},
+            details={
+                "coverage_depth": source.coverage_depth,
+                "editorial_origin": source.editorial_origin,
+            },
         )
+        from engine.workflow import advance_source_stage
+
+        advance_source_stage(source, "provenance_checked")
     elif req.level == "all":
         source.human_verified = True
         source.identity_status = "confirmed"
         if req.coverage_depth:
             source.coverage_depth = req.coverage_depth
         from engine.fetcher import check_liveness
+
         source.liveness, source.archive_url = check_liveness(source.url)
         log_source_verification(
             source,
@@ -1000,7 +1263,11 @@ def verify_source_level(req: VerifySourceLevelRequest) -> dict:
 
     profile.notability = score_notability(profile.name, profile.sources, profile.claims)
     store._save_session(profile)
-    return {"ok": True, "source": source.model_dump(), "notability": profile.notability.model_dump() if profile.notability else None}
+    return {
+        "ok": True,
+        "source": source.model_dump(),
+        "notability": profile.notability.model_dump() if profile.notability else None,
+    }
 
 
 @research_router.get("/research/verification-summary")
@@ -1010,31 +1277,91 @@ def get_verification_summary(profile_name: str) -> dict:
     total_sources = len(profile.sources)
     total_claims = len(profile.claims)
 
-    l1_alive = sum(1 for s in profile.sources if getattr(s, "liveness", "unknown") == "alive")
-    l1_dead = sum(1 for s in profile.sources if getattr(s, "liveness", "unknown") == "dead")
-    l1_blocked = sum(1 for s in profile.sources if getattr(s, "liveness", "unknown") == "blocked")
-    l1_agent = sum(1 for s in profile.sources if getattr(s, "liveness_by", None) == "agent")
-    l1_human = sum(1 for s in profile.sources if getattr(s, "liveness_by", None) == "human")
+    l1_alive = sum(
+        1 for s in profile.sources if getattr(s, "liveness", "unknown") == "alive"
+    )
+    l1_dead = sum(
+        1 for s in profile.sources if getattr(s, "liveness", "unknown") == "dead"
+    )
+    l1_blocked = sum(
+        1 for s in profile.sources if getattr(s, "liveness", "unknown") == "blocked"
+    )
+    l1_agent = sum(
+        1 for s in profile.sources if getattr(s, "liveness_by", None) == "agent"
+    )
+    l1_human = sum(
+        1 for s in profile.sources if getattr(s, "liveness_by", None) == "human"
+    )
 
-    l2_confirmed = sum(1 for s in profile.sources if getattr(s, "identity_status", "unverified") == "confirmed" or s.human_verified)
-    l2_suspect = sum(1 for s in profile.sources if getattr(s, "identity_status", "unverified") in {"suspect", "wrong_person"} or getattr(s, "relevance_flag", "") == "likely_wrong")
+    l2_confirmed = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "identity_status", "unverified") == "confirmed"
+        or s.human_verified
+    )
+    l2_suspect = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "identity_status", "unverified") in {"suspect", "wrong_person"}
+        or getattr(s, "relevance_flag", "") == "likely_wrong"
+    )
     l2_unverified = max(0, total_sources - l2_confirmed - l2_suspect)
-    l2_agent = sum(1 for s in profile.sources if getattr(s, "identity_by", None) == "agent")
-    l2_human = sum(1 for s in profile.sources if getattr(s, "identity_by", None) == "human" or (s.human_verified and not getattr(s, "identity_by", None)))
+    l2_agent = sum(
+        1 for s in profile.sources if getattr(s, "identity_by", None) == "agent"
+    )
+    l2_human = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "identity_by", None) == "human"
+        or (s.human_verified and not getattr(s, "identity_by", None))
+    )
 
-    l3_significant = sum(1 for s in profile.sources if getattr(s, "coverage_depth", "unassessed") == "significant")
-    l3_passing = sum(1 for s in profile.sources if getattr(s, "coverage_depth", "unassessed") == "passing_mention")
-    l3_independent = sum(1 for s in profile.sources if getattr(s, "is_independent", False) and getattr(s, "provenance_category", "") == "independent_secondary")
+    l3_significant = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "coverage_depth", "unassessed") == "significant"
+    )
+    l3_passing = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "coverage_depth", "unassessed") == "passing_mention"
+    )
+    l3_independent = sum(
+        1
+        for s in profile.sources
+        if getattr(s, "is_independent", False)
+        and getattr(s, "provenance_category", "") == "independent_secondary"
+    )
 
-    l4_settled = sum(1 for c in profile.claims if c.verification in {VerificationState.confirmed, VerificationState.edited})
-    l4_unverified = sum(1 for c in profile.claims if c.verification == VerificationState.unverified)
-    l4_skipped = sum(1 for c in profile.claims if c.verification == VerificationState.skipped)
-    l4_agent = sum(1 for c in profile.claims if getattr(c, "verified_by", None) == "agent")
-    l4_human = sum(1 for c in profile.claims if getattr(c, "verified_by", None) == "human")
+    l4_settled = sum(
+        1
+        for c in profile.claims
+        if c.verification in {VerificationState.confirmed, VerificationState.edited}
+    )
+    l4_unverified = sum(
+        1 for c in profile.claims if c.verification == VerificationState.unverified
+    )
+    l4_skipped = sum(
+        1 for c in profile.claims if c.verification == VerificationState.skipped
+    )
+    l4_agent = sum(
+        1 for c in profile.claims if getattr(c, "verified_by", None) == "agent"
+    )
+    l4_human = sum(
+        1 for c in profile.claims if getattr(c, "verified_by", None) == "human"
+    )
 
     l5_approved = sum(1 for c in profile.claims if c.draft_approved)
-    l5_agent = sum(1 for c in profile.claims if c.draft_approved and getattr(c, "draft_approved_by", None) == "agent")
-    l5_human = sum(1 for c in profile.claims if c.draft_approved and getattr(c, "draft_approved_by", None) != "agent")
+    l5_agent = sum(
+        1
+        for c in profile.claims
+        if c.draft_approved and getattr(c, "draft_approved_by", None) == "agent"
+    )
+    l5_human = sum(
+        1
+        for c in profile.claims
+        if c.draft_approved and getattr(c, "draft_approved_by", None) != "agent"
+    )
 
     total_agent_events = 0
     total_human_events = 0
@@ -1102,13 +1429,25 @@ def reject_source(body: dict) -> dict:
     profile = store._get_profile(body["profile_name"])
     url = body["url"]
     c_url = canonical_url(url)
-    matching = [s for s in profile.sources if canonical_url(s.url) == c_url or s.url == url]
+    matching = [
+        s for s in profile.sources if canonical_url(s.url) == c_url or s.url == url
+    ]
     title = matching[0].title if matching else ""
     snippet = matching[0].snippet if matching else ""
 
-    profile.sources = [s for s in profile.sources if s.url != url and canonical_url(s.url) != c_url]
-    removed = [c for c in profile.claims if c.source_url == url or canonical_url(c.source_url or "") == c_url]
-    profile.claims = [c for c in profile.claims if c.source_url != url and canonical_url(c.source_url or "") != c_url]
+    profile.sources = [
+        s for s in profile.sources if s.url != url and canonical_url(s.url) != c_url
+    ]
+    removed = [
+        c
+        for c in profile.claims
+        if c.source_url == url or canonical_url(c.source_url or "") == c_url
+    ]
+    profile.claims = [
+        c
+        for c in profile.claims
+        if c.source_url != url and canonical_url(c.source_url or "") != c_url
+    ]
 
     record_discarded(
         profile,
@@ -1148,7 +1487,9 @@ def skip_suggestion(body: dict) -> dict:
 
 
 @research_router.get("/research/discarded-sources")
-def get_discarded_sources_endpoint(profile_name: str, reason: str | None = None) -> dict:
+def get_discarded_sources_endpoint(
+    profile_name: str, reason: str | None = None
+) -> dict:
     """Return all discarded sources for human or agent audit and recovery."""
     profile = store._get_profile(profile_name)
     discarded = profile.discarded_sources
@@ -1178,6 +1519,7 @@ def get_lifecycle_audit_endpoint(profile_name: str) -> dict:
     """Run comprehensive lifecycle audit across all 4 research and drafting stages."""
     from dataclasses import asdict
     from engine.lifecycle_audit import audit_full_lifecycle
+
     profile = store._get_profile(profile_name)
     audit = audit_full_lifecycle(profile)
     return asdict(audit)
@@ -1187,6 +1529,7 @@ def get_lifecycle_audit_endpoint(profile_name: str) -> dict:
 def get_mobile_bridge_status_endpoint() -> dict:
     """Return status of OpenScrape mobile browser bridge (Tailnet port 38765)."""
     from engine.mobile_bridge import is_mobile_bridge_available, get_mobile_client
+
     online = is_mobile_bridge_available()
     details = None
     if online:
@@ -1206,6 +1549,7 @@ def get_mobile_bridge_status_endpoint() -> dict:
 def find_researcher_ids_endpoint(req: FindIdsRequest) -> dict:
     """Search for ORCID, Google Scholar, Scopus, ResearchGate IDs and validate ORCID."""
     from engine.researcher_ids import search_researcher_ids, validate_orcid
+
     profile = store._get_profile(req.profile_name)
     found = search_researcher_ids(profile.name, profile.field, profile.affiliation)
     for id_type, id_val in found.items():
@@ -1230,12 +1574,21 @@ def find_researcher_ids_endpoint(req: FindIdsRequest) -> dict:
 @research_router.post("/research/refresh-papers")
 def refresh_papers_endpoint(req: RefreshPapersRequest) -> dict:
     """Re-fetch publications from ORCID or Semantic Scholar for a confirmed ID."""
-    from engine.researcher_ids import fetch_orcid_works, fetch_s2_author_papers, validate_orcid
+    from engine.researcher_ids import (
+        fetch_orcid_works,
+        fetch_s2_author_papers,
+        validate_orcid,
+    )
+
     profile = store._get_profile(req.profile_name)
 
     if req.confirm:
-        if req.id_type == "orcid" and not validate_orcid(req.id_value, profile.name, profile.affiliation):
-            raise HTTPException(400, "ORCID does not match the subject name and affiliation")
+        if req.id_type == "orcid" and not validate_orcid(
+            req.id_value, profile.name, profile.affiliation
+        ):
+            raise HTTPException(
+                400, "ORCID does not match the subject name and affiliation"
+            )
         profile.researcher_ids[req.id_type] = req.id_value
         profile.confirmed_ids[req.id_type] = True
 
@@ -1250,7 +1603,9 @@ def refresh_papers_endpoint(req: RefreshPapersRequest) -> dict:
     new_sources = [s for s in new_sources if s.url not in existing_urls]
     for s in new_sources:
         s.human_verified = True
-    new_sources = _enrich_and_flag_sources(new_sources, profile.name, profile.field or "", profile.affiliation or "")
+    new_sources = _enrich_and_flag_sources(
+        new_sources, profile.name, profile.field or "", profile.affiliation or ""
+    )
     new_claims = extract_claims(profile, new_sources, store.llm())
     profile.sources.extend(new_sources)
     profile.claims.extend(new_claims)
@@ -1276,6 +1631,7 @@ def fetch_from_browser(body: dict) -> dict:
 
     try:
         from browser_server import _dispatch, _running
+
         if not _running:
             raise HTTPException(503, "Browser server is not running")
         data = _dispatch("content")
@@ -1291,7 +1647,9 @@ def fetch_from_browser(body: dict) -> dict:
         raise HTTPException(400, "This source is already in your list.")
 
     source = fetch_url_source_with_paste(url, text)
-    [source] = _enrich_and_flag_sources([source], profile.name, profile.field or "", profile.affiliation or "")
+    [source] = _enrich_and_flag_sources(
+        [source], profile.name, profile.field or "", profile.affiliation or ""
+    )
 
     profile.sources.append(source)
     profile.notability = score_notability(profile.name, profile.sources, profile.claims)
@@ -1320,8 +1678,11 @@ def fetch_blocked(body: dict) -> dict:
     profile = store._get_profile(body["profile_name"])
     try:
         from browser_server import _dispatch, _running, looks_like_wall
+
         if not _running:
-            raise HTTPException(503, "Remote browser is not running — open the companion browser first.")
+            raise HTTPException(
+                503, "Remote browser is not running — open the companion browser first."
+            )
     except ImportError:
         raise HTTPException(503, "Remote browser is not available")
 
@@ -1337,7 +1698,9 @@ def fetch_blocked(body: dict) -> dict:
         source.snippet = text[:400]
         source.liveness = "alive"
         source.fetched_by = "browser"
-        [source] = _enrich_and_flag_sources([source], profile.name, profile.field or "", profile.affiliation or "")
+        [source] = _enrich_and_flag_sources(
+            [source], profile.name, profile.field or "", profile.affiliation or ""
+        )
         fetched.append(source.url)
 
     profile.notability = score_notability(profile.name, profile.sources, profile.claims)
@@ -1355,11 +1718,11 @@ def suggest_urls(body: dict) -> dict:
     """Return a ranked queue of URL suggestions based on what the profile is missing."""
     from engine.suggester import suggest_next_urls
     from engine.models import UrlSuggestion
+
     profile = store._get_profile(body["profile_name"])
     suggestions = suggest_next_urls(profile, max_results=body.get("max_results", 8))
     validated = [UrlSuggestion(**s).model_dump() for s in suggestions]
     return {"suggestions": validated}
-
 
 
 @research_router.post("/research/source/assess")
@@ -1373,8 +1736,12 @@ def assess_source(req: AssessSourceRequest) -> dict:
     source = next((item for item in profile.sources if item.url == req.url), None)
     if source is None:
         raise HTTPException(404, "Source not found in this session")
-    if req.coverage_depth == "significant" and not (source.human_verified or getattr(source, "identity_status", "") == "confirmed"):
-        raise HTTPException(400, "Verify the source before marking significant coverage")
+    if req.coverage_depth == "significant" and not (
+        source.human_verified or getattr(source, "identity_status", "") == "confirmed"
+    ):
+        raise HTTPException(
+            400, "Verify the source before marking significant coverage"
+        )
 
     actor = req.actor or "human"
     source.coverage_depth = req.coverage_depth
@@ -1403,18 +1770,21 @@ def assess_source(req: AssessSourceRequest) -> dict:
     }
 
 
-
 @research_router.post("/session/namesakes")
 def add_namesake(req: AddNamesakeRequest) -> dict:
     """Add a session-scoped namesake signature. Ingest then auto-screens against it."""
     import uuid as _uuid
+
     profile = store._get_profile(req.profile_name)
     from datetime import datetime, timezone
+
     namesake = KnownNamesake(
         namesake_id=req.namesake_id or f"ns-{_uuid.uuid4().hex[:8]}",
         display_name=req.display_name.strip(),
         signature_terms=[t.strip() for t in req.signature_terms if t.strip()],
-        distinguishing_traits=[t.strip() for t in req.distinguishing_traits if t.strip()],
+        distinguishing_traits=[
+            t.strip() for t in req.distinguishing_traits if t.strip()
+        ],
         notes=req.notes,
         created_by=req.actor or "human",
         created_at=datetime.now(timezone.utc).isoformat(),
@@ -1430,23 +1800,20 @@ def add_namesake(req: AddNamesakeRequest) -> dict:
 def delete_namesake(namesake_id: str, profile_name: str) -> dict:
     profile = store._get_profile(profile_name)
     before = len(profile.known_namesakes)
-    profile.known_namesakes = [n for n in profile.known_namesakes if n.namesake_id != namesake_id]
+    profile.known_namesakes = [
+        n for n in profile.known_namesakes if n.namesake_id != namesake_id
+    ]
     if len(profile.known_namesakes) == before:
         raise HTTPException(404, f"Namesake {namesake_id} not found")
     store._save_session(profile)
     return {"ok": True, "namesakes": [n.model_dump() for n in profile.known_namesakes]}
 
 
-@research_router.get("/session/namesakes")
-def list_namesakes(profile_name: str) -> dict:
-    profile = store._get_profile(profile_name)
-    return {"namesakes": [n.model_dump() for n in profile.known_namesakes]}
-
-
 @research_router.get("/research/claim-clusters")
 def get_claim_clusters(profile_name: str) -> dict:
     """Fact clusters: one fact, every supporting link, ranked best-citation first."""
     from engine.claim_selection import build_claim_clusters
+
     profile = store._get_profile(profile_name)
     clusters = build_claim_clusters(profile)
     return {
@@ -1515,6 +1882,7 @@ def select_best_all(body: dict) -> dict:
     invariant) so the change is visible in the review queue.
     """
     from engine.claim_selection import build_claim_clusters
+
     profile = store._get_profile(body["profile_name"])
     apply_changes = bool(body.get("apply"))
     clusters = build_claim_clusters(profile)
@@ -1530,19 +1898,23 @@ def select_best_all(body: dict) -> dict:
         best = ranked[0]
         if best["rank"] == -99.0:
             continue
-        current_rank = next((r["rank"] for r in ranked if r["url"] == claim.source_url), None)
+        current_rank = next(
+            (r["rank"] for r in ranked if r["url"] == claim.source_url), None
+        )
         if current_rank is not None and best["rank"] <= current_rank:
             continue
         if claim.source_url == best["url"]:
             continue
-        planned.append({
-            "claim_index": canon_idx,
-            "fact": (cluster["canonical_text"] or "")[:120],
-            "from": claim.source_url,
-            "to": best["url"],
-            "from_rank": current_rank,
-            "to_rank": best["rank"],
-        })
+        planned.append(
+            {
+                "claim_index": canon_idx,
+                "fact": (cluster["canonical_text"] or "")[:120],
+                "from": claim.source_url,
+                "to": best["url"],
+                "from_rank": current_rank,
+                "to_rank": best["rank"],
+            }
+        )
         if apply_changes:
             previous = claim.source_url
             claim.source_url = best["url"]
@@ -1559,57 +1931,49 @@ def select_best_all(body: dict) -> dict:
                 action="rebind_source_bulk",
                 verdict="warning",
                 summary=f"Fact auto-upgraded to best-ranked link ({best['url'][:80]}); re-verification required",
-                details={"previous_source_url": previous, "new_source_url": best["url"],
-                         "previous_rank": current_rank, "new_rank": best["rank"]},
+                details={
+                    "previous_source_url": previous,
+                    "new_source_url": best["url"],
+                    "previous_rank": current_rank,
+                    "new_rank": best["rank"],
+                },
             )
     if apply_changes and planned:
-        profile.notability = score_notability(profile.name, profile.sources, profile.claims)
+        profile.notability = score_notability(
+            profile.name, profile.sources, profile.claims
+        )
         store._save_session(profile)
-    return {"ok": True, "apply": apply_changes, "planned": planned, "count": len(planned)}
+    return {
+        "ok": True,
+        "apply": apply_changes,
+        "planned": planned,
+        "count": len(planned),
+    }
 
 
 @research_router.get("/research/draft-suggestions")
 def get_draft_suggestions(profile_name: str, limit: int = 60) -> dict:
     """Facts ready (or nearly ready) to move into the draft, one per fact."""
     from engine.claim_selection import suggest_draft_upgrades
+
     profile = store._get_profile(profile_name)
     return suggest_draft_upgrades(profile, limit=max(1, min(limit, 300)))
 
 
 @research_router.post("/research/claims/set-quote")
-def set_claim_quote(body: dict) -> dict:
+def set_claim_quote(body: SetClaimQuoteRequest) -> dict:
     """Attach a verbatim L4 quote to a claim (batch, guarded by source match).
 
     Only accepts a quote when the claim's source_url matches the provided one,
     so backfill cannot attach evidence from a different document.
     """
-    profile = store._get_profile(body["profile_name"])
-    items = body.get("items") or []
-    actor = body.get("actor", "agent")
-    updated, skipped = 0, []
-    for item in items:
-        try:
-            idx = int(item["claim_index"])
-        except (KeyError, TypeError, ValueError):
-            skipped.append({"item": item, "why": "bad index"})
-            continue
-        if idx < 0 or idx >= len(profile.claims):
-            skipped.append({"claim_index": idx, "why": "out of range"})
-            continue
-        quote = (item.get("quote") or "").strip()
-        if not quote or len(quote) < 20:
-            skipped.append({"claim_index": idx, "why": "quote too short"})
-            continue
-        claim = profile.claims[idx]
-        if (item.get("source_url") or "") != (claim.source_url or ""):
-            skipped.append({"claim_index": idx, "why": "source mismatch (guard)"})
-            continue
-        claim.settled_quote = quote[:800]
-        log_claim_verification(
-            claim, level="claim", actor=actor, action="backfill_quote", verdict="passed",
-            summary=f"L4 quote backfilled by {actor} (score {item.get('score')})",
-            details={"score": item.get("score"), "quote": claim.settled_quote[:200]},
-        )
-        updated += 1
+    from engine.evidence import apply_quote_candidates
+
+    profile = store._get_profile(body.profile_name)
+    result = apply_quote_candidates(
+        profile,
+        [item.model_dump() for item in body.items],
+        body.actor,
+    )
     store._save_session(profile)
-    return {"ok": True, "updated": updated, "skipped": skipped}
+    return {"ok": True, **result}

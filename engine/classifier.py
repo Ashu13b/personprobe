@@ -1,4 +1,5 @@
 """Tag each source as reliable_secondary / primary / self_published / unreliable."""
+
 from __future__ import annotations
 import json
 from .models import Source, SourceReliability
@@ -13,9 +14,16 @@ from .publishers import (
 )
 
 # Known reliable secondary source domains — skip LLM for these
-_RS_DOMAINS = INDEPENDENT_NEWS_DOMAINS | ACADEMIC_PUBLISHER_DOMAINS | {
-    "en.wikipedia.org", "wikipedia.org", "britannica.com", "sgttimes.com",
-}
+_RS_DOMAINS = (
+    INDEPENDENT_NEWS_DOMAINS
+    | ACADEMIC_PUBLISHER_DOMAINS
+    | {
+        "en.wikipedia.org",
+        "wikipedia.org",
+        "britannica.com",
+        "sgttimes.com",
+    }
+)
 _PRIMARY_DOMAINS = PRIMARY_OR_INSTITUTIONAL_DOMAINS
 _SELF_DOMAINS = SELF_PUBLISHED_DOMAINS
 _UNRELIABLE_DOMAINS = UNRELIABLE_DOMAINS
@@ -23,6 +31,7 @@ _UNRELIABLE_DOMAINS = UNRELIABLE_DOMAINS
 
 def _domain_classify(url: str) -> SourceReliability | None:
     from urllib.parse import urlparse
+
     host = urlparse(url).netloc.lower().replace("www.", "")
     for d in _RS_DOMAINS:
         if host == d or host.endswith("." + d):

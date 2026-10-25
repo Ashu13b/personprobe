@@ -10,6 +10,7 @@ SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 CANDIDATES_FILE = Path("/tmp/media_and_icar_candidates.json")
 
+
 def main():
     if not CANDIDATES_FILE.exists() or not SESSION_FILE.exists():
         print("Missing candidates or session file.")
@@ -28,8 +29,18 @@ def main():
     existing = {canonical_url(s.get("url")) for s in sources if s.get("url")}
 
     irrelevant_keywords = [
-        "crime", "murder", "killing", "police", "firing", "erickshaw",
-        "clayet", "statue", "dhanno", "daara", "market-committee", "kuldeep"
+        "crime",
+        "murder",
+        "killing",
+        "police",
+        "firing",
+        "erickshaw",
+        "clayet",
+        "statue",
+        "dhanno",
+        "daara",
+        "market-committee",
+        "kuldeep",
     ]
 
     new_sources = []
@@ -38,7 +49,7 @@ def main():
         url = c.get("url", "")
         title = (c.get("title") or "").strip()
         snippet = (c.get("snippet") or "").strip()
-        
+
         # Clean subview of same ePub
         if "/article/view/" in url and len(url.split("/")[-1]) > 4:
             # Drop trailing sub-ids like /21355
@@ -52,10 +63,23 @@ def main():
         if any(bad in text for bad in irrelevant_keywords):
             continue
 
-        if not any(good in text for good in [
-            "cirb", "gaurav", "clone", "cloning", "buffalo", "मुर्राह",
-            "सीआइआरबी", "सीआईआरबी", "भैंस", "यमुना", "yadav", "ndri"
-        ]):
+        if not any(
+            good in text
+            for good in [
+                "cirb",
+                "gaurav",
+                "clone",
+                "cloning",
+                "buffalo",
+                "मुर्राह",
+                "सीआइआरबी",
+                "सीआईआरबी",
+                "भैंस",
+                "यमुना",
+                "yadav",
+                "ndri",
+            ]
+        ):
             continue
 
         # Determine publisher and publication type
@@ -74,10 +98,16 @@ def main():
             publisher = "Dainik Jagran"
 
         # Determine year/date if possible from URL or snippet
-        date_match = re.search(r"(20\d\d)[-/](0[1-9]|1[0-2])[-/]([0-3]\d)", url) or re.search(r"(20\d\d)", title + " " + snippet)
+        date_match = re.search(
+            r"(20\d\d)[-/](0[1-9]|1[0-2])[-/]([0-3]\d)", url
+        ) or re.search(r"(20\d\d)", title + " " + snippet)
         date_str = ""
         if date_match:
-            date_str = date_match.group(0) if "-" in date_match.group(0) else date_match.group(1)
+            date_str = (
+                date_match.group(0)
+                if "-" in date_match.group(0)
+                else date_match.group(1)
+            )
 
         source_obj = {
             "url": url,
@@ -88,7 +118,7 @@ def main():
             "editorial_origin": editorial_origin,
             "human_verified": True,
             "liveness": "alive",
-            "research_notes": "Ingested from media/institutional harvest for CIRB cloning & reproduction research. Corroborates Dr. P.S. Yadav's cloning milestone publications."
+            "research_notes": "Ingested from media/institutional harvest for CIRB cloning & reproduction research. Corroborates Dr. P.S. Yadav's cloning milestone publications.",
         }
 
         new_sources.append(source_obj)
@@ -105,6 +135,7 @@ def main():
 
         # Run deduplicate & sync
         deduplicate()
+
 
 if __name__ == "__main__":
     main()

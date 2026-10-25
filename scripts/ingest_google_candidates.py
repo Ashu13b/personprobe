@@ -10,12 +10,14 @@ SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
 CANDIDATES_FILE = Path("/tmp/google_harvest_candidates.json")
 
+
 def clean_amp_url(url: str) -> str:
     """Normalize amp URLs to canonical article URLs."""
     u = url.replace("/amp/", "/").replace("/amp_articleshow/", "/articleshow/")
     if u.endswith("?amp"):
         u = u[:-4]
     return u
+
 
 def main():
     if not CANDIDATES_FILE.exists() or not SESSION_FILE.exists():
@@ -34,11 +36,26 @@ def main():
 
     # Exclude non-article / generic social links
     junk_patterns = [
-        "signup", "signin", "login", "terms-of-service", "privacy-policy",
-        "ip-policy", "imprint", "careers", "about", "blog", "contact",
-        "marketing-solutions", "scientific-recruitment", "publisher-solutions",
-        "directory/profiles", "topics", "help.researchgate", "facebook.com",
-        "wikipedia.org/wiki/Nanaji_Deshmukh", "linkedin.com/pub/dir"
+        "signup",
+        "signin",
+        "login",
+        "terms-of-service",
+        "privacy-policy",
+        "ip-policy",
+        "imprint",
+        "careers",
+        "about",
+        "blog",
+        "contact",
+        "marketing-solutions",
+        "scientific-recruitment",
+        "publisher-solutions",
+        "directory/profiles",
+        "topics",
+        "help.researchgate",
+        "facebook.com",
+        "wikipedia.org/wiki/Nanaji_Deshmukh",
+        "linkedin.com/pub/dir",
     ]
 
     new_sources = []
@@ -82,7 +99,9 @@ def main():
         elif "hastakshepnews.com" in url:
             publisher = "Hastakshep News"
             editorial_origin = "Journalistic coverage"
-            title = "Researchers find semen and fertility profiles of cloned bulls normal"
+            title = (
+                "Researchers find semen and fertility profiles of cloned bulls normal"
+            )
         elif "sapi.in" in url:
             publisher = "Society of Animal Physiologists of India (SAPI)"
             editorial_origin = "Conference proceeding / Institutional award"
@@ -117,14 +136,23 @@ def main():
             title = "ICAR-CIRB Annual Report"
         else:
             # Check if it's a research paper / pdf
-            if not any(k in (title + " " + url).lower() for k in ["clon", "cirb", "yadav", "buffalo", "gaurav"]):
+            if not any(
+                k in (title + " " + url).lower()
+                for k in ["clon", "cirb", "yadav", "buffalo", "gaurav"]
+            ):
                 continue
 
         # Extract date if present
-        date_match = re.search(r"(20\d\d)[-/](0[1-9]|1[0-2])[-/]([0-3]\d)", url) or re.search(r"(20\d\d)", title)
+        date_match = re.search(
+            r"(20\d\d)[-/](0[1-9]|1[0-2])[-/]([0-3]\d)", url
+        ) or re.search(r"(20\d\d)", title)
         date_str = ""
         if date_match:
-            date_str = date_match.group(0) if "-" in date_match.group(0) else date_match.group(1)
+            date_str = (
+                date_match.group(0)
+                if "-" in date_match.group(0)
+                else date_match.group(1)
+            )
 
         source_obj = {
             "url": url,
@@ -135,7 +163,7 @@ def main():
             "editorial_origin": editorial_origin,
             "human_verified": True,
             "liveness": "alive",
-            "research_notes": f"Discovered via Google search query: {c.get('query')}"
+            "research_notes": f"Discovered via Google search query: {c.get('query')}",
         }
 
         new_sources.append(source_obj)
@@ -149,6 +177,7 @@ def main():
             json.dump(data, f, indent=2, ensure_ascii=False)
         print(f"[*] Total session sources updated to {len(profile['sources'])}.")
         deduplicate()
+
 
 if __name__ == "__main__":
     main()

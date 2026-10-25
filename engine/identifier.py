@@ -1,4 +1,5 @@
 """Phase 1: find candidate cards for a person name + hints."""
+
 from __future__ import annotations
 import re
 import requests
@@ -30,7 +31,20 @@ def find_candidates(name: str, hints: str = "") -> list[PersonCandidate]:
     return merged[:5]
 
 
-_HONORIFICS = {"dr", "dr.", "prof", "prof.", "mr", "mr.", "mrs", "mrs.", "ms", "ms.", "sir", "shri"}
+_HONORIFICS = {
+    "dr",
+    "dr.",
+    "prof",
+    "prof.",
+    "mr",
+    "mr.",
+    "mrs",
+    "mrs.",
+    "ms",
+    "ms.",
+    "sir",
+    "shri",
+}
 
 
 def _significant_tokens(name: str) -> list[str]:
@@ -54,11 +68,19 @@ def _name_matches(candidate_title: str, searched_name: str) -> bool:
 def _search_wikipedia(name: str, hints: str) -> list[PersonCandidate]:
     # Search with just the name so Wikipedia doesn't boost unrelated articles via hints
     try:
-        resp = requests.get(WIKI_API, params={
-            "action": "query", "list": "search",
-            "srsearch": name, "srnamespace": "0",
-            "srlimit": "10", "format": "json",
-        }, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            WIKI_API,
+            params={
+                "action": "query",
+                "list": "search",
+                "srsearch": name,
+                "srnamespace": "0",
+                "srlimit": "10",
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         resp.raise_for_status()
     except Exception:
         return []
@@ -73,20 +95,27 @@ def _search_wikipedia(name: str, hints: str) -> list[PersonCandidate]:
             continue
         snippet = _strip_html(r.get("snippet", ""))
         if hint_words:
-            hint_score = sum(1 for w in hint_words if w in snippet.lower() or w in title.lower())
+            hint_score = sum(
+                1 for w in hint_words if w in snippet.lower() or w in title.lower()
+            )
             # When hints are given, drop candidates that match none of them
             if hint_score == 0:
                 continue
         else:
             hint_score = 0
         detail = _wikipedia_detail(title)
-        candidates.append((hint_score, PersonCandidate(
-            name=title,
-            photo_url=detail.get("photo_url"),
-            bio_snippet=snippet,
-            wikipedia_url=f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}",
-            wikidata_id=detail.get("wikidata_id"),
-        )))
+        candidates.append(
+            (
+                hint_score,
+                PersonCandidate(
+                    name=title,
+                    photo_url=detail.get("photo_url"),
+                    bio_snippet=snippet,
+                    wikipedia_url=f"https://en.wikipedia.org/wiki/{title.replace(' ', '_')}",
+                    wikidata_id=detail.get("wikidata_id"),
+                ),
+            )
+        )
     candidates.sort(key=lambda x: x[0], reverse=True)
     return [c for _, c in candidates[:5]]
 
@@ -95,10 +124,19 @@ def _search_wikidata(name: str, hints: str = "") -> list[PersonCandidate]:
     hint_words = [w.lower() for w in hints.split() if len(w) > 2] if hints else []
 
     try:
-        resp = requests.get(WIKIDATA_API, params={
-            "action": "wbsearchentities", "search": name,
-            "language": "en", "type": "item", "limit": "5", "format": "json",
-        }, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            WIKIDATA_API,
+            params={
+                "action": "wbsearchentities",
+                "search": name,
+                "language": "en",
+                "type": "item",
+                "limit": "5",
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         resp.raise_for_status()
     except Exception:
         return []
@@ -112,31 +150,42 @@ def _search_wikidata(name: str, hints: str = "") -> list[PersonCandidate]:
         if not _name_matches(label, name):
             continue
         if hint_words:
-            hint_score = sum(1 for w in hint_words if w in desc.lower() or w in label.lower())
+            hint_score = sum(
+                1 for w in hint_words if w in desc.lower() or w in label.lower()
+            )
             if hint_score == 0:
                 continue
         detail = _wikidata_detail(r["id"])
-        candidates.append(PersonCandidate(
-            name=r.get("label", name),
-            photo_url=detail.get("photo_url"),
-            bio_snippet=desc,
-            birth_year=detail.get("birth_year"),
-            nationality=detail.get("nationality"),
-            field=detail.get("field"),
-            affiliation=detail.get("affiliation"),
-            wikipedia_url=detail.get("wikipedia_url"),
-            wikidata_id=r["id"],
-        ))
+        candidates.append(
+            PersonCandidate(
+                name=r.get("label", name),
+                photo_url=detail.get("photo_url"),
+                bio_snippet=desc,
+                birth_year=detail.get("birth_year"),
+                nationality=detail.get("nationality"),
+                field=detail.get("field"),
+                affiliation=detail.get("affiliation"),
+                wikipedia_url=detail.get("wikipedia_url"),
+                wikidata_id=r["id"],
+            )
+        )
     return candidates
 
 
 def _wikipedia_detail(title: str) -> dict:
     try:
-        resp = requests.get(WIKI_API, params={
-            "action": "query", "titles": title,
-            "prop": "pageimages|pageprops",
-            "pithumbsize": "300", "format": "json",
-        }, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            WIKI_API,
+            params={
+                "action": "query",
+                "titles": title,
+                "prop": "pageimages|pageprops",
+                "pithumbsize": "300",
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         resp.raise_for_status()
     except Exception:
         return {}
@@ -150,10 +199,17 @@ def _wikipedia_detail(title: str) -> dict:
 
 def _wikidata_detail(qid: str) -> dict:
     try:
-        resp = requests.get(WIKIDATA_API, params={
-            "action": "wbgetentities", "ids": qid,
-            "props": "claims|sitelinks", "format": "json",
-        }, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            WIKIDATA_API,
+            params={
+                "action": "wbgetentities",
+                "ids": qid,
+                "props": "claims|sitelinks",
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         resp.raise_for_status()
     except Exception:
         return {}
@@ -179,7 +235,9 @@ def _wikidata_detail(qid: str) -> dict:
         "field": _val("P101"),
         "affiliation": _val("P108"),
         "photo_url": _wikidata_image(claims),
-        "wikipedia_url": f"https://en.wikipedia.org/wiki/{enwiki.replace(' ', '_')}" if enwiki else None,
+        "wikipedia_url": f"https://en.wikipedia.org/wiki/{enwiki.replace(' ', '_')}"
+        if enwiki
+        else None,
     }
 
 
@@ -195,9 +253,23 @@ def _wikidata_image(claims: dict) -> str | None:
 
 def _looks_like_person(description: str) -> bool:
     keywords = {
-        "researcher", "scientist", "professor", "academic", "politician",
-        "author", "writer", "physician", "doctor", "engineer", "activist",
-        "journalist", "economist", "philosopher", "historian", "artist", "born",
+        "researcher",
+        "scientist",
+        "professor",
+        "academic",
+        "politician",
+        "author",
+        "writer",
+        "physician",
+        "doctor",
+        "engineer",
+        "activist",
+        "journalist",
+        "economist",
+        "philosopher",
+        "historian",
+        "artist",
+        "born",
     }
     return any(kw in description.lower() for kw in keywords)
 

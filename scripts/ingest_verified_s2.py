@@ -9,6 +9,7 @@ from pathlib import Path
 API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
 
+
 def api_post(path: str, payload: dict) -> dict:
     req = urllib.request.Request(
         API_BASE + path,
@@ -17,23 +18,52 @@ def api_post(path: str, payload: dict) -> dict:
     )
     return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
 
+
 def main():
-    session_file = Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
+    session_file = (
+        Path("/home/ubuntu/Expeei/personprobe/sessions") / f"{SESSION_ID}.json"
+    )
     session_data = json.loads(session_file.read_text())
-    existing_urls = {s.get("url", "").lower().rstrip("/") for s in session_data["profile"]["sources"]}
+    existing_urls = {
+        s.get("url", "").lower().rstrip("/") for s in session_data["profile"]["sources"]
+    }
 
     with open("/tmp/s2_new_papers.json") as f:
         papers = json.load(f)
 
     # Filtering keywords
     ANIMAL_KW = [
-        "buffalo", "bubalis", "clon", "embryo", "oocyte", "semen", "somatic cell",
-        "in vitro", "stem cell", "cryopreserv", "equine", "caprine", "oct4",
-        "acrosome", "sperm", "casa", "transposon", "fertilization"
+        "buffalo",
+        "bubalis",
+        "clon",
+        "embryo",
+        "oocyte",
+        "semen",
+        "somatic cell",
+        "in vitro",
+        "stem cell",
+        "cryopreserv",
+        "equine",
+        "caprine",
+        "oct4",
+        "acrosome",
+        "sperm",
+        "casa",
+        "transposon",
+        "fertilization",
     ]
     REJECT_KW = [
-        "cotton", "fertilizer", "arboreum", "guar", "calcareous", "foliar",
-        "spacing", "hirsutum", "soil", "wheat", "crop"
+        "cotton",
+        "fertilizer",
+        "arboreum",
+        "guar",
+        "calcareous",
+        "foliar",
+        "spacing",
+        "hirsutum",
+        "soil",
+        "wheat",
+        "crop",
     ]
 
     valid_papers = []
@@ -46,7 +76,9 @@ def main():
         if any(k in t_low for k in ANIMAL_KW):
             valid_papers.append(p)
 
-    print(f"[*] Filtered {len(valid_papers)} confirmed animal biotech publications out of {len(papers)} candidates.")
+    print(
+        f"[*] Filtered {len(valid_papers)} confirmed animal biotech publications out of {len(papers)} candidates."
+    )
 
     ingested = 0
     for p in valid_papers:
@@ -75,11 +107,14 @@ def main():
 
         print(f"[*] Ingesting [{year}] {title[:60]}...")
         try:
-            res = api_post("/research/add-source-paste", {
-                "profile_name": SESSION_ID,
-                "url": target_url,
-                "pasted_text": pasted_text
-            })
+            res = api_post(
+                "/research/add-source-paste",
+                {
+                    "profile_name": SESSION_ID,
+                    "url": target_url,
+                    "pasted_text": pasted_text,
+                },
+            )
             existing_urls.add(target_url.lower())
             ingested += 1
             print(f"    [OK] Ingested. Source ID: {res.get('source', {}).get('id')}")
@@ -94,6 +129,7 @@ def main():
         print("[*] Session synchronized.")
     except Exception as se:
         print(f"[*] Sync error: {se}")
+
 
 if __name__ == "__main__":
     main()

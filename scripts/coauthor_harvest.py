@@ -8,6 +8,7 @@ hits as sources via /api/research/add-source.
 
 Vidwan-specific; replace the discover* mappers for other registries.
 """
+
 import sys
 import time
 
@@ -15,6 +16,7 @@ sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
 from openscrape_client import MobileBrowserClient  # noqa: E402
 
 import requests  # noqa: E402
+
 sys.path.insert(0, "/home/ubuntu/Expeei/wikimaker")
 from engine.models import PersonProfile  # noqa: E402
 from engine.coauthor_network import coauthor_source_batch  # noqa: E402
@@ -39,24 +41,39 @@ def harvest_coauthors(session_id: str, coauthor_names: list[str]) -> dict:
         except Exception as e:
             print("  !", nm, str(e)[:40], flush=True)
             continue
-        links = [lk for lk in (r.get("content") or {}).get("links", []) if "/profile/" in lk.get("href", "")]
+        links = [
+            lk
+            for lk in (r.get("content") or {}).get("links", [])
+            if "/profile/" in lk.get("href", "")
+        ]
         if not links:
             continue
         # take first matching link (name resolved)
         target = links[0]["href"]
         try:
-            c.navigate(f"https://vidwan.inflibnet.ac.in{links[0]['href']}", wait_seconds=12)
+            c.navigate(
+                f"https://vidwan.inflibnet.ac.in{links[0]['href']}", wait_seconds=12
+            )
         except Exception:
             pass
         try:
             time.sleep(5)
             pr = c.scrape(links[0]["href"], wait_seconds=20)
-            body = (pr.get("content") or {})
-            got = coauthor_source_batch(model, [(links[0]["href"], (pr.get("content") or {}).get("text", ""))])
+            body = pr.get("content") or {}
+            got = coauthor_source_batch(
+                model, [(links[0]["href"], (pr.get("content") or {}).get("text", ""))]
+            )
             for src in got:
-                res = requests.post(f"{API}/research/add-source", json={
-                    "profile_name": session_id, "url": payload_url(src.url),
-                    "title": src.title, "text": f"{src.snippet}\n\n(identity: {src.identity_status}; {src.identity_note})"}, timeout=15)
+                res = requests.post(
+                    f"{API}/research/add-source",
+                    json={
+                        "profile_name": session_id,
+                        "url": payload_url(src.url),
+                        "title": src.title,
+                        "text": f"{src.snippet}\n\n(identity: {src.identity_status}; {src.identity_note})",
+                    },
+                    timeout=15,
+                )
                 added += 1
                 print(f"  + {src.url[:60]} status {res.status_code}", flush=True)
             dropped += 0
@@ -72,8 +89,16 @@ def payload_url(u):
 if __name__ == "__main__":
     sid = sys.argv[1] if len(sys.argv) > 1 else "py-prem-singh-yadav-569e5aea"
     names = [
-        "Bhabani Das", "Prakash Narayan Dwivedi", "Maharaj Singh", "Jai Sunder",
-        "A V S R Swamy", "V K Garg", "D V Amla", "S N Singh", "Ranjan Banerji", "B S Dixit",
+        "Bhabani Das",
+        "Prakash Narayan Dwivedi",
+        "Maharaj Singh",
+        "Jai Sunder",
+        "A V S R Swamy",
+        "V K Garg",
+        "D V Amla",
+        "S N Singh",
+        "Ranjan Banerji",
+        "B S Dixit",
     ]
     res = coauthor_harvest(sid, names)
     print(res)

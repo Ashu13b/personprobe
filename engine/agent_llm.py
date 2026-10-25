@@ -9,6 +9,7 @@ Set PERSONPROBE_LLM=agent to select this provider.
 Unlike the stub, this never fabricates: an unanswered job simply yields `{}` (no
 claims, no classification), and the agent's answer is applied only when written.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -38,9 +39,13 @@ class AgentProvider(LLMProvider):
         if resp_path.exists():
             return json.loads(resp_path.read_text())["response"]
         if not job_path.exists():
-            job_path.write_text(json.dumps(
-                {"id": job_id, "system": system, "user": user}, indent=2, ensure_ascii=False
-            ))
+            job_path.write_text(
+                json.dumps(
+                    {"id": job_id, "system": system, "user": user},
+                    indent=2,
+                    ensure_ascii=False,
+                )
+            )
         return "{}"
 
 
@@ -48,7 +53,9 @@ def pending_jobs(jobs_dir: Path = AGENT_JOBS_DIR) -> list[dict]:
     """Agent jobs that have been queued but not yet answered."""
     jobs = []
     for job_path in sorted(Path(jobs_dir).glob("*.job.json")):
-        resp_path = job_path.with_name(job_path.name.replace(".job.json", ".response.json"))
+        resp_path = job_path.with_name(
+            job_path.name.replace(".job.json", ".response.json")
+        )
         if resp_path.exists():
             continue
         try:
@@ -61,5 +68,7 @@ def pending_jobs(jobs_dir: Path = AGENT_JOBS_DIR) -> list[dict]:
 def answer_job(job_id: str, response: str, jobs_dir: Path = AGENT_JOBS_DIR) -> Path:
     """Record an agent's answer for a job so a re-run of the prompt returns it."""
     resp_path = Path(jobs_dir) / f"{job_id}.response.json"
-    resp_path.write_text(json.dumps({"id": job_id, "response": response}, ensure_ascii=False))
+    resp_path.write_text(
+        json.dumps({"id": job_id, "response": response}, ensure_ascii=False)
+    )
     return resp_path

@@ -1,7 +1,12 @@
 """Unit tests for Strict Provenance & Trust Scoring engine."""
+
 import pytest
 from engine.models import Source, Claim, SourceReliability, VerificationState
-from engine.provenance import get_domain_trust, classify_source_provenance, evaluate_claim_trust
+from engine.provenance import (
+    get_domain_trust,
+    classify_source_provenance,
+    evaluate_claim_trust,
+)
 from engine.notability import score_notability
 
 
@@ -24,7 +29,7 @@ def test_source_provenance_classification():
         url="https://doi.org/10.1038/s41586-020-0000-0",
         title="A groundbreaking paper in Nature",
         publisher="Nature Publishing Group",
-        fetched_by="semantic_scholar"
+        fetched_by="semantic_scholar",
     )
     classified_pub = classify_source_provenance(s_pub, "Jane Doe")
     assert classified_pub.provenance_category == "authored_publication"
@@ -34,7 +39,7 @@ def test_source_provenance_classification():
     s_bio = Source(
         url="https://cs.mit.edu/people/faculty/jane-doe",
         title="Jane Doe - Professor of Computer Science",
-        publisher="MIT CSIL"
+        publisher="MIT CSIL",
     )
     classified_bio = classify_source_provenance(s_bio, "Jane Doe")
     assert classified_bio.provenance_category == "institutional_bio"
@@ -44,7 +49,7 @@ def test_source_provenance_classification():
     s_news = Source(
         url="https://www.bbc.com/news/technology-123456",
         title="MIT Researcher Wins Prestigious Turing Award",
-        publisher="BBC News"
+        publisher="BBC News",
     )
     classified_news = classify_source_provenance(s_news, "Jane Doe")
     assert classified_news.provenance_category == "independent_secondary"
@@ -59,32 +64,38 @@ def test_academic_indexes_never_count_as_independent_news():
         "https://pmc.ncbi.nlm.nih.gov/articles/PMC123/",
         "https://www.researchgate.net/publication/123_title",
     ):
-        source = classify_source_provenance(Source(
-            url=url,
-            title="Authored research record",
-            publisher="Academic index",
-            fetched_by="google_search",
-        ))
+        source = classify_source_provenance(
+            Source(
+                url=url,
+                title="Authored research record",
+                publisher="Academic index",
+                fetched_by="google_search",
+            )
+        )
         assert source.provenance_category == "authored_publication"
         assert source.is_independent is False
         assert source.reliability == SourceReliability.primary
 
 
 def test_search_discovery_does_not_make_unknown_site_independent():
-    source = classify_source_provenance(Source(
-        url="https://example-low-trust.test/profile",
-        title="Search result",
-        publisher="Unknown publisher",
-        fetched_by="google_search",
-    ))
+    source = classify_source_provenance(
+        Source(
+            url="https://example-low-trust.test/profile",
+            title="Search result",
+            publisher="Unknown publisher",
+            fetched_by="google_search",
+        )
+    )
 
     assert source.provenance_category == "general_web"
     assert source.reliability != SourceReliability.reliable_secondary
+
+
 def test_claim_trust_evaluation():
     s_news = Source(
         url="https://www.bbc.com/news/technology-123456",
         title="MIT Researcher Wins Award",
-        publisher="BBC News"
+        publisher="BBC News",
     )
     s_news = classify_source_provenance(s_news)
 
@@ -93,7 +104,7 @@ def test_claim_trust_evaluation():
         field="award",
         source_url=s_news.url,
         date_context="2022",
-        verification=VerificationState.confirmed
+        verification=VerificationState.confirmed,
     )
     eval_c1 = evaluate_claim_trust(c1, s_news)
     assert eval_c1.trust_score >= 0.8
@@ -104,13 +115,11 @@ def test_claim_trust_evaluation():
     s_bio = Source(
         url="https://cs.mit.edu/people/faculty/jane-doe",
         title="Jane Doe Bio",
-        publisher="MIT"
+        publisher="MIT",
     )
     s_bio = classify_source_provenance(s_bio)
     c2 = Claim(
-        text="Joined MIT faculty in 2010",
-        field="position",
-        source_url=s_bio.url
+        text="Joined MIT faculty in 2010", field="position", source_url=s_bio.url
     )
     eval_c2 = evaluate_claim_trust(c2, s_bio)
     assert eval_c2.provenance_status == "primary_sourced"
@@ -130,7 +139,7 @@ def test_strict_notability_independence():
         url="https://cs.mit.edu/people/jane",
         title="Faculty Bio",
         publisher="MIT",
-        human_verified=True
+        human_verified=True,
     )
     claim = Claim(
         text="Jane Doe received a major research award",
@@ -227,29 +236,35 @@ def test_notability_deduplicates_syndicated_editorial_origins():
 
     assert result.rs_count == 1
     assert result.candidate_count == 1
+
+
 def test_icar_and_cirb_reports_are_institutional_primary_sources():
     for url in (
         "https://cirb.res.in/reports/annual.pdf",
         "https://icar.org.in/award-citations.pdf",
         "https://icar.gov.in/node/123",
     ):
-        source = classify_source_provenance(Source(
-            url=url,
-            title="Official institutional report",
-            publisher="Indian Council of Agricultural Research",
-        ))
+        source = classify_source_provenance(
+            Source(
+                url=url,
+                title="Official institutional report",
+                publisher="Indian Council of Agricultural Research",
+            )
+        )
         assert source.provenance_category == "institutional_bio"
         assert source.reliability == SourceReliability.primary
         assert source.is_independent is False
 
 
 def test_record_registries_are_primary_and_non_independent():
-    source = classify_source_provenance(Source(
-        url="https://indiabookofrecords.in/maximum-buffalo-clones-produced/",
-        title="Maximum buffalo clones produced",
-        publisher="India Book of Records",
-        fetched_by="google_search",
-    ))
+    source = classify_source_provenance(
+        Source(
+            url="https://indiabookofrecords.in/maximum-buffalo-clones-produced/",
+            title="Maximum buffalo clones produced",
+            publisher="India Book of Records",
+            fetched_by="google_search",
+        )
+    )
 
     assert source.provenance_category == "record_registry"
     assert source.reliability == SourceReliability.primary
@@ -258,32 +273,69 @@ def test_record_registries_are_primary_and_non_independent():
 
 def test_meaningful_redirect_detection():
     from engine.relevance import is_meaningful_redirect
-    assert is_meaningful_redirect(
-        "http://www.jagran.com/a/slug-13350123.html",
-        "https://jagran.com/a/slug-13350123.html") is False  # scheme + www normalisation
-    assert is_meaningful_redirect(
-        "https://m.jagran.com/a/slug-13350123.html",
-        "https://www.jagran.com/a/slug-13350123.html") is False  # mobile subdomain
-    assert is_meaningful_redirect(
-        "https://amp.jagran.com/a/slug-13350123.html",
-        "https://www.jagran.com/a/slug-13350123.html") is False  # amp subdomain
-    assert is_meaningful_redirect(
-        "https://jagran.com/a/slug-13350123.html",
-        "https://jagran.com/a/slug-13350123.html/amp") is False  # AMP variant
-    assert is_meaningful_redirect(
-        "https://trib.al/xyz", "https://www.tribuneindia.com/news/some-article") is False  # shortener
-    assert is_meaningful_redirect(
-        "https://doi.org/10.1000/xyz", "https://publisher.example/xyz") is False  # DOI resolver
-    assert is_meaningful_redirect(
-        "https://jagran.com/a/slug.html?utm_source=1",
-        "https://jagran.com/a/slug.html") is False  # query params only
+
+    assert (
+        is_meaningful_redirect(
+            "http://www.jagran.com/a/slug-13350123.html",
+            "https://jagran.com/a/slug-13350123.html",
+        )
+        is False
+    )  # scheme + www normalisation
+    assert (
+        is_meaningful_redirect(
+            "https://m.jagran.com/a/slug-13350123.html",
+            "https://www.jagran.com/a/slug-13350123.html",
+        )
+        is False
+    )  # mobile subdomain
+    assert (
+        is_meaningful_redirect(
+            "https://amp.jagran.com/a/slug-13350123.html",
+            "https://www.jagran.com/a/slug-13350123.html",
+        )
+        is False
+    )  # amp subdomain
+    assert (
+        is_meaningful_redirect(
+            "https://jagran.com/a/slug-13350123.html",
+            "https://jagran.com/a/slug-13350123.html/amp",
+        )
+        is False
+    )  # AMP variant
+    assert (
+        is_meaningful_redirect(
+            "https://trib.al/xyz", "https://www.tribuneindia.com/news/some-article"
+        )
+        is False
+    )  # shortener
+    assert (
+        is_meaningful_redirect(
+            "https://doi.org/10.1000/xyz", "https://publisher.example/xyz"
+        )
+        is False
+    )  # DOI resolver
+    assert (
+        is_meaningful_redirect(
+            "https://jagran.com/a/slug.html?utm_source=1",
+            "https://jagran.com/a/slug.html",
+        )
+        is False
+    )  # query params only
     # The trap: same domain, different article.
-    assert is_meaningful_redirect(
-        "https://www.jagran.com/haryana/hisar-gaurav-13350123.html",
-        "https://www.jagran.com/haryana/unrelated-2015-article-99999999.html") is True
+    assert (
+        is_meaningful_redirect(
+            "https://www.jagran.com/haryana/hisar-gaurav-13350123.html",
+            "https://www.jagran.com/haryana/unrelated-2015-article-99999999.html",
+        )
+        is True
+    )
     # Landed on a different site entirely.
-    assert is_meaningful_redirect(
-        "https://jagran.com/a/x.html", "https://theprint.in/b/y.html") is True
+    assert (
+        is_meaningful_redirect(
+            "https://jagran.com/a/x.html", "https://theprint.in/b/y.html"
+        )
+        is True
+    )
     assert is_meaningful_redirect("https://jagran.com/a/x.html", "") is False
 
 
@@ -302,10 +354,14 @@ def test_fetch_url_source_flags_silent_redirect_trap(monkeypatch):
 
     monkeypatch.setattr("engine.fetcher.fetch_url", fake_fetch)
     source, blocked = fetch_url_source(
-        "https://www.jagran.com/haryana/hisar-gaurav-13350123.html", "Prem Singh Yadav")
+        "https://www.jagran.com/haryana/hisar-gaurav-13350123.html", "Prem Singh Yadav"
+    )
 
     assert blocked is False
-    assert source.redirected_to == "https://www.jagran.com/haryana/unrelated-2015-article-99999999.html"
+    assert (
+        source.redirected_to
+        == "https://www.jagran.com/haryana/unrelated-2015-article-99999999.html"
+    )
     assert source.relevance_flag == "uncertain"
 
 
@@ -324,11 +380,13 @@ def test_fetch_url_source_ignores_normal_redirects(monkeypatch):
 
     monkeypatch.setattr("engine.fetcher.fetch_url", fake_fetch)
     source, blocked = fetch_url_source(
-        "http://www.jagran.com/a/slug-13350123.html", "Prem Singh Yadav")
+        "http://www.jagran.com/a/slug-13350123.html", "Prem Singh Yadav"
+    )
 
     assert blocked is False
     assert source.redirected_to is None
     assert source.relevance_flag == "unscored"
+
 
 def test_source_assessment_requires_verification_and_persists():
     from fastapi import HTTPException

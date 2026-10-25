@@ -1,4 +1,5 @@
 """Check Wikipedia for existing pages, draft history, and deletion logs."""
+
 from __future__ import annotations
 import requests
 from pydantic import BaseModel
@@ -24,7 +25,10 @@ def check_title_for(name: str, wikipedia_url: str | None = None) -> str:
     name because the real article may carry a parenthetical disambiguator."""
     if wikipedia_url:
         from urllib.parse import unquote, urlsplit
-        derived = unquote(urlsplit(wikipedia_url).path.rsplit("/wiki/", 1)[-1]).replace("_", " ")
+
+        derived = unquote(urlsplit(wikipedia_url).path.rsplit("/wiki/", 1)[-1]).replace(
+            "_", " "
+        )
         if derived:
             return derived
     return name
@@ -51,9 +55,16 @@ def check_existing_page(title: str) -> WikiStatus:
 
 def _page_exists(title: str) -> bool:
     try:
-        resp = requests.get(WIKI_API, params={
-            "action": "query", "titles": title, "format": "json",
-        }, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            WIKI_API,
+            params={
+                "action": "query",
+                "titles": title,
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         resp.raise_for_status()
         pages = resp.json().get("query", {}).get("pages", {})
         return "-1" not in pages
@@ -63,11 +74,19 @@ def _page_exists(title: str) -> bool:
 
 def _deletion_note(title: str) -> str | None:
     try:
-        resp = requests.get(WIKI_API, params={
-            "action": "query", "list": "logevents",
-            "letype": "delete", "letitle": title,
-            "lelimit": "1", "format": "json",
-        }, headers=HEADERS, timeout=10)
+        resp = requests.get(
+            WIKI_API,
+            params={
+                "action": "query",
+                "list": "logevents",
+                "letype": "delete",
+                "letitle": title,
+                "lelimit": "1",
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=10,
+        )
         resp.raise_for_status()
         events = resp.json().get("query", {}).get("logevents", [])
         if not events:

@@ -1,4 +1,5 @@
 """Unit tests for multilingual and bilingual search query expansion."""
+
 from engine.multilingual_search import (
     detect_languages,
     transliterate_name,

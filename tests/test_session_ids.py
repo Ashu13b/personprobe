@@ -1,4 +1,5 @@
 """Tests for stable subject/session ids — same-named people cannot collide."""
+
 import json
 
 from engine.models import PersonProfile
@@ -6,7 +7,9 @@ from backend import store
 from backend.main import ResearchRequest, research_start
 
 
-def _profile(name: str, session_id: str, wikidata_id: str | None = None) -> PersonProfile:
+def _profile(
+    name: str, session_id: str, wikidata_id: str | None = None
+) -> PersonProfile:
     return PersonProfile(name=name, session_id=session_id, wikidata_id=wikidata_id)
 
 
@@ -20,7 +23,9 @@ def test_resolve_profile_by_id_and_by_name(monkeypatch):
     a = _profile("Prem Singh Yadav", "py-prem-singh-yadav-aaaa")
     b = _profile("Prem Singh Yadav", "py-prem-singh-yadav-bbbb")
     c = _profile("Other Person", "py-other-person-cccc")
-    monkeypatch.setattr(store, "_sessions", {a.session_id: a, b.session_id: b, c.session_id: c})
+    monkeypatch.setattr(
+        store, "_sessions", {a.session_id: a, b.session_id: b, c.session_id: c}
+    )
 
     assert store._resolve_profile("py-prem-singh-yadav-bbbb") is b
     assert store._resolve_profile("Other Person") is c
@@ -68,11 +73,26 @@ def test_legacy_session_without_id_migrates_on_save(tmp_path, monkeypatch):
 
 
 def test_identity_matches_policy():
-    assert store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A B", "Q1") is True
-    assert store._identity_matches({"name": "A B", "wikidata_id": None}, "A B", None) is True
-    assert store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A B", "Q2") is False
-    assert store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A B", None) is False
-    assert store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A C", "Q1") is False
+    assert (
+        store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A B", "Q1")
+        is True
+    )
+    assert (
+        store._identity_matches({"name": "A B", "wikidata_id": None}, "A B", None)
+        is True
+    )
+    assert (
+        store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A B", "Q2")
+        is False
+    )
+    assert (
+        store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A B", None)
+        is False
+    )
+    assert (
+        store._identity_matches({"name": "A B", "wikidata_id": "Q1"}, "A C", "Q1")
+        is False
+    )
 
 
 def test_resume_migrates_legacy_file_to_id_file(tmp_path, monkeypatch):
@@ -91,9 +111,12 @@ def test_resume_migrates_legacy_file_to_id_file(tmp_path, monkeypatch):
         def model_dump(self):
             return {"status": "clear", "url": None, "note": None}
 
-    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: _Clear())
+    monkeypatch.setattr(
+        "adapters.wiki.wiki_check.check_existing_page", lambda title: _Clear()
+    )
 
     from backend.routes_sessions import resume_session
+
     result = resume_session({"file": "Legacy_Person.json"})
 
     sid = result["profile"]["session_id"]
@@ -105,6 +128,7 @@ def test_resume_migrates_legacy_file_to_id_file(tmp_path, monkeypatch):
 
 def test_resume_refreshes_wiki_status_instead_of_trusting_stored(monkeypatch, tmp_path):
     from backend import store as st
+
     profile = PersonProfile(name="Legacy Person")
     payload = {
         "profile": json.loads(profile.model_dump_json()),
@@ -118,11 +142,18 @@ def test_resume_refreshes_wiki_status_instead_of_trusting_stored(monkeypatch, tm
 
     class _Exists:
         def model_dump(self):
-            return {"status": "exists", "url": "https://en.wikipedia.org/wiki/Legacy_Person", "note": "A Wikipedia article already exists for this person."}
+            return {
+                "status": "exists",
+                "url": "https://en.wikipedia.org/wiki/Legacy_Person",
+                "note": "A Wikipedia article already exists for this person.",
+            }
 
-    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: _Exists())
+    monkeypatch.setattr(
+        "adapters.wiki.wiki_check.check_existing_page", lambda title: _Exists()
+    )
 
     from backend.routes_sessions import resume_session
+
     result = resume_session({"file": "Legacy_Person.json"})
 
     assert result["wiki_status"]["status"] == "exists"
@@ -131,7 +162,11 @@ def test_resume_refreshes_wiki_status_instead_of_trusting_stored(monkeypatch, tm
 def test_research_start_resumes_in_memory_same_identity(monkeypatch):
     existing = _profile("Same Name", "py-same-name-aaaa")
     monkeypatch.setattr(store, "_sessions", {existing.session_id: existing})
-    monkeypatch.setattr(store, "_wiki_statuses", {existing.session_id: {"status": "clear", "url": None, "note": None}})
+    monkeypatch.setattr(
+        store,
+        "_wiki_statuses",
+        {existing.session_id: {"status": "clear", "url": None, "note": None}},
+    )
     monkeypatch.setattr(store, "_find_session_on_disk", lambda pred: None)
 
     result = research_start(ResearchRequest(name="Same Name"))
@@ -143,7 +178,11 @@ def test_research_start_resumes_in_memory_same_identity(monkeypatch):
 def test_research_start_resumes_same_name_different_identity_creates_new(monkeypatch):
     existing = _profile("Same Name", "py-same-name-aaaa", wikidata_id="Q1")
     monkeypatch.setattr(store, "_sessions", {existing.session_id: existing})
-    monkeypatch.setattr(store, "_wiki_statuses", {existing.session_id: {"status": "clear", "url": None, "note": None}})
+    monkeypatch.setattr(
+        store,
+        "_wiki_statuses",
+        {existing.session_id: {"status": "clear", "url": None, "note": None}},
+    )
     _mock_fresh_research_pipeline(monkeypatch)
     # Same name, different/absent wikidata -> distinct person -> must NOT resume.
     result = research_start(ResearchRequest(name="Same Name", wikidata_id="Q2"))
@@ -157,9 +196,15 @@ def _mock_fresh_research_pipeline(monkeypatch):
         def model_dump(self):
             return {"status": "clear", "url": None, "note": None}
 
-    monkeypatch.setattr("backend.routes_research.check_existing_page", lambda name: _WikiStatus())
-    monkeypatch.setattr("backend.routes_research.fetch_auto_sources", lambda *a, **k: ([], None))
-    monkeypatch.setattr("backend.routes_research.fetch_institution_sources", lambda *a, **k: [])
+    monkeypatch.setattr(
+        "backend.routes_research.check_existing_page", lambda name: _WikiStatus()
+    )
+    monkeypatch.setattr(
+        "backend.routes_research.fetch_auto_sources", lambda *a, **k: ([], None)
+    )
+    monkeypatch.setattr(
+        "backend.routes_research.fetch_institution_sources", lambda *a, **k: []
+    )
 
 
 def test_research_start_migrates_legacy_session_from_disk(tmp_path, monkeypatch):
@@ -188,7 +233,11 @@ def test_delete_only_evicts_target_not_same_named_namesake(tmp_path, monkeypatch
     b = _profile("Same Name", "py-same-bbbb")
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {a.session_id: a, b.session_id: b})
-    monkeypatch.setattr(store, "_wiki_statuses", {a.session_id: {"status": "clear"}, b.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store,
+        "_wiki_statuses",
+        {a.session_id: {"status": "clear"}, b.session_id: {"status": "clear"}},
+    )
     (tmp_path / "py-same-aaaa.json").write_text("{}")
     (tmp_path / "py-same-bbbb.json").write_text("{}")
     from backend.main import delete_session
@@ -199,7 +248,9 @@ def test_delete_only_evicts_target_not_same_named_namesake(tmp_path, monkeypatch
     assert store._sessions.get(b.session_id or "") is b
 
 
-def test_corrupt_legacy_file_is_skipped_and_fresh_session_created(tmp_path, monkeypatch):
+def test_corrupt_legacy_file_is_skipped_and_fresh_session_created(
+    tmp_path, monkeypatch
+):
     (tmp_path / "Corrupt_Person.json").write_text("{not valid json")
     monkeypatch.setattr(store, "SESSIONS_DIR", tmp_path)
     monkeypatch.setattr(store, "_sessions", {})
@@ -212,8 +263,12 @@ def test_corrupt_legacy_file_is_skipped_and_fresh_session_created(tmp_path, monk
     assert result["profile"]["session_id"] is not None
 
 
-def test_legacy_filename_with_id_keyed_content_migrates_keeping_session_id(tmp_path, monkeypatch):
-    profile = PersonProfile(name="Legacy Person", session_id="py-legacy-person-abcd1234")
+def test_legacy_filename_with_id_keyed_content_migrates_keeping_session_id(
+    tmp_path, monkeypatch
+):
+    profile = PersonProfile(
+        name="Legacy Person", session_id="py-legacy-person-abcd1234"
+    )
     payload = {
         "profile": json.loads(profile.model_dump_json()),
         "wiki_status": {"status": "clear", "url": None, "note": None},
@@ -228,9 +283,12 @@ def test_legacy_filename_with_id_keyed_content_migrates_keeping_session_id(tmp_p
         def model_dump(self):
             return {"status": "clear", "url": None, "note": None}
 
-    monkeypatch.setattr("adapters.wiki.wiki_check.check_existing_page", lambda title: _Clear())
+    monkeypatch.setattr(
+        "adapters.wiki.wiki_check.check_existing_page", lambda title: _Clear()
+    )
 
     from backend.routes_sessions import resume_session
+
     result = resume_session({"file": "Legacy_Person.json"})
 
     sid = result["profile"]["session_id"]
@@ -244,7 +302,11 @@ def test_save_session_by_profile_avoids_same_name_409(tmp_path, monkeypatch):
     a = _profile("John Doe", "py-john-doe-1111")
     b = _profile("John Doe", "py-john-doe-2222")
     monkeypatch.setattr(store, "_sessions", {a.session_id: a, b.session_id: b})
-    monkeypatch.setattr(store, "_wiki_statuses", {a.session_id: {"status": "clear"}, b.session_id: {"status": "clear"}})
+    monkeypatch.setattr(
+        store,
+        "_wiki_statuses",
+        {a.session_id: {"status": "clear"}, b.session_id: {"status": "clear"}},
+    )
 
     # Saving directly with profile should never raise 409
     store._save_session(a)
@@ -262,7 +324,9 @@ def test_generate_draft_checks_wiki_status_by_session_id(monkeypatch):
     profile = _profile("Famous Person", "py-famous-person-exists")
     monkeypatch.setattr(store, "_sessions", {profile.session_id: profile})
     # Key strictly by sid in _wiki_statuses
-    monkeypatch.setattr(store, "_wiki_statuses", {profile.session_id: {"status": "exists"}})
+    monkeypatch.setattr(
+        store, "_wiki_statuses", {profile.session_id: {"status": "exists"}}
+    )
 
     assert profile.session_id is not None
     with pytest.raises(HTTPException) as exc:

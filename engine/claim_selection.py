@@ -7,6 +7,7 @@ ranks the supporting links, and surfaces the best citation so a human (or the
 agent) can pick what goes into the draft — rather than the draft inheriting
 whichever link happened to be ingested first.
 """
+
 from __future__ import annotations
 
 from .models import PersonProfile, Source
@@ -29,7 +30,9 @@ _TRUST_BONUS = {"high": 1.0, "medium": 0.0, "low": -1.0, "untrusted": -3.0}
 
 def source_citation_rank(source: Source) -> float:
     """Score one source as a citation for a fact (higher is better)."""
-    score = float(_CATEGORY_RANK.get(source.provenance_category or "general_web", 1) * 2)
+    score = float(
+        _CATEGORY_RANK.get(source.provenance_category or "general_web", 1) * 2
+    )
     score += _DEPTH_BONUS.get(source.coverage_depth or "unassessed", -0.5)
     score += _TRUST_BONUS.get(source.domain_trust or "medium", 0.0)
     if source.human_verified:
@@ -49,24 +52,36 @@ def source_citation_rank(source: Source) -> float:
     return round(score, 2)
 
 
-def rank_sources_for_fact(urls: list[str], sources_by_url: dict[str, Source]) -> list[dict]:
+def rank_sources_for_fact(
+    urls: list[str], sources_by_url: dict[str, Source]
+) -> list[dict]:
     """Rank the links carried by one claim cluster."""
     ranked: list[dict] = []
     for url in urls:
         source = sources_by_url.get(url)
         if source is None:
-            ranked.append({"url": url, "rank": -99.0, "title": None, "category": "unknown",
-                           "depth": None, "note": "source not in session (mirror/removed)"})
+            ranked.append(
+                {
+                    "url": url,
+                    "rank": -99.0,
+                    "title": None,
+                    "category": "unknown",
+                    "depth": None,
+                    "note": "source not in session (mirror/removed)",
+                }
+            )
             continue
-        ranked.append({
-            "url": source.url,
-            "rank": source_citation_rank(source),
-            "title": source.title,
-            "category": source.provenance_category,
-            "depth": source.coverage_depth,
-            "human_verified": bool(source.human_verified),
-            "liveness": source.liveness,
-        })
+        ranked.append(
+            {
+                "url": source.url,
+                "rank": source_citation_rank(source),
+                "title": source.title,
+                "category": source.provenance_category,
+                "depth": source.coverage_depth,
+                "human_verified": bool(source.human_verified),
+                "liveness": source.liveness,
+            }
+        )
     ranked.sort(key=lambda r: r["rank"], reverse=True)
     return ranked
 
@@ -76,36 +91,48 @@ def build_claim_clusters(profile: PersonProfile) -> list[dict]:
     sources_by_url = {s.url: s for s in profile.sources}
     out: list[dict] = []
     for cluster in cluster_claims(profile.claims):
-        canonical = profile.claims[cluster.claim_indices[0]] if cluster.claim_indices else None
+        canonical = (
+            profile.claims[cluster.claim_indices[0]] if cluster.claim_indices else None
+        )
         # cluster_claims picks the longest text as canonical; find its index
-        canon_idx = max(cluster.claim_indices, key=lambda i: len(profile.claims[i].text)) if cluster.claim_indices else None
+        canon_idx = (
+            max(cluster.claim_indices, key=lambda i: len(profile.claims[i].text))
+            if cluster.claim_indices
+            else None
+        )
         canon_claim = profile.claims[canon_idx] if canon_idx is not None else None
         ranked = rank_sources_for_fact(cluster.corroborating_sources, sources_by_url)
-        approved = [i for i in cluster.claim_indices if profile.claims[i].draft_approved]
-        out.append({
-            "cluster_id": f"cl-{canon_idx}",
-            "canonical_text": cluster.canonical_text,
-            "field": cluster.field,
-            "claim_indices": cluster.claim_indices,
-            "repetition_count": cluster.repetition_count,
-            "canonical_index": canon_idx,
-            "link_count": len(cluster.corroborating_sources),
-            "sources": ranked,
-            "best_source_url": ranked[0]["url"] if ranked else None,
-            "best_source_rank": ranked[0]["rank"] if ranked else None,
-            "approved_indices": approved,
-            "approved": bool(approved),
-        })
+        approved = [
+            i for i in cluster.claim_indices if profile.claims[i].draft_approved
+        ]
+        out.append(
+            {
+                "cluster_id": f"cl-{canon_idx}",
+                "canonical_text": cluster.canonical_text,
+                "field": cluster.field,
+                "claim_indices": cluster.claim_indices,
+                "repetition_count": cluster.repetition_count,
+                "canonical_index": canon_idx,
+                "link_count": len(cluster.corroborating_sources),
+                "sources": ranked,
+                "best_source_url": ranked[0]["url"] if ranked else None,
+                "best_source_rank": ranked[0]["rank"] if ranked else None,
+                "approved_indices": approved,
+                "approved": bool(approved),
+            }
+        )
     # multi-link facts first, then single-link; approved sink lower
-    out.sort(key=lambda c: (c["approved"], -c["link_count"], -(c["best_source_rank"] or 0)))
+    out.sort(
+        key=lambda c: (c["approved"], -c["link_count"], -(c["best_source_rank"] or 0))
+    )
     return out
 
 
 # Draft-readiness statuses
-READY = "ready"                          # verified source + settled fact -> approve directly
-NEEDS_CONFIRM = "needs_confirmation"     # verified source, claim itself unconfirmed -> approving confirms it
+READY = "ready"  # verified source + settled fact -> approve directly
+NEEDS_CONFIRM = "needs_confirmation"  # verified source, claim itself unconfirmed -> approving confirms it
 NEEDS_SOURCE = "needs_source_verification"  # claim fine, source not verified yet
-BLOCKED = "blocked"                      # cv/wrong-person/no source -> never suggest
+BLOCKED = "blocked"  # cv/wrong-person/no source -> never suggest
 
 
 def _claim_source(profile: PersonProfile, url: str | None) -> Source | None:
@@ -124,13 +151,18 @@ def evaluate_claim(profile: PersonProfile, index: int, cluster_link_count: int) 
     if source is None:
         blockers.append("no source attached")
     else:
-        if (source.provenance_category == "cv_blueprint"):
+        if source.provenance_category == "cv_blueprint":
             blockers.append("source is CV input, never citable evidence")
-        if source.relevance_flag == "likely_wrong" or source.identity_status == "wrong_person":
+        if (
+            source.relevance_flag == "likely_wrong"
+            or source.identity_status == "wrong_person"
+        ):
             blockers.append("source belongs to a different person / namesake")
         if source.identity_status == "suspect":
             blockers.append("identity unconfirmed (initials-only match)")
-        if not blockers and not (source.human_verified or source.identity_status == "confirmed"):
+        if not blockers and not (
+            source.human_verified or source.identity_status == "confirmed"
+        ):
             notes.append("source identity not yet verified")
         if source.liveness in ("dead", "blocked") and not source.archive_url:
             notes.append(f"link is {source.liveness} without archive")
@@ -138,8 +170,18 @@ def evaluate_claim(profile: PersonProfile, index: int, cluster_link_count: int) 
     if claim.verification.value == "skipped":
         blockers.append("claim was skipped in review")
 
-    status = BLOCKED if blockers else NEEDS_SOURCE if not (source and (source.human_verified or source.identity_status == "confirmed")) else (
-        READY if claim.verification.value in ("confirmed", "edited") else NEEDS_CONFIRM
+    status = (
+        BLOCKED
+        if blockers
+        else NEEDS_SOURCE
+        if not (
+            source and (source.human_verified or source.identity_status == "confirmed")
+        )
+        else (
+            READY
+            if claim.verification.value in ("confirmed", "edited")
+            else NEEDS_CONFIRM
+        )
     )
 
     rank = source_citation_rank(source) if source else -99.0
@@ -182,15 +224,27 @@ def suggest_draft_upgrades(profile: PersonProfile, limit: int = 60) -> dict:
     approved_facts = 0
 
     for cluster in clusters:
-        members = [i for i in cluster["claim_indices"] if not profile.claims[i].draft_approved]
+        members = [
+            i for i in cluster["claim_indices"] if not profile.claims[i].draft_approved
+        ]
         if not members:
             approved_facts += 1
             continue
         # best member = canonical wording if still open, else the one with the best source
-        candidate = cluster["canonical_index"] if cluster["canonical_index"] in members else members[0]
-        best = max((evaluate_claim(profile, i, cluster["link_count"]) for i in members),
-                   key=lambda e: e["score"])
-        chosen = best if candidate not in members else evaluate_claim(profile, candidate, cluster["link_count"])
+        candidate = (
+            cluster["canonical_index"]
+            if cluster["canonical_index"] in members
+            else members[0]
+        )
+        best = max(
+            (evaluate_claim(profile, i, cluster["link_count"]) for i in members),
+            key=lambda e: e["score"],
+        )
+        chosen = (
+            best
+            if candidate not in members
+            else evaluate_claim(profile, candidate, cluster["link_count"])
+        )
         # prefer the highest-scoring member unless canonical is materially better sourced
         if best["score"] > chosen["score"]:
             chosen = best
@@ -212,8 +266,12 @@ def suggest_draft_upgrades(profile: PersonProfile, limit: int = 60) -> dict:
         "suggestions": suggestions[:limit],
         "counts": {
             "ready": len(ready),
-            "needs_confirmation": sum(1 for s in suggestions if s["status"] == NEEDS_CONFIRM),
-            "needs_source_verification": sum(1 for s in suggestions if s["status"] == NEEDS_SOURCE),
+            "needs_confirmation": sum(
+                1 for s in suggestions if s["status"] == NEEDS_CONFIRM
+            ),
+            "needs_source_verification": sum(
+                1 for s in suggestions if s["status"] == NEEDS_SOURCE
+            ),
             "blocked": sum(1 for s in suggestions if s["status"] == BLOCKED),
             "already_approved_facts": approved_facts,
         },

@@ -1,4 +1,5 @@
 """Unit tests for Multi-Level Verification (L1-L5) & Dual-Client (Agent/Human) Logging."""
+
 from engine.models import (
     Source,
     Claim,
@@ -76,7 +77,9 @@ def test_claim_verification_logging():
         action="settle_claim",
         verdict="passed",
         summary="Matched verbatim sentence in source document",
-        details={"quote": "Jane Doe was appointed Director in 2015 and concluded her term in 2020."},
+        details={
+            "quote": "Jane Doe was appointed Director in 2015 and concluded her term in 2020."
+        },
     )
     assert claim.verified_by == "agent"
     assert len(claim.verification_trail) == 1

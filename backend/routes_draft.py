@@ -1,4 +1,5 @@
 """Draft generation, preview, links, and QA routes."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
@@ -13,6 +14,7 @@ from adapters.wiki.draft_hi import render_hindi_draft
 
 draft_router = APIRouter()
 
+
 @draft_router.get("/draft/audit/{name}")
 def draft_audit(name: str) -> dict:
     """Return server-computed draft readiness without generating text."""
@@ -25,21 +27,28 @@ def generate_draft(req: DraftRequest) -> dict:
     """Generate and persist a deterministic draft from the server-owned session."""
     profile = store._get_profile(req.profile_name)
     sid = store._ensure_session_id(profile)
-    wiki_status = store._wiki_statuses.get(sid) or store._wiki_statuses.get(profile.name, {"status": "clear"})
+    wiki_status = store._wiki_statuses.get(sid) or store._wiki_statuses.get(
+        profile.name, {"status": "clear"}
+    )
     status = wiki_status.get("status", "clear")
     if not draft_generation_allowed(status):
         if status == "exists":
             detail = "An article already exists. Prepare improvements instead of a duplicate draft."
         else:
-            detail = "A prior deletion must be reviewed before generating another draft."
+            detail = (
+                "A prior deletion must be reviewed before generating another draft."
+            )
         raise HTTPException(409, detail)
 
     audit = audit_profile(profile)
     if not audit.ready:
-        raise HTTPException(422, {
-            "message": "The evidence audit found blockers.",
-            "audit": audit.model_dump(exclude={"evidence"}),
-        })
+        raise HTTPException(
+            422,
+            {
+                "message": "The evidence audit found blockers.",
+                "audit": audit.model_dump(exclude={"evidence"}),
+            },
+        )
 
     profile.wikitext_en = render_draft(profile, audit)
     try:
@@ -150,5 +159,3 @@ def draft_verify(body: dict) -> dict:
         "links": [link.model_dump() for link in links],
         "verified": qa.passed and all(link.status == "ok" for link in links),
     }
-
-

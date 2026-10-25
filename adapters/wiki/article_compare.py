@@ -5,6 +5,7 @@ Deterministic, no LLM: token-overlap matching against the article's plain text.
 covered becomes a candidate addition in the edit proposal. The split is a
 heuristic aid for the human editor, never a machine judgment.
 """
+
 from __future__ import annotations
 
 import re
@@ -19,10 +20,47 @@ WIKI_API = "https://en.wikipedia.org/w/api.php"
 HEADERS = {"User-Agent": "personprobe/0.1 (ay.yadav53@gmail.com)"}
 
 STOPWORDS = {
-    "the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "with", "at",
-    "by", "from", "as", "is", "was", "were", "are", "has", "have", "had", "he",
-    "she", "his", "her", "their", "its", "this", "that", "who", "which", "while",
-    "during", "also", "into", "about", "after", "before", "among", "between",
+    "the",
+    "a",
+    "an",
+    "and",
+    "or",
+    "of",
+    "to",
+    "in",
+    "on",
+    "for",
+    "with",
+    "at",
+    "by",
+    "from",
+    "as",
+    "is",
+    "was",
+    "were",
+    "are",
+    "has",
+    "have",
+    "had",
+    "he",
+    "she",
+    "his",
+    "her",
+    "their",
+    "its",
+    "this",
+    "that",
+    "who",
+    "which",
+    "while",
+    "during",
+    "also",
+    "into",
+    "about",
+    "after",
+    "before",
+    "among",
+    "between",
 }
 
 _COVERAGE_THRESHOLD = 0.6
@@ -58,10 +96,18 @@ def title_from_url(url: str) -> str:
 def fetch_article_text(title: str) -> str:
     """Plain-text extract of the live article (TextExtracts, then wikitext fallback)."""
     try:
-        resp = requests.get(WIKI_API, params={
-            "action": "query", "prop": "extracts", "explaintext": "1",
-            "titles": title, "format": "json",
-        }, headers=HEADERS, timeout=15)
+        resp = requests.get(
+            WIKI_API,
+            params={
+                "action": "query",
+                "prop": "extracts",
+                "explaintext": "1",
+                "titles": title,
+                "format": "json",
+            },
+            headers=HEADERS,
+            timeout=15,
+        )
         resp.raise_for_status()
         pages = resp.json().get("query", {}).get("pages", {})
         for page in pages.values():
@@ -70,16 +116,25 @@ def fetch_article_text(title: str) -> str:
                 return extract
     except Exception:
         pass
-    resp = requests.get(WIKI_API, params={
-        "action": "parse", "page": title, "prop": "wikitext", "format": "json",
-    }, headers=HEADERS, timeout=15)
+    resp = requests.get(
+        WIKI_API,
+        params={
+            "action": "parse",
+            "page": title,
+            "prop": "wikitext",
+            "format": "json",
+        },
+        headers=HEADERS,
+        timeout=15,
+    )
     resp.raise_for_status()
     return resp.json().get("parse", {}).get("wikitext", {}).get("*", "")
 
 
 def _tokens(text: str) -> set[str]:
     return {
-        t for t in re.findall(r"[a-z0-9]+", text.lower())
+        t
+        for t in re.findall(r"[a-z0-9]+", text.lower())
         if t not in STOPWORDS and len(t) > 2
     }
 
@@ -87,7 +142,9 @@ def _tokens(text: str) -> set[str]:
 def claim_coverage(claim: Claim, article_text: str) -> ClaimCoverage:
     article_tokens = _tokens(article_text)
     claim_tokens = _tokens(claim.text)
-    score = len(claim_tokens & article_tokens) / len(claim_tokens) if claim_tokens else 0.0
+    score = (
+        len(claim_tokens & article_tokens) / len(claim_tokens) if claim_tokens else 0.0
+    )
 
     # A verbatim year in the source that is absent from the article weakens coverage
     # for temporal facts even when generic tokens overlap.
@@ -98,8 +155,8 @@ def claim_coverage(claim: Claim, article_text: str) -> ClaimCoverage:
     covered = score >= _COVERAGE_THRESHOLD
     note = (
         "Fact wording already appears in the article."
-        if covered else
-        "Not found in the article — candidate addition."
+        if covered
+        else "Not found in the article — candidate addition."
     )
     return ClaimCoverage(
         claim_index=-1,  # filled by caller
@@ -113,10 +170,11 @@ def claim_coverage(claim: Claim, article_text: str) -> ClaimCoverage:
     )
 
 
-def build_article_proposal(profile: PersonProfile, title: str, url: str, article_text: str) -> ArticleProposal:
+def build_article_proposal(
+    profile: PersonProfile, title: str, url: str, article_text: str
+) -> ArticleProposal:
     candidates = [
-        c for c in profile.claims
-        if c.verification.value in ("confirmed", "edited")
+        c for c in profile.claims if c.verification.value in ("confirmed", "edited")
     ]
     coverage: list[ClaimCoverage] = []
     for i, claim in enumerate(candidates):

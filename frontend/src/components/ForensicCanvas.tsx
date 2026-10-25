@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import type { PersonProfile, SubjectRecordMatrix, PublicRecordRepository, ForensicInquiry } from "../types";
+import type { PersonProfile, SubjectRecordMatrix, PublicRecordRepository, ForensicInquiry, OsintDork } from "../types";
 import {
   getForensicsSummary,
+  getForensicsDorks,
   addInvestigationPivot,
   deleteInvestigationPivot,
   addAuxiliaryLead,
@@ -84,8 +85,14 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
   const [leadNotes, setLeadNotes] = useState("");
   const [leadQuery, setLeadQuery] = useState("");
 
-  // Section sub-tabs (split the 3 heavy panels)
-  const [subTab, setSubTab] = useState<"pivots" | "inquiries" | "leads">("pivots");
+  // Section sub-tabs (split the panels)
+  const [subTab, setSubTab] = useState<"pivots" | "inquiries" | "leads" | "dorks">("pivots");
+
+  // OSINT Dorks State
+  const [dorks, setDorks] = useState<OsintDork[]>([]);
+  const [loadingDorks, setLoadingDorks] = useState(false);
+  const [dorkCopiedIdx, setDorkCopiedIdx] = useState<number | null>(null);
+  const [dorkCategoryFilter, setDorkCategoryFilter] = useState("all");
 
   // Filter & Search
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -168,6 +175,27 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
       cancelled = true;
     };
   }, [profile.name]);
+
+  // Fetch OSINT dorks when dorks tab is activated
+  useEffect(() => {
+    let cancelled = false;
+    if (subTab === "dorks" && dorks.length === 0 && !loadingDorks) {
+      setLoadingDorks(true);
+      getForensicsDorks(profileRef(profile))
+        .then(res => {
+          if (!cancelled) setDorks(res.dorks || []);
+        })
+        .catch(e => {
+          if (!cancelled) setError(String(e));
+        })
+        .finally(() => {
+          if (!cancelled) setLoadingDorks(false);
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [subTab, profile.name]);
 
   async function handleGenerateInquiries() {
     setGeneratingInquiries(true);
@@ -746,9 +774,10 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
         }}
       >
         {([
-          ["pivots", "Investigation Pivots", pivots.length],
-          ["inquiries", "Deductive Inquiries", inquiries.length],
-          ["leads", "Auxiliary Leads", leads.length],
+          ["pivots", "Investigation Pivots", String(pivots.length)],
+          ["inquiries", "Deductive Inquiries", String(inquiries.length)],
+          ["leads", "Auxiliary Leads", String(leads.length)],
+          ["dorks", "OSINT Dorks & Operators", dorks.length > 0 ? String(dorks.length) : "🎯"],
         ] as const).map(([id, label, count]) => (
           <button
             key={id}
@@ -1749,6 +1778,212 @@ export default function ForensicCanvas({ profile, onProfileUpdate }: Props) {
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      </>)}
+
+      {subTab === "dorks" && (<>
+      {/* Section 4: OSINT Precision Search Operators & Dorks */}
+      <div className="card" style={{ padding: "18px 20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+          <div>
+            <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              🎯 OSINT Precision Search Operators &amp; Dorks
+            </h3>
+            <p style={{ fontSize: 12, color: "var(--muted)", margin: "3px 0 0" }}>
+              High-precision search queries targeting Indian governmental gazettes, university repositories, research grant portals, judicial tribunals, vernacular press, and patents.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => {
+                setLoadingDorks(true);
+                getForensicsDorks(profileRef(profile))
+                  .then(res => setDorks(res.dorks || []))
+                  .catch(e => setError(String(e)))
+                  .finally(() => setLoadingDorks(false));
+              }}
+              disabled={loadingDorks}
+              style={{ fontSize: 12, padding: "6px 12px" }}
+            >
+              {loadingDorks ? "Refreshing…" : "🔄 Refresh Dorks"}
+            </button>
+          </div>
+        </div>
+
+        {/* Category Filter Pills */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+          {[
+            { id: "all", label: "All Dorks" },
+            { id: "academic_theses", label: "🎓 Theses & Dissertations" },
+            { id: "grants_funding", label: "💰 Research Grants & Sanctions" },
+            { id: "gazette_records", label: "📜 Official Gazettes" },
+            { id: "legal_tribunal", label: "⚖️ Legal & Tribunals" },
+            { id: "vernacular_press", label: "📰 Vernacular Press (Hindi)" },
+            { id: "patents", label: "🔬 Patents & IP" },
+          ].map(c => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setDorkCategoryFilter(c.id)}
+              style={{
+                fontSize: 11,
+                fontWeight: dorkCategoryFilter === c.id ? 700 : 500,
+                padding: "4px 10px",
+                borderRadius: 20,
+                border: "1px solid",
+                borderColor: dorkCategoryFilter === c.id ? "var(--primary)" : "var(--border)",
+                background: dorkCategoryFilter === c.id ? "rgba(37, 99, 235, 0.1)" : "transparent",
+                color: dorkCategoryFilter === c.id ? "var(--primary)" : "var(--muted)",
+                cursor: "pointer",
+              }}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        {loadingDorks ? (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--muted)" }}>
+            <div style={{ fontSize: 24, marginBottom: 8 }}>🔍</div>
+            <p style={{ margin: 0, fontSize: 13 }}>Compiling OSINT search dorks for {profile.name}…</p>
+          </div>
+        ) : dorks.length === 0 ? (
+          <div style={{ padding: "40px 20px", textAlign: "center", color: "var(--muted)" }}>
+            <p style={{ margin: 0, fontSize: 13 }}>No search dorks generated yet. Click "Refresh Dorks" to build precision queries.</p>
+          </div>
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {dorks
+              .filter(d => dorkCategoryFilter === "all" || d.category === dorkCategoryFilter)
+              .map((dork, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    background: "#ffffff",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    padding: "14px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>
+                          {dork.title}
+                        </span>
+                        <span style={{ fontSize: 11, color: "var(--muted)" }}>
+                          ({dork.target_portal})
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: 0.5,
+                            padding: "2px 7px",
+                            borderRadius: 4,
+                            background: "rgba(37, 99, 235, 0.08)",
+                            color: "var(--primary)",
+                          }}
+                        >
+                          {dork.category.replace("_", " ")}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 12, color: "var(--muted)", margin: 0, lineHeight: 1.4 }}>
+                        {dork.forensic_objective}
+                      </p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <a
+                        href={dork.google_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-primary"
+                        style={{
+                          fontSize: 11,
+                          padding: "5px 10px",
+                          textDecoration: "none",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        🔍 Google ↗
+                      </a>
+                      <a
+                        href={dork.duckduckgo_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-ghost"
+                        style={{
+                          fontSize: 11,
+                          padding: "5px 10px",
+                          textDecoration: "none",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        🦆 DuckDuckGo ↗
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Query Box */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      background: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: 6,
+                      padding: "8px 12px",
+                    }}
+                  >
+                    <code
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "monospace",
+                        color: "#0f172a",
+                        wordBreak: "break-all",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {dork.query}
+                    </code>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => {
+                        navigator.clipboard.writeText(dork.query);
+                        setDorkCopiedIdx(idx);
+                        setTimeout(() => setDorkCopiedIdx(null), 2000);
+                      }}
+                      style={{
+                        fontSize: 11,
+                        padding: "3px 8px",
+                        flexShrink: 0,
+                        fontWeight: 600,
+                        color: dorkCopiedIdx === idx ? "var(--success)" : "var(--muted)",
+                      }}
+                    >
+                      {dorkCopiedIdx === idx ? "✓ Copied" : "📋 Copy"}
+                    </button>
+                  </div>
+                </div>
+              ))}
           </div>
         )}
       </div>

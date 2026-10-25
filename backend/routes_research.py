@@ -24,6 +24,7 @@ from .schemas import (
     VerifySourceLevelRequest,
     AddNamesakeRequest,
     SetClaimQuoteRequest,
+    OpenAlexImportRequest,
 )
 
 from engine.models import (
@@ -1977,3 +1978,40 @@ def set_claim_quote(body: SetClaimQuoteRequest) -> dict:
     )
     store._save_session(profile)
     return {"ok": True, **result}
+
+
+@research_router.get("/research/openalex/search")
+def openalex_search(name: str, institution: str | None = None) -> dict:
+    """Search OpenAlex academic intelligence graph for author entities."""
+    from engine.openalex import search_author
+
+    results = search_author(name, institution)
+    return {"ok": True, "results": results}
+
+
+@research_router.post("/research/openalex/import")
+def openalex_import(body: OpenAlexImportRequest) -> dict:
+    """Import verified works from OpenAlex into the research profile as sources."""
+    profile = store._get_profile(body.profile_name)
+    from engine.openalex import get_author_works, convert_works_to_sources
+
+    works = get_author_works(body.author_id, limit=body.limit)
+    new_sources = convert_works_to_sources(works, profile.name)
+
+    existing_urls = {s.url.lower().rstrip("/") for s in profile.sources if s.url}
+    added_urls: list[str] = []
+    with store._lock:
+        for s in new_sources:
+            norm_url = s.url.lower().rstrip("/")
+            if norm_url not in existing_urls:
+                profile.sources.append(s)
+                existing_urls.add(norm_url)
+                added_urls.append(s.url)
+        store._save_session(profile)
+
+    return {
+        "ok": True,
+        "imported_count": len(added_urls),
+        "total_works": len(works),
+        "added_urls": added_urls,
+    }

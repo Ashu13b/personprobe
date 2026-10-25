@@ -349,6 +349,35 @@ export function SourceCard({ source, sourceNumber, profileName, linkOpened, onLi
         />
       </div>
 
+      {/* PDF Document Metadata Forensic Tag */}
+      {source.pdf_metadata && (
+        <div style={{ marginTop: 8, padding: "6px 10px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 11, color: "#334155" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, color: "#0f172a", marginBottom: 3 }}>
+            <span>📄 PDF Document Forensics</span>
+            <span style={{ fontSize: 10, background: "#e2e8f0", padding: "1px 6px", borderRadius: 4 }}>
+              {source.pdf_metadata.page_count} pages
+            </span>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, color: "#475569" }}>
+            {source.pdf_metadata.author && (
+              <span><strong>Author:</strong> {source.pdf_metadata.author}</span>
+            )}
+            {source.pdf_metadata.creator && (
+              <span><strong>Creator:</strong> {source.pdf_metadata.creator}</span>
+            )}
+            {source.pdf_metadata.producer && (
+              <span><strong>Producer:</strong> {source.pdf_metadata.producer}</span>
+            )}
+            {source.pdf_metadata.creation_date && (
+              <span><strong>Created:</strong> {source.pdf_metadata.creation_date.slice(0, 10)}</span>
+            )}
+            {source.pdf_metadata.modification_date && (
+              <span><strong>Modified:</strong> {source.pdf_metadata.modification_date.slice(0, 10)}</span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Inline Extracted Claims — AI suggestions, not yet verified facts */}
       {sourceClaims.length > 0 && (
         <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(139, 92, 246, 0.07)", border: "1px solid rgba(139, 92, 246, 0.2)", borderRadius: 6 }}>

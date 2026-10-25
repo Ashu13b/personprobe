@@ -247,3 +247,9 @@ class ProbeForensicInquiryRequest(BaseModel):
     profile_name: str
     inquiry_id: Optional[str] = None
     actor: Optional[Literal["human", "agent", "system"]] = "human"
+
+
+class OpenAlexImportRequest(BaseModel):
+    profile_name: str
+    author_id: str
+    limit: int = 50

@@ -684,3 +684,18 @@ def remove_custom_repository(category_id: str) -> dict:
         "deleted_id": category_id,
         "total_repositories": len(atlas),
     }
+
+
+@forensics_router.get("/dorks")
+def get_forensics_dorks(profile_name: str) -> dict:
+    """Generate categorized OSINT precision search dorks for the subject."""
+    profile = store._get_profile(profile_name)
+    from engine.osint_dorks import generate_osint_dorks
+
+    dorks = generate_osint_dorks(profile)
+    return {
+        "ok": True,
+        "profile_name": profile.name,
+        "dorks_count": len(dorks),
+        "dorks": [d.model_dump() for d in dorks],
+    }

@@ -107,6 +107,9 @@ class Source(BaseModel):
         "discovered", "retrieved", "identity_checked", "provenance_checked"
     ] = "discovered"
 
+    # Document forensic metadata (PDF author, creator software, creation timestamps)
+    pdf_metadata: Optional[dict[str, Any]] = None
+
     # Multi-level verification & actor audit trail (L1, L2, L3)
     verification_trail: list[VerificationLogEntry] = Field(default_factory=list)
     liveness_by: Optional[str] = None  # human | agent | system

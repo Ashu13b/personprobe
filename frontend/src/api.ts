@@ -709,3 +709,26 @@ export async function selectBestAll(profileName: string, apply: boolean) {
   if (!r.ok) throw new Error(`select-best-all failed: ${r.status}`);
   return r.json();
 }
+
+export async function getForensicsDorks(profileName: string): Promise<{ ok: boolean; dorks_count: number; dorks: import("./types").OsintDork[] }> {
+  const r = await fetch(`/api/forensics/dorks?profile_name=${encodeURIComponent(profileName)}`);
+  if (!r.ok) throw new Error(`get-dorks failed: ${r.status}`);
+  return r.json();
+}
+
+export async function searchOpenAlex(name: string, institution?: string): Promise<{ ok: boolean; results: import("./types").OpenAlexAuthor[] }> {
+  const url = `/api/research/openalex/search?name=${encodeURIComponent(name)}${institution ? `&institution=${encodeURIComponent(institution)}` : ""}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`openalex-search failed: ${r.status}`);
+  return r.json();
+}
+
+export async function importOpenAlexWorks(profileName: string, authorId: string, limit: number = 50): Promise<{ ok: boolean; imported_count: number; total_works: number; added_urls: string[] }> {
+  const r = await fetch("/api/research/openalex/import", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profile_name: profileName, author_id: authorId, limit }),
+  });
+  if (!r.ok) throw new Error(`openalex-import failed: ${r.status}`);
+  return r.json();
+}

@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-25 10:50 UTC · sha fe160fd · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-25 13:27 UTC · sha c1e5676 · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 109 files · 964 symbols
-- TypeScript — 34 files · 279 symbols
+- Python — 113 files · 983 symbols
+- TypeScript — 34 files · 286 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 148 files · 1246 symbols across 6 languages._
+_Total: 152 files · 1272 symbols across 6 languages._
 
 
 ## Compartments
@@ -36,11 +36,11 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `backend/pipelines.py` — def _add_sd_article, def _add_sd_author_profile
 - `backend/routes_browser.py` — browser_router, _last_captcha_solved, def captcha_solved, def last_captcha_solved
 - `backend/routes_draft.py` — draft_router, def draft_audit, def generate_draft, def draft_links, def draft_preview, def draft_qa, def draft_verify
-- `backend/routes_forensics.py` — forensics_router, def get_forensics_summary, def add_pivot, def delete_pivot, def add_auxiliary_lead, def update_auxiliary_lead, def promote_lead_to_source, def delete_auxiliary_lead, def run_forensic_sweep, def generate_inquiries, … +11 more
+- `backend/routes_forensics.py` — forensics_router, def get_forensics_summary, def add_pivot, def delete_pivot, def add_auxiliary_lead, def update_auxiliary_lead, def promote_lead_to_source, def delete_auxiliary_lead, def run_forensic_sweep, def generate_inquiries, … +12 more
 - `backend/routes_ops.py` — ops_router, def get_fetch_telemetry
-- `backend/routes_research.py` — research_router, def _namesake_check, def identify, def _find_resumable_session, def _enrich_and_flag_sources, def _populate_initial_sources, def research_start, def add_source, def add_document_fact, def add_sourced_claim, … +31 more
+- `backend/routes_research.py` — research_router, def _namesake_check, def identify, def _find_resumable_session, def _enrich_and_flag_sources, def _populate_initial_sources, def research_start, def add_source, def add_document_fact, def add_sourced_claim, … +33 more
 - `backend/routes_sessions.py` — sessions_router, def resume_session, def list_sessions, def delete_session
-- `backend/schemas.py` — class IdentifyRequest, class ResearchRequest, class AddSourceRequest, class AddNamesakeRequest, class DeleteNamesakeRequest, class AssessSourceRequest, class VerifySourceLevelRequest, class AddDocumentFact, class AddSourcedClaimRequest, class VerifyClaimRequest, … +18 more
+- `backend/schemas.py` — class IdentifyRequest, class ResearchRequest, class AddSourceRequest, class AddNamesakeRequest, class DeleteNamesakeRequest, class AssessSourceRequest, class VerifySourceLevelRequest, class AddDocumentFact, class AddSourcedClaimRequest, class VerifyClaimRequest, … +19 more
 - `backend/store.py` — SESSIONS_DIR, _sessions, _wiki_statuses, _lock, _llm, def llm, def _new_session_id, def _ensure_session_id, def _session_path, def _resolve_profile, … +9 more
 ### engine/
 - `engine/agent_llm.py` — AGENT_JOBS_DIR, def _job_id, class AgentProvider(__init__, complete), def pending_jobs, def answer_job
@@ -51,6 +51,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `engine/coauthor_network.py` — def _coauthor_mention_note, def extract_subject_mentions, def screen_coauthor_page, def coauthor_source_batch
 - `engine/crawler.py` — TIMEOUT, S2_API, class SourceNode, class SourceGraph(to_sources), def crawl, def _extract_meta, def _extract_links, def _extract_dois, def _extract_entities, def _count_mentions, … +5 more
 - `engine/discarded_registry.py` — def record_discarded, def is_discarded, def is_known_or_discarded, def get_known_and_discarded_canonical_urls, def recover_discarded, def get_discarded_by_reason
+- `engine/doc_metadata.py` — def parse_pdf_date, def extract_pdf_metadata
 - `engine/evidence.py` — def apply_quote_candidates
 - `engine/extractor.py` — WIKI_SLOTS, SLOT_SOURCE_HINTS, def find_missing_slots, SYSTEM, def _validate_and_filter_claims, def filter_person_snippets, def extract_claims, def _deduplicate
 - `engine/fetch_telemetry.py` — LOG_PATH, DEFAULT_DELAY_S, THROTTLE_DELAY_S, _THROTTLE_WINDOW_S, MAX_HOST_ATTEMPTS, def _host, def record, def timed, class _Timer(__init__, __enter__, __exit__), def recent_throttles, … +8 more
@@ -66,6 +67,8 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `engine/multilingual_search.py` — _NATIONALITY_TO_LANGUAGES, _INDIC_PHONETIC_MAP, _LOCALIZED_SLOT_TERMS, _COUNTRY_NEWS_OUTLETS, def detect_languages, def transliterate_name, def get_regional_news_outlets, def build_bilingual_queries
 - `engine/name_verifier.py` — class NameVerificationResult, def generate_name_variants, def verify_name_in_content, def _is_initials_only_variant, def assess_namesake_risk
 - `engine/notability.py` — S2_API, _S2_TTL_SECONDS, _s2_cache, def score_notability, def _semantic_scholar_signals, def _fetch_semantic_scholar
+- `engine/openalex.py` — OPENALEX_API_BASE, OPENALEX_HEADERS, def search_author, def get_author_works, def convert_works_to_sources
+- `engine/osint_dorks.py` — class OsintDork, def generate_osint_dorks
 - `engine/provenance.py` — HIGH_TRUST_DOMAINS, MEDIUM_TRUST_DOMAINS, UNTRUSTED_DOMAINS, def normalize_url, MEDIUM_TRUST_DOMAINS, UNTRUSTED_DOMAINS, def get_domain_trust, def classify_source_provenance, def evaluate_claim_trust
 - `engine/public_records_atlas.py` — REGISTRY_DIR, REGISTRY_FILE, BUILTIN_REPOSITORIES, def _ensure_registry_dir, def load_custom_repositories, def save_custom_repositories, def register_public_repository, def delete_custom_repository, def record_repository_learning, def get_public_records_atlas, … +2 more
 - `engine/publishers.py` — def extract_domain, INDEPENDENT_NEWS_DOMAINS, ACADEMIC_PUBLISHER_DOMAINS, PRIMARY_OR_INSTITUTIONAL_DOMAINS, RECORD_REGISTRY_DOMAINS, SELF_PUBLISHED_DOMAINS, UNRELIABLE_DOMAINS, def matches_domain_set, def is_independent_secondary_news, def is_primary_or_institutional
@@ -79,7 +82,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### frontend/
 - `frontend/index.html` — #root
 - `frontend/src/App.tsx` — ErrorBoundaryProps, ErrorBoundaryState, ErrorBoundary, constructor, getDerivedStateFromError, componentDidCatch, render, Stage, MainApp, handleMessage, … +5 more
-- `frontend/src/api.ts` — apiPost, apiGet, apiDelete, apiPatch, IdentifyResult, identifyPerson, startResearch, getSession, addSource, fetchFromBrowser, … +68 more
+- `frontend/src/api.ts` — apiPost, apiGet, apiDelete, apiPatch, IdentifyResult, identifyPerson, startResearch, getSession, addSource, fetchFromBrowser, … +71 more
 - `frontend/src/components/ArticleProposal.tsx` — ArticleProposalView
 - `frontend/src/components/BookmarkletCard.tsx` — BookmarkletCard, handleCopy
 - `frontend/src/components/ClaimsReview.tsx` — FilterTab, ClaimsReview, toggleTrail, doVerify, handleBatchAction, ActionBtn
@@ -88,7 +91,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `frontend/src/components/DraftLinks.tsx` — DraftLinkRow, DraftWikilinkRow, DraftLinks, toggleVerified
 - `frontend/src/components/DraftPreview.tsx` — Props, DraftPreview, copy
 - `frontend/src/components/DraftQa.tsx` — DraftQa
-- `frontend/src/components/EvidenceWorkspace.tsx` — Props, EvidenceWorkspace, handleAddUrl, handleAddPaste, handleCrawl, handleAutoEnrichSlots, refreshProfile
+- `frontend/src/components/EvidenceWorkspace.tsx` — Props, EvidenceWorkspace, handleAddUrl, handleAddPaste, handleCrawl, handleAutoEnrichSlots, handleSearchOpenAlex, handleImportOpenAlex, refreshProfile
 - `frontend/src/components/FactClusters.tsx` — FactClusters, useBest
 - `frontend/src/components/FetchOpsPanel.tsx` — FetchOpsPanel, load
 - `frontend/src/components/ForensicCanvas.tsx` — Props, ForensicCanvas, handleGenerateInquiries, handleProbeInquiry, handleProbeAllInquiries, handleExpandCivic, handleToggleAtlas, handleAddRepoSubmit, handleDeleteRepo, handleLogFailureSubmit, … +10 more
@@ -107,7 +110,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `frontend/src/pages/IdentifyPage.tsx` — Props, View, IdentifyPage, handleResume, handleDelete, handleSearch, handleConfirm, handleConfirmIdentity
 - `frontend/src/pages/ResearchPage.tsx` — Props, ResearchPage, Spinner
 - `frontend/src/thematic.ts` — ThematicCategory, ThematicCategoryMeta, getSourceCategories, computeCategoryCounts, filterSources
-- `frontend/src/types.ts` — PersonCandidate, SourceReliability, VerificationState, SourceFetchedBy, VerificationActor, VerificationLevel, VerificationLogEntry, Source, Claim, VerificationSummaryResponse, … +35 more
+- `frontend/src/types.ts` — PersonCandidate, SourceReliability, VerificationState, SourceFetchedBy, VerificationActor, VerificationLevel, VerificationLogEntry, Source, Claim, VerificationSummaryResponse, … +37 more
 - `frontend/src/url.ts` — normalizeUrl, getHostname, safeHref
 - `frontend/src/workflow.ts` — WorkspaceMode, WorkspaceTone, WorkspaceRoute, getWorkspaceRoute, canGenerateDraft, getDraftDestination
 ### scripts/
@@ -155,12 +158,12 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_llm.py` — def test_extract_claims_is_noop_under_stub, def test_get_provider_uses_vertex_when_available, def test_get_provider_falls_back_to_agent_when_vertex_unavailable
 - `tests/test_multilingual_search.py` — def test_detect_languages, def test_transliterate_name, def test_get_regional_news_outlets, def test_build_bilingual_queries_hindi, def test_build_bilingual_queries_carries_date_and_event_hint_into_hindi, def test_build_bilingual_queries_french, def test_build_bilingual_queries_german
 - `tests/test_name_verifier.py` — def test_generate_name_variants_western, def test_generate_name_variants_indic, def test_verify_name_in_content_exact_and_initials, def test_verify_name_in_content_devanagari, def test_verify_name_no_match, def test_verify_name_homonym_risk, def test_namesake_risk_known_conflict_and_siblings, def test_identity_strength_full_vs_weak, def test_coauthor_profile_network_screen
+- `tests/test_osint.py` — def test_openalex_search_and_ranking, def test_openalex_get_works_and_convert_sources, def test_generate_osint_dorks, def test_pdf_metadata_extraction, def test_parse_pdf_date_variants, def test_multi_archive_fallback_to_archive_today
 - `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls
 - `tests/test_provenance.py` — def test_domain_trust_classification, def test_source_provenance_classification, def test_academic_indexes_never_count_as_independent_news, def test_search_discovery_does_not_make_unknown_site_independent, def test_claim_trust_evaluation, def test_strict_notability_independence, def test_notability_requires_confirmed_claims_and_deduplicates_outlets, def test_notability_keeps_unassessed_candidates_out_of_score, def test_notability_deduplicates_syndicated_editorial_origins, def test_icar_and_cirb_reports_are_institutional_primary_sources, … +5 more
 - `tests/test_quote_backfill.py` — def test_best_quote_matches_paraphrase_with_date_normalization, def test_best_quote_matches_birth_date_across_date_formats, def test_best_quote_refuses_when_no_support, def test_collect_claims_needing_quotes_filters, def test_apply_quote_candidates_requires_approved_source_bound_claim
-- `tests/test_researcher.py` — def _result, def test_disambiguator_drops_institutional_stopwords, def test_news_sweep_issues_site_restricted_and_hindi_queries, def test_news_sweep_deduplicates_across_queries, def test_news_sweep_respects_limit, def test_targeted_award_search_never_falls_back_to_education_queries, def test_try_browser_server_probes_unified_mount_first, def test_try_browser_server_returns_none_when_no_browser_running, def test_junk_source_url_filter, def test_pick_author_id_returns_none_when_nothing_validates, … +1 more
 
 ### Collapsed Directories (Fractal Router)
-- 📁 `tests/` — 7 file(s) (_profile, test_find_ids_removes_an_orcid_that_fails_identity_validation, test_refresh_rejects_an_unvalidated_orcid, test_validated_new_ids_drops_wrong_person_orcid…) · `ck show tests/` lists them
+- 📁 `tests/` — 8 file(s) (_result, test_disambiguator_drops_institutional_stopwords, test_news_sweep_issues_site_restricted_and_hindi_queries, test_news_sweep_deduplicates_across_queries…) · `ck show tests/` lists them
 
-_Router mode: 131 of 138 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._
+_Router mode: 134 of 142 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._

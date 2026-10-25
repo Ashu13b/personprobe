@@ -129,21 +129,35 @@ def check_liveness(url: str) -> tuple[str, str | None]:
 
 
 def get_wayback_url(url: str) -> str | None:
-    """Return the closest Wayback snapshot URL for a dead page, or None."""
+    """Return the closest archive snapshot URL (Wayback first, archive.today fallback)."""
+    # 1. Primary: Internet Archive Wayback Machine
     try:
         resp = requests.get(
             "https://archive.org/wayback/available",
             params={"url": url},
             headers=HEADERS,
-            timeout=10,
+            timeout=8,
         )
         snapshot = resp.json().get("archived_snapshots", {}).get("closest", {})
         snap_url = snapshot.get("url") or None
-        if snap_url and "/*/" in snap_url:
-            return None  # wildcard form (*/timestamp) is not a real snapshot and breaks citations
-        return snap_url
+        if snap_url and "/*/" not in snap_url:
+            return snap_url
     except Exception:
-        return None
+        pass
+
+    # 2. Secondary fallback: archive.today / archive.ph timemap probe
+    try:
+        parsed_target = quote_plus(url)
+        timemap_url = f"https://archive.ph/timemap/{parsed_target}"
+        r = requests.get(timemap_url, headers=HEADERS, timeout=6, allow_redirects=True)
+        if r.status_code == 200 and "https://archive.ph/" in r.text:
+            m = re.search(r"https://archive\.ph/\d+/[^\s,;>\"]+", r.text)
+            if m:
+                return m.group(0)
+    except Exception:
+        pass
+
+    return None
 
 
 class FetchResult:

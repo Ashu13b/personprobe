@@ -67,6 +67,7 @@ export interface Source {
   provenance_at?: string | null;
   confirmed_for_extraction_by?: VerificationActor | null;
   confirmed_for_extraction_at?: string | null;
+  pdf_metadata?: Record<string, any> | null;
 }
 
 export interface Claim {
@@ -248,6 +249,29 @@ export interface ForensicsSummaryResponse {
     corroborated_leads: number;
     inquiries_count?: number;
   };
+}
+
+export interface OsintDork {
+  category: string;
+  title: string;
+  target_portal: string;
+  query: string;
+  google_url: string;
+  duckduckgo_url: string;
+  forensic_objective: string;
+  expected_evidence_type?: string;
+}
+
+export interface OpenAlexAuthor {
+  id: string;
+  openalex_id: string;
+  display_name: string;
+  affiliations: string[];
+  works_count: number;
+  cited_by_count: number;
+  h_index: number;
+  orcid?: string | null;
+  relevance_score?: number;
 }
 
 export interface PublicRecordRepository {

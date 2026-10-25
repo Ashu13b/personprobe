@@ -1,12 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
-import type { PersonProfile } from "../types";
+import type { PersonProfile, OpenAlexAuthor } from "../types";
 import {
   THEMATIC_CATEGORIES,
   ThematicCategory,
   computeCategoryCounts,
   filterSources,
 } from "../thematic";
-import { addSource, addSourcePaste, autoEnrich, deepCrawl, getSession, profileRef } from "../api";
+import { addSource, addSourcePaste, autoEnrich, deepCrawl, searchOpenAlex, importOpenAlexWorks, getSession, profileRef } from "../api";
 import { normalizeUrl } from "../url";
 import { SourceCard } from "./SourceCard";
 import DiscardedTab from "./DiscardedTab";
@@ -43,7 +43,7 @@ export default function EvidenceWorkspace({
 
   // Advanced import drawer
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [advancedMode, setAdvancedMode] = useState<"paste" | "crawl">("paste");
+  const [advancedMode, setAdvancedMode] = useState<"paste" | "crawl" | "openalex">("paste");
   const [pasteUrl, setPasteUrl] = useState("");
   const [pasteText, setPasteText] = useState("");
   const [pasteLoading, setPasteLoading] = useState(false);
@@ -54,6 +54,14 @@ export default function EvidenceWorkspace({
   const [crawlLoading, setCrawlLoading] = useState(false);
   const [crawlResult, setCrawlResult] = useState<string | null>(null);
   const [crawlError, setCrawlError] = useState<string | null>(null);
+
+  // OpenAlex Academic Graph state
+  const [oaQuery, setOaQuery] = useState(profile.name);
+  const [oaLoading, setOaLoading] = useState(false);
+  const [oaError, setOaError] = useState<string | null>(null);
+  const [oaAuthors, setOaAuthors] = useState<OpenAlexAuthor[]>([]);
+  const [oaImportingId, setOaImportingId] = useState<string | null>(null);
+  const [oaImportResult, setOaImportResult] = useState<string | null>(null);
 
   // Multi-level verification health and agent/human attribution
   const verificationHealth = useMemo(() => {
@@ -201,6 +209,40 @@ export default function EvidenceWorkspace({
     }
   }
 
+  async function handleSearchOpenAlex() {
+    if (!oaQuery.trim()) return;
+    setOaLoading(true);
+    setOaError(null);
+    setOaImportResult(null);
+    try {
+      const resp = await searchOpenAlex(oaQuery);
+      const results = resp.results || [];
+      setOaAuthors(results);
+      if (results.length === 0) {
+        setOaError("No matching authors found on OpenAlex for this query.");
+      }
+    } catch (err: any) {
+      setOaError(err?.message || "Failed to search OpenAlex");
+    } finally {
+      setOaLoading(false);
+    }
+  }
+
+  async function handleImportOpenAlex(authorId: string) {
+    setOaImportingId(authorId);
+    setOaError(null);
+    setOaImportResult(null);
+    try {
+      const res = await importOpenAlexWorks(profileRef(profile), authorId);
+      setOaImportResult(`Successfully imported ${res.imported_count} works (${res.total_works} total on OpenAlex).`);
+      await refreshProfile();
+    } catch (err: any) {
+      setOaError(err?.message || "Failed to import OpenAlex works");
+    } finally {
+      setOaImportingId(null);
+    }
+  }
+
   async function refreshProfile() {
     try {
       const updated = await getSession(profileRef(profile));
@@ -308,7 +350,7 @@ export default function EvidenceWorkspace({
             onClick={() => setShowAdvanced(!showAdvanced)}
             style={{ fontSize: 12, padding: "8px 12px", color: "var(--muted)" }}
           >
-            {showAdvanced ? "Hide Ingestion Tools" : "⚙️ Paste / Crawl"}
+            {showAdvanced ? "Hide Ingestion Tools" : "⚙️ Advanced Tools (Paste / Crawl / OpenAlex)"}
           </button>
         </div>
 
@@ -341,7 +383,7 @@ export default function EvidenceWorkspace({
         {/* Expandable Advanced Ingestion Drawer */}
         {showAdvanced && (
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
-            <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+            <div style={{ display: "flex", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
               <button
                 type="button"
                 className={advancedMode === "paste" ? "btn-primary" : "btn-ghost"}
@@ -357,6 +399,19 @@ export default function EvidenceWorkspace({
                 style={{ fontSize: 12, padding: "5px 12px" }}
               >
                 Deep Web Crawl
+              </button>
+              <button
+                type="button"
+                className={advancedMode === "openalex" ? "btn-primary" : "btn-ghost"}
+                onClick={() => {
+                  setAdvancedMode("openalex");
+                  if (oaAuthors.length === 0 && !oaLoading) {
+                    handleSearchOpenAlex();
+                  }
+                }}
+                style={{ fontSize: 12, padding: "5px 12px" }}
+              >
+                🎓 OpenAlex Academic Graph
               </button>
             </div>
 
@@ -388,7 +443,7 @@ export default function EvidenceWorkspace({
                   {pasteLoading ? "Submitting…" : "Submit Pasted Content"}
                 </button>
               </div>
-            ) : (
+            ) : advancedMode === "crawl" ? (
               <div>
                 <textarea
                   value={crawlSeeds}
@@ -415,6 +470,94 @@ export default function EvidenceWorkspace({
                 >
                   {crawlLoading ? "Crawling…" : "Start Crawl"}
                 </button>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: 12, color: "var(--muted)", margin: "0 0 10px", lineHeight: 1.4 }}>
+                  Connect to OpenAlex's 250M+ open scholarly graph. Resolves author profiles, institutional affiliations, and auto-imports verified peer-reviewed publications into your evidence session.
+                </p>
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  <input
+                    value={oaQuery}
+                    onChange={e => setOaQuery(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleSearchOpenAlex()}
+                    placeholder="Search researcher name on OpenAlex…"
+                    aria-label="OpenAlex researcher name"
+                    style={{ fontSize: 13, flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={handleSearchOpenAlex}
+                    disabled={oaLoading || !oaQuery.trim()}
+                    style={{ padding: "6px 14px", fontSize: 12, whiteSpace: "nowrap" }}
+                  >
+                    {oaLoading ? "Searching OpenAlex…" : "🔍 Search Graph"}
+                  </button>
+                </div>
+
+                {oaError && <p style={{ color: "var(--danger)", fontSize: 12, marginBottom: 8 }}>{oaError}</p>}
+                {oaImportResult && <p style={{ color: "var(--success)", fontSize: 12, marginBottom: 8, fontWeight: 600 }}>✓ {oaImportResult}</p>}
+
+                {oaAuthors.length > 0 && (
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {oaAuthors.map(author => (
+                      <div
+                        key={author.id}
+                        style={{
+                          background: "#ffffff",
+                          border: "1px solid var(--border)",
+                          borderRadius: 8,
+                          padding: "12px 14px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 12,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
+                            <strong style={{ fontSize: 14 }}>{author.display_name}</strong>
+                            <span style={{ fontSize: 11, color: "var(--muted)", fontFamily: "monospace" }}>{author.id}</span>
+                            {author.orcid && (
+                              <a
+                                href={author.orcid}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontSize: 11, color: "#16a34a", textDecoration: "none" }}
+                              >
+                                🟢 ORCID ↗
+                              </a>
+                            )}
+                          </div>
+                          {author.affiliations && author.affiliations.length > 0 && (
+                            <p style={{ fontSize: 12, color: "var(--text)", margin: "0 0 4px" }}>
+                              🏛️ {author.affiliations.join(", ")}
+                            </p>
+                          )}
+                          <div style={{ display: "flex", gap: 10, fontSize: 11, color: "var(--muted)", flexWrap: "wrap" }}>
+                            <span>📚 <strong>{author.works_count}</strong> works</span>
+                            <span>📈 <strong>{author.cited_by_count}</strong> citations</span>
+                            <span>🎯 h-index: <strong>{author.h_index}</strong></span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <button
+                            type="button"
+                            className="btn-primary"
+                            onClick={() => handleImportOpenAlex(author.id)}
+                            disabled={oaImportingId === author.id}
+                            style={{ fontSize: 12, padding: "6px 14px", whiteSpace: "nowrap" }}
+                          >
+                            {oaImportingId === author.id ? "Importing Works…" : "📥 Ingest Works"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

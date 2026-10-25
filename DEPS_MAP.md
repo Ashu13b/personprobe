@@ -1,4 +1,4 @@
-<!-- context-kit DEPS_MAP · v0.2.0 · generated 2026-10-25 12:09 UTC · sha fe160fd · host instance-trading-bot-restored -->
+<!-- context-kit DEPS_MAP · v0.2.0 · generated 2026-10-25 13:30 UTC · sha c1e5676 · host instance-trading-bot-restored -->
 
 # DEPS_MAP
 
@@ -29,6 +29,7 @@ External packages and required env keys (names only — no values).
 - ddgs
 - engine
 - fastapi
+- fitz
 - google
 - google-generativeai
 - pdfminer
@@ -37,6 +38,7 @@ External packages and required env keys (names only — no values).
 - playwright-stealth
 - playwright_stealth
 - pydantic
+- pymupdf
 - pypdf
 - requests
 - uvicorn

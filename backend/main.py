@@ -8,6 +8,7 @@ frontend, and re-exports the public API names the frontend and tests use.
 
 from __future__ import annotations
 
+import ipaddress
 import os
 import sys
 from pathlib import Path
@@ -124,6 +125,61 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Network access guard ────────────────────────────────────────────────────
+# The server binds 0.0.0.0 (so localhost tooling and the Tailscale-reached UI /
+# phone companion all work) but has no authentication, so it must refuse any
+# client that is neither loopback nor inside the Tailscale CGNAT range. This is
+# network-trust, not auth: because loopback is trusted, any SSRF that reaches
+# localhost becomes full API access — the fetcher/checker/browser URL guards
+# must stay in place. Relaxed to True by the test suite (see tests/conftest.py).
+_TRUST_ALL_CLIENTS = False
+_TAILSCALE_CGNAT = ipaddress.ip_network("100.64.0.0/10")
+
+
+def _client_is_trusted(host: str | None) -> bool:
+    if _TRUST_ALL_CLIENTS:
+        return True
+    if not host:
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return ip.is_loopback or ip in _TAILSCALE_CGNAT
+
+
+class _TrustedNetworkMiddleware:
+    """Reject HTTP/WebSocket requests from untrusted client addresses (pure ASGI)."""
+
+    def __init__(self, asgi_app):
+        self.asgi_app = asgi_app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] in ("http", "websocket"):
+            client = scope.get("client")
+            if not _client_is_trusted(client[0] if client else None):
+                if scope["type"] == "websocket":
+                    await send({"type": "websocket.close", "code": 1008})
+                else:
+                    await send(
+                        {
+                            "type": "http.response.start",
+                            "status": 403,
+                            "headers": [(b"content-type", b"text/plain")],
+                        }
+                    )
+                    await send(
+                        {
+                            "type": "http.response.body",
+                            "body": b"Forbidden: client address not trusted",
+                        }
+                    )
+                return
+        await self.asgi_app(scope, receive, send)
+
+
+app.add_middleware(_TrustedNetworkMiddleware)
 
 # Mount sub-apps
 app.mount("/api", api_app)

@@ -120,3 +120,21 @@ def test_browser_server_navigate_blocks_unsafe_urls():
 
     res_file = navigate(NavReq(url="file:///etc/passwd"))
     assert "Disallowed URL target" in res_file.get("error", "")
+
+
+def test_network_guard_rejects_untrusted_client_addresses(monkeypatch):
+    # Re-enable the guard (conftest relaxes it) and confirm loopback + Tailscale
+    # clients pass while a LAN / VPC neighbour is refused.
+    from fastapi.testclient import TestClient
+    import backend.main as main
+
+    monkeypatch.setattr(main, "_TRUST_ALL_CLIENTS", False)
+
+    lan = TestClient(main.app, client=("10.0.0.5", 50000))
+    assert lan.get("/api/sessions").status_code == 403
+
+    loopback = TestClient(main.app, client=("127.0.0.1", 50000))
+    assert loopback.get("/api/sessions").status_code == 200
+
+    tailscale = TestClient(main.app, client=("100.72.202.86", 50000))
+    assert tailscale.get("/api/sessions").status_code == 200

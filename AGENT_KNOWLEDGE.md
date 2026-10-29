@@ -33,6 +33,20 @@ There is no database. `sessions/*.json` stores a `PersonProfile`, Wikimedia
 status, and save timestamp. In-memory session dictionaries mirror loaded work.
 
 ## Decisions & rejected approaches
+- The server binds `0.0.0.0:3890` with no authentication, so `backend/main.py`
+  wraps the outer `app` in `_TrustedNetworkMiddleware`: it 403s (or ws-closes)
+  any client whose address is neither loopback nor in the Tailscale CGNAT range
+  (`100.64.0.0/10`). The 0.0.0.0 bind is kept on purpose — localhost scripts and
+  the Tailscale-reached UI/phone all need it; a loopback-only bind breaks the
+  scripts, a Tailscale-IP-only bind breaks localhost tooling, and token auth
+  would have to reach the frontend, phone app, bookmarklet and ~15 scripts.
+  Rejected widening the allowlist to `10.0.0.0/24`: `wg0` (10.0.0.1/24) overlaps
+  the VPC LAN (enp0s6 10.0.0.140/24), so that would re-admit every VPC neighbour.
+  This is network-trust, not auth — because loopback is trusted, any SSRF that
+  reaches localhost is full API access, so the [[fetcher]]/checker/`/browser`
+  URL guards must stay. Tests relax it via `_TRUST_ALL_CLIENTS` in
+  `tests/conftest.py` (TestClient's default client host is the non-IP string
+  `"testclient"`). Takes effect on next server restart.
 - `openscrape_client` (imported by the phone-bridge scripts in `scripts/`) is
   sys.path-injected from `../android-browser`, not a packaged dependency. Pyright
   cannot resolve it, so each import carries an inline

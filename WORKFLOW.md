@@ -1,4 +1,4 @@
-<!-- context-kit WORKFLOW · v0.1.0 · generated 2026-07-10 11:09 UTC · sha a91db49 · host vnic-trading -->
+<!-- context-kit WORKFLOW · v0.2.0 · generated 2026-10-29 10:50 UTC · sha 07ae07d · host instance-trading-bot-restored -->
 
 # WORKFLOW
 
@@ -6,7 +6,7 @@ Rigor profile: **standard** — change via `.context-kit/profile` (`light`|`stan
 
 For non-trivial tasks, **start in plan mode** and get a quick go-ahead before coding.
 Then loop per change:
-0. Orient — consult CODE_MAP / ARCH_MAP / DEPS_MAP / DOCS_MAP / COMMANDS_MAP / CONVENTIONS_MAP / ENV_MAP before Grep/Read; don't re-derive what a map already states.
+0. Orient — consult CODE_MAP / ARCH_MAP / DEPS_MAP / COMMANDS_MAP / CONVENTIONS_MAP / ENV_MAP before Grep/Read; don't re-derive what a map already states.
 1. Implement a small slice.
 2. Typecheck — pyright/mypy (py), tsc (ts), `go vet`, `cargo check`. Fix diagnostics.
 3. Test the affected paths — pytest / vitest / `go test` / `cargo test`.

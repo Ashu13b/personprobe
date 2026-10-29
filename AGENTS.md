@@ -8,7 +8,6 @@ etc. just point here.
 @CODE_MAP.md
 @ARCH_MAP.md
 @DEPS_MAP.md
-@DOCS_MAP.md
 @COMMANDS_MAP.md
 @CONVENTIONS_MAP.md
 @WORKFLOW.md

@@ -1,4 +1,4 @@
-<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-10-29 10:23 UTC · sha b7f793c · host instance-trading-bot-restored -->
+<!-- context-kit DOCS_MAP · v0.2.0 · generated 2026-10-29 14:45 UTC · sha 07ae07d · host instance-trading-bot-restored -->
 
 # DOCS_MAP
 
@@ -8,7 +8,7 @@ Index of existing docs (headings only). Load the full file on demand. Oversized/
 - `AGENT_CAPABILITIES.md`
   - Agent Capability Negotiation
     - Inspect
-- `AGENT_KNOWLEDGE.md` — _cold (70kB); load on demand_
+- `AGENT_KNOWLEDGE.md` — _cold (72kB); load on demand_
 - `PHONE_WORKFLOW.md`
   - PHONE_WORKFLOW — driving PersonProbe's UI from the Android phone
     - Topology (what works and why)

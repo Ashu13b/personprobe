@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-29 10:29 UTC · sha b7f793c · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-29 11:25 UTC · sha 07ae07d · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 115 files · 1009 symbols
+- Python — 115 files · 1014 symbols
 - TypeScript — 35 files · 293 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 155 files · 1305 symbols across 6 languages._
+_Total: 155 files · 1310 symbols across 6 languages._
 
 
 ## Compartments
@@ -33,7 +33,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `adapters/wiki/draft_verifier.py` — class DraftLink, _REF_OPEN, _REF_CLOSE, _CITE_FIELD, _EXTERNAL_LINK, def extract_draft_links, def check_draft_links, def _check_links_via_requests, def render_preview, class DraftWikilink, … +4 more
 - `adapters/wiki/wiki_check.py` — HEADERS, WIKI_API, class WikiStatus, def draft_generation_allowed, def check_title_for, def check_existing_page, def _page_exists, def _deletion_note
 ### backend/
-- `backend/main.py` — api_app, def lifespan, app, FRONTEND_DIST
+- `backend/main.py` — api_app, def lifespan, app, _TRUST_ALL_CLIENTS, _TAILSCALE_CGNAT, def _client_is_trusted, class _TrustedNetworkMiddleware(__init__, __call__), FRONTEND_DIST
 - `backend/pipelines.py` — def _add_sd_article, def _add_sd_author_profile
 - `backend/routes_browser.py` — browser_router, _last_captcha_solved, def captcha_solved, def last_captcha_solved
 - `backend/routes_draft.py` — draft_router, def draft_audit, def generate_draft, def draft_links, def draft_preview, def draft_qa, def draft_verify, def draft_checker_endpoint
@@ -161,7 +161,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_multilingual_search.py` — def test_detect_languages, def test_transliterate_name, def test_get_regional_news_outlets, def test_build_bilingual_queries_hindi, def test_build_bilingual_queries_carries_date_and_event_hint_into_hindi, def test_build_bilingual_queries_french, def test_build_bilingual_queries_german
 - `tests/test_name_verifier.py` — def test_generate_name_variants_western, def test_generate_name_variants_indic, def test_verify_name_in_content_exact_and_initials, def test_verify_name_in_content_devanagari, def test_verify_name_no_match, def test_verify_name_homonym_risk, def test_namesake_risk_known_conflict_and_siblings, def test_identity_strength_full_vs_weak, def test_coauthor_profile_network_screen
 - `tests/test_osint.py` — def test_openalex_search_and_ranking, def test_openalex_get_works_and_convert_sources, def test_generate_osint_dorks, def test_pdf_metadata_extraction, def test_parse_pdf_date_variants, def test_multi_archive_fallback_to_archive_today
-- `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls
+- `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls, def test_network_guard_rejects_untrusted_client_addresses
 
 ### Collapsed Directories (Fractal Router)
 - 📁 `tests/` — 11 file(s) (test_domain_trust_classification, test_source_provenance_classification, test_academic_indexes_never_count_as_independent_news, test_search_discovery_does_not_make_unknown_site_independent…) · `ck show tests/` lists them

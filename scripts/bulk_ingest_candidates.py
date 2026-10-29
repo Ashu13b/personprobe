@@ -64,7 +64,7 @@ def main():
         )
 
         try:
-            res = api_post(
+            api_post(
                 "/research/add-source-paste",
                 {"profile_name": SESSION_ID, "url": url, "pasted_text": pasted_text},
             )

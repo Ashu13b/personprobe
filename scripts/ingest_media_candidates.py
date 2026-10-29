@@ -24,7 +24,6 @@ def main():
 
     profile = data.get("profile", {})
     sources = profile.get("sources", [])
-    claims = profile.get("claims", [])
 
     existing = {canonical_url(s.get("url")) for s in sources if s.get("url")}
 

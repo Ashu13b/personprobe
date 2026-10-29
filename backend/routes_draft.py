@@ -10,7 +10,6 @@ from .schemas import DraftRequest
 
 from adapters.wiki.wiki_check import draft_generation_allowed
 from adapters.wiki.draft import audit_profile, render_draft
-from adapters.wiki.intelligent_draft import render_intelligent_draft
 from adapters.wiki.draft_hi import render_hindi_draft
 
 draft_router = APIRouter()
@@ -25,7 +24,7 @@ def draft_audit(name: str) -> dict:
 
 @draft_router.post("/draft")
 def generate_draft(req: DraftRequest) -> dict:
-    """Generate and persist an intelligent encyclopedic draft from the server-owned session."""
+    """Generate and persist the deterministic draft from the server-owned session."""
     profile = store._get_profile(req.profile_name)
     sid = store._ensure_session_id(profile)
     wiki_status = store._wiki_statuses.get(sid) or store._wiki_statuses.get(
@@ -51,10 +50,7 @@ def generate_draft(req: DraftRequest) -> dict:
             },
         )
 
-    try:
-        profile.wikitext_en = render_intelligent_draft(profile, audit)
-    except Exception:
-        profile.wikitext_en = render_draft(profile, audit)
+    profile.wikitext_en = render_draft(profile, audit)
 
     try:
         profile.wikitext_hi = render_hindi_draft(profile, audit)

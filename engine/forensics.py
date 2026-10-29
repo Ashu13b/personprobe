@@ -424,7 +424,10 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
     # Check if any lead, claim, or affiliation points to HAU or 1985
     all_text = " ".join(
         [profile.affiliation or "", profile.field or ""]
-        + [l.title + " " + (l.lead_notes or "") for l in profile.auxiliary_leads]
+        + [
+            lead.title + " " + (lead.lead_notes or "")
+            for lead in profile.auxiliary_leads
+        ]
         + [(c.text or "") for c in profile.claims]
     ).lower()
 

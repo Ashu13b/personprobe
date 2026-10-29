@@ -77,7 +77,7 @@ def get_forensics_summary(profile_name: str) -> dict:
         "ok": True,
         "profile_name": profile.name,
         "pivots": [p.model_dump() for p in profile.investigation_pivots],
-        "leads": [l.model_dump() for l in profile.auxiliary_leads],
+        "leads": [lead.model_dump() for lead in profile.auxiliary_leads],
         "inquiries": [i.model_dump() for i in profile.forensic_inquiries],
         "metrics": {
             "pivots_count": pivots_count,
@@ -168,7 +168,7 @@ def add_auxiliary_lead(req: AddAuxiliaryLeadRequest) -> dict:
     return {
         "ok": True,
         "lead": new_lead.model_dump(),
-        "leads": [l.model_dump() for l in profile.auxiliary_leads],
+        "leads": [lead.model_dump() for lead in profile.auxiliary_leads],
     }
 
 
@@ -203,7 +203,7 @@ def update_auxiliary_lead(lead_id: str, req: UpdateAuxiliaryLeadRequest) -> dict
     return {
         "ok": True,
         "lead": target_lead.model_dump(),
-        "leads": [l.model_dump() for l in profile.auxiliary_leads],
+        "leads": [lead.model_dump() for lead in profile.auxiliary_leads],
     }
 
 
@@ -325,14 +325,17 @@ def delete_auxiliary_lead(lead_id: str, profile_name: str) -> dict:
     profile = store._get_profile(profile_name)
     before_len = len(profile.auxiliary_leads)
     profile.auxiliary_leads = [
-        l for l in profile.auxiliary_leads if l.lead_id != lead_id
+        lead for lead in profile.auxiliary_leads if lead.lead_id != lead_id
     ]
 
     if len(profile.auxiliary_leads) == before_len:
         raise HTTPException(404, f"Lead {lead_id} not found")
 
     store._save_session(profile)
-    return {"ok": True, "leads": [l.model_dump() for l in profile.auxiliary_leads]}
+    return {
+        "ok": True,
+        "leads": [lead.model_dump() for lead in profile.auxiliary_leads],
+    }
 
 
 @forensics_router.post("/sweep")
@@ -353,7 +356,7 @@ def run_forensic_sweep(req: RunForensicSweepRequest) -> dict:
             raise HTTPException(404, f"Pivot {req.pivot_id} not found")
 
     generated_leads: list[AuxiliaryLead] = []
-    existing_titles = {l.title.lower() for l in profile.auxiliary_leads}
+    existing_titles = {lead.title.lower() for lead in profile.auxiliary_leads}
 
     for piv in target_pivots:
         sweep_leads = build_forensic_sweep_leads(profile, piv)
@@ -369,7 +372,7 @@ def run_forensic_sweep(req: RunForensicSweepRequest) -> dict:
     return {
         "ok": True,
         "new_leads_count": len(generated_leads),
-        "leads": [l.model_dump() for l in profile.auxiliary_leads],
+        "leads": [lead.model_dump() for lead in profile.auxiliary_leads],
     }
 
 

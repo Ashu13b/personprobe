@@ -9,7 +9,7 @@ import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 
 FORENSIC_QUERIES = [
     {
@@ -82,10 +82,10 @@ def main():
 
             # Filter external non-google links
             found_links = []
-            for l in links:
-                raw_href = l.get("href", "")
+            for lk in links:
+                raw_href = lk.get("href", "")
                 url = clean_google_url(raw_href)
-                title = l.get("text", "").strip()
+                title = lk.get("text", "").strip()
                 if url.startswith("http") and not any(
                     x in url
                     for x in [

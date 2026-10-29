@@ -33,6 +33,11 @@ There is no database. `sessions/*.json` stores a `PersonProfile`, Wikimedia
 status, and save timestamp. In-memory session dictionaries mirror loaded work.
 
 ## Decisions & rejected approaches
+- `openscrape_client` (imported by the phone-bridge scripts in `scripts/`) is
+  sys.path-injected from `../android-browser`, not a packaged dependency. Pyright
+  cannot resolve it, so each import carries an inline
+  `# pyright: ignore[reportMissingImports]`. Do not "fix" this with a pyright
+  `extraPaths` entry or a manifest addition — the path is host-specific.
 - Identity resolution must not depend on Wikipedia or Wikidata. General web,
   academic, institutional, and researcher-ID sources provide optional identity
   clues; the human-entered subject remains a valid starting point.
@@ -916,14 +921,22 @@ status, and save timestamp. In-memory session dictionaries mirror loaded work.
 - **Strict Two-Pipeline Architecture**:
   1. *Pipeline 1 (Exhaustive Biographical Discovery & Offline Dossier)*: Captures the total civil, familial, residential, educational, career, and post-retirement reality of the subject. Uncensored and unredacted: includes ancestral roots, immediate family ties, domestic addresses, and post-superannuation roles. Never filtered for Wikipedia notability or WP:BLP.
   2. *Pipeline 2 (Wikipedia AfC & Encyclopedic Drafting)*: A downstream consumer of discoveries. Selects only notable, encyclopedic, verified claims. Strictly filters for WP:BLP (censoring private residential plots, phone numbers, and non-notable family names), neutral encyclopedic tone (WP:NPOV, eliminating peacock praise), and standard layout (WP:MOS).
-- **Intelligent Being Drafting Layer (`adapters/wiki/intelligent_draft.py`)**:
-  - Mechanical code generation that glues fragmented claim snippets produces rigid, unnatural prose and triggers attribution warnings.
-  - The AI agent acts as the Intelligent Synthesis Provider: it composes fluid, articulate, encyclopedic sections (Lead, Early life and education, Career and research, Buffalo cloning milestones, Post-retirement leadership, Awards, Publications) while maintaining 100% sentence-to-citation grounding.
+- **Intelligent Being Drafting Layer (`adapters/wiki/intelligent_draft.py`) — REJECTED and DELETED (Oct 2026)**:
+  - The stated goal was fluid, articulate encyclopedic synthesis. What actually shipped in `render_intelligent_draft` hardcoded one subject's biography (Prem Singh Yadav: `born 10 April 1963`, Nimoth, CCS HAU, *Hisar Gaurav* cloning, Limca record, RPS College Balana) as literal wikitext, reading the session's claims only to pick a citation to staple beside the pre-written sentences.
+  - Consequences: `/draft` (`backend/routes_draft.py`) emitted Yadav's biography under *any* subject's name, attaching that subject's own citations to Yadav's facts — the worst failure mode for a BLP tool. Even for Yadav it bypassed the approved-claims gate. This violates the core invariant (deterministic, server-owned, approved-claims-only, no fabricated prose) — the same reason the LLM `wiki/wikitext.py` path was retired.
+  - `/draft` now uses only `adapters/wiki/draft.py` `render_draft`. Do NOT reintroduce an "intelligent synthesis" renderer that emits prose not derived from the session's draft-approved claims. If fluid synthesis is wanted later, it must render strictly from those claims, with zero subject facts baked into code.
 - **Standalone Wiki Draft & Integrity Checker (`wiki_draft_checker.py`)**:
   - Standalone verification module completely decoupled from internal session objects so it can audit wikitext from ANY source (PersonProbe sessions, outside tools, or human authors).
   - CLI: `python3 wiki_draft_checker.py <path> [--json] [--no-live-links]`.
   - Backend API: `POST /api/draft/checker` accepting arbitrary wikitext or profile name.
   - Frontend UI: Standalone "Draft Checker" tab inside `DraftAndOutputs.tsx`.
+  - **SSRF guard (do not remove for "standalone" purity)**: `_verify_live_links`
+    fetches citation URLs server-side from unauthenticated, arbitrary-wikitext
+    input, so it imports `engine.fetcher.is_safe_public_url` and refuses any URL
+    (and any redirect hop, via `_SafeRedirectHandler`) that resolves to a
+    private/loopback/cloud-metadata address. "Standalone" here means decoupled
+    from session *objects*, not from this pure URL-safety util — stripping the
+    import reopens an SSRF against internal services and the metadata endpoint.
   - **Critical False-Positive Guards**:
     1. *Bibliographic ISBN protection*: Masking `|isbn=...`, `|issn=...`, and citation URLs prevents Indian 10-digit mobile phone regexes from false-flagging book ISBNs (e.g. `8189304801`).
     2. *Abbreviation shielding*: Replaces periods in `Dr.`, `Ph.D.`, `B.Sc.`, `P.S.`, `eds.`, etc., with temporary tokens during sentence segmentation, preventing bibliographies and initials from fragmenting into false ungrounded clauses.

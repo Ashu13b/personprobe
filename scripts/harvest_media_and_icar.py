@@ -8,7 +8,7 @@ import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
@@ -63,9 +63,9 @@ def main():
             links = dom.get("content", {}).get("links", [])
             print(f"  Links returned: {len(links)}")
 
-            for l in links:
-                href = l.get("href", "")
-                text = l.get("text", "").strip()
+            for lk in links:
+                href = lk.get("href", "")
+                text = lk.get("text", "").strip()
                 if "uddg=" in href:
                     parsed = urllib.parse.parse_qs(urllib.parse.urlparse(href).query)
                     target = parsed.get("uddg", [""])[0]

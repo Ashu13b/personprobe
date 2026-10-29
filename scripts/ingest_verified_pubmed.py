@@ -49,8 +49,10 @@ def fetch_pubmed_details(pmids: list[str]) -> list[dict]:
 
     results = []
     for article in root.findall(".//PubmedArticle"):
-        pmid = article.find(".//MedlineCitation/PMID").text
-        title = (article.find(".//ArticleTitle").text or "").strip()
+        pmid_el = article.find(".//MedlineCitation/PMID")
+        pmid = pmid_el.text if pmid_el is not None else ""
+        title_el = article.find(".//ArticleTitle")
+        title = ((title_el.text if title_el is not None else "") or "").strip()
 
         # Abstract
         abstract_parts = []

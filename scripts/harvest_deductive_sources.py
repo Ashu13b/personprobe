@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
 sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 from scripts.deduplicate_session import canonical_url
 
 SESSION_ID = "py-prem-singh-yadav-569e5aea"

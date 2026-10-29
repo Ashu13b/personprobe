@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-25 20:09 UTC · sha ca7db32 · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-29 10:29 UTC · sha b7f793c · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 116 files · 1007 symbols
+- Python — 115 files · 1009 symbols
 - TypeScript — 35 files · 293 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 156 files · 1303 symbols across 6 languages._
+_Total: 155 files · 1305 symbols across 6 languages._
 
 
 ## Compartments
@@ -24,14 +24,13 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### ./
 - `browser_home.html` — #status, #open-desktop
 - `browser_server.py` — PROFILE_DIR, XVFB_DISPLAY, PORT, _UA, def looks_like_wall, class _Cmd, _q, _headed, _running, _xvfb, … +29 more
-- `wiki_draft_checker.py` — class CheckFinding, class LinkAuditResult, class SentenceGroundingResult, class DraftCheckerReport, PEACOCK_TERMS, PRIVACY_PATTERNS, DIRTY_TITLE_PATTERNS, ISO_DATE_PATTERN, ABBREVIATIONS, class WikiDraftChecker(__init__, check, _check_structure, _check_links_and_citations, _verify_live_links, _split_into_sentences, _check_sentence_grounding, _check_privacy_and_blp, _check_tone_and_npov), … +2 more
+- `wiki_draft_checker.py` — class _UnsafeRedirect, class _SafeRedirectHandler(redirect_request), class CheckFinding, class LinkAuditResult, class SentenceGroundingResult, class DraftCheckerReport, PEACOCK_TERMS, PRIVACY_PATTERNS, DIRTY_TITLE_PATTERNS, ISO_DATE_PATTERN, … +4 more
 ### adapters/
 - `adapters/wiki/article_compare.py` — WIKI_API, HEADERS, STOPWORDS, _COVERAGE_THRESHOLD, class ClaimCoverage, class ArticleProposal, def title_from_url, def fetch_article_text, def _tokens, def claim_coverage, … +1 more
 - `adapters/wiki/draft.py` — class DraftIssue, class DraftEvidence, class DraftAudit, _NOISE_PATTERNS, _ROLE_WORDS, _CAREER_ACTIVITY_WORDS, _INSTITUTION_WORDS, _PUBLICATION_WORDS, _BIRTH_SUBJECT_NOISE, _RESEARCH_ACTIONS, … +25 more
 - `adapters/wiki/draft_hi.py` — def _hindi_infobox, def _render_hindi_items, def render_hindi_draft
 - `adapters/wiki/draft_qa.py` — Severity, class Finding, class QaReport(passed, counts), _WEAK_RELIABILITIES, _LEAD_END, _ATTRIBUTION, _REF_SNIPPET, _CITE_URL, _CITE_TITLE, _CITE_DATE, … +9 more
 - `adapters/wiki/draft_verifier.py` — class DraftLink, _REF_OPEN, _REF_CLOSE, _CITE_FIELD, _EXTERNAL_LINK, def extract_draft_links, def check_draft_links, def _check_links_via_requests, def render_preview, class DraftWikilink, … +4 more
-- `adapters/wiki/intelligent_draft.py` — def render_intelligent_draft
 - `adapters/wiki/wiki_check.py` — HEADERS, WIKI_API, class WikiStatus, def draft_generation_allowed, def check_title_for, def check_existing_page, def _page_exists, def _deletion_note
 ### backend/
 - `backend/main.py` — api_app, def lifespan, app, FRONTEND_DIST
@@ -167,4 +166,4 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 ### Collapsed Directories (Fractal Router)
 - 📁 `tests/` — 11 file(s) (test_domain_trust_classification, test_source_provenance_classification, test_academic_indexes_never_count_as_independent_news, test_search_discovery_does_not_make_unknown_site_independent…) · `ck show tests/` lists them
 
-_Router mode: 135 of 146 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._
+_Router mode: 134 of 145 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._

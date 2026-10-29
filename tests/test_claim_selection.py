@@ -1,5 +1,7 @@
 """Claim clustering + best-source ranking for draft selection."""
 
+from typing import Literal
+
 from engine.claim_selection import (
     build_claim_clusters,
     rank_sources_for_fact,
@@ -11,7 +13,7 @@ from engine.models import Claim, PersonProfile, Source, SourceReliability
 def _src(
     url,
     cat="independent_secondary",
-    depth="unassessed",
+    depth: Literal["unassessed", "passing_mention", "significant"] = "unassessed",
     verified=False,
     alive=True,
     trust="high",

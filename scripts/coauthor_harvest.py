@@ -13,7 +13,7 @@ import sys
 import time
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-from openscrape_client import MobileBrowserClient  # noqa: E402
+from openscrape_client import MobileBrowserClient  # noqa: E402  # pyright: ignore[reportMissingImports]
 
 import requests  # noqa: E402
 
@@ -30,14 +30,12 @@ def harvest_coauthors(session_id: str, coauthor_names: list[str]) -> dict:
     model = PersonProfile.model_validate(prof)
     c = MobileBrowserClient()
     added = dropped = 0
-    out_text = []
     for nm in coauthor_names[:40]:
         q = "https://vidwan.inflibnet.ac.in/profiles?q=" + nm.replace(" ", "+")
         try:
             c.navigate(q, wait_seconds=12)
             time.sleep(5)
             r = c.scrape(q, wait_seconds=18)
-            tst = (r.get("content") or {}).get("text", "")
         except Exception as e:
             print("  !", nm, str(e)[:40], flush=True)
             continue
@@ -49,7 +47,6 @@ def harvest_coauthors(session_id: str, coauthor_names: list[str]) -> dict:
         if not links:
             continue
         # take first matching link (name resolved)
-        target = links[0]["href"]
         try:
             c.navigate(
                 f"https://vidwan.inflibnet.ac.in{links[0]['href']}", wait_seconds=12
@@ -59,7 +56,6 @@ def harvest_coauthors(session_id: str, coauthor_names: list[str]) -> dict:
         try:
             time.sleep(5)
             pr = c.scrape(links[0]["href"], wait_seconds=20)
-            body = pr.get("content") or {}
             got = coauthor_source_batch(
                 model, [(links[0]["href"], (pr.get("content") or {}).get("text", ""))]
             )
@@ -100,5 +96,5 @@ if __name__ == "__main__":
         "Ranjan Banerji",
         "B S Dixit",
     ]
-    res = coauthor_harvest(sid, names)
+    res = harvest_coauthors(sid, names)
     print(res)

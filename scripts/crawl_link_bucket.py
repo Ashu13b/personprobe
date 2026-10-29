@@ -23,7 +23,7 @@ from pathlib import Path
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
 sys.path.insert(0, "/home/ubuntu/Expeei/personprobe")
 
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 
 API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
@@ -214,7 +214,7 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
                 if verify_dr_yadav(text, title):
                     print("  --> VERIFIED DR. YADAV WORK! Ingesting into session...")
                     try:
-                        r = api_post(
+                        api_post(
                             "/research/add-source-paste",
                             {
                                 "profile_name": SESSION_ID,
@@ -233,8 +233,8 @@ def crawl(max_pages: int = 20, wait_seconds: int = 10):
                     print("  [SKIP] Not confirmed as Dr. Prem Singh Yadav work")
 
             # Extract outbound links for the queue
-            for l in links:
-                href = l.get("href", "")
+            for lk in links:
+                href = lk.get("href", "")
                 if not href or not href.startswith("http"):
                     continue
                 clean_href = href.split("?")[0].rstrip("/")

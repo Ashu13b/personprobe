@@ -25,10 +25,31 @@ import argparse
 import json
 import re
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 import concurrent.futures
 from dataclasses import dataclass, field, asdict
+
+from engine.fetcher import is_safe_public_url
+
+
+# -----------------------------------------------------------------------------
+# SSRF guard for live-link verification
+# -----------------------------------------------------------------------------
+
+
+class _UnsafeRedirect(Exception):
+    """A redirect target resolved to a private/loopback/cloud-metadata address."""
+
+
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Block redirects to unsafe hosts before the hop is followed (SSRF defence)."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not is_safe_public_url(newurl):
+            raise _UnsafeRedirect(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 # -----------------------------------------------------------------------------
@@ -540,17 +561,29 @@ class WikiDraftChecker:
         def probe(audit: LinkAuditResult) -> None:
             if audit.status == "malformed":
                 return
+            if not is_safe_public_url(audit.url):
+                audit.status = "blocked_unsafe"
+                audit.error_message = (
+                    "URL resolves to a private/loopback/cloud-metadata address"
+                )
+                return
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
             req = urllib.request.Request(audit.url, headers=headers)
+            opener = urllib.request.build_opener(_SafeRedirectHandler())
             try:
-                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                with opener.open(req, timeout=self.timeout) as resp:
                     audit.status_code = resp.status
                     if resp.status in (200, 201, 206, 301, 302):
                         audit.status = "valid"
                     else:
                         audit.status = "unexpected_status"
+            except _UnsafeRedirect:
+                audit.status = "blocked_unsafe"
+                audit.error_message = (
+                    "Redirect to a private/loopback/cloud-metadata address blocked"
+                )
             except urllib.error.HTTPError as e:
                 audit.status_code = e.code
                 if e.code == 404:
@@ -593,6 +626,17 @@ class WikiDraftChecker:
                         message=f"Source server error: '{audit.url}' returned {audit.error_message}.",
                         context=audit.url,
                         suggestion="Verify server availability or replace with an archived mirror.",
+                    )
+                )
+            elif audit.status == "blocked_unsafe":
+                findings.append(
+                    CheckFinding(
+                        category="links",
+                        severity="ERROR",
+                        rule_id="unsafe_citation_url",
+                        message=f"Unsafe citation URL not fetched: '{audit.url}' ({audit.error_message}).",
+                        context=audit.url,
+                        suggestion="Citations must point to public web sources, not internal or private addresses.",
                     )
                 )
 

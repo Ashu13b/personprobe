@@ -1,5 +1,7 @@
 """Tests for the Forensic Investigation Engine: Pivots, Auxiliary Leads, and Sweeps."""
 
+from fastapi.testclient import TestClient
+
 from engine.models import PersonProfile, InvestigationPivot, AuxiliaryLead
 from engine.forensics import (
     seed_default_pivots,
@@ -7,6 +9,7 @@ from engine.forensics import (
     generate_deductive_inquiries,
 )
 from backend import store
+from backend.main import api_app
 
 
 def test_seed_default_pivots_from_profile():
@@ -46,10 +49,6 @@ def test_generate_forensic_queries():
 
     shodhganga_q = next(q for q in queries if q["category"] == "thesis_dissertation")
     assert "shodhganga.inflibnet.ac.in" in shodhganga_q["query"]
-
-
-from fastapi.testclient import TestClient
-from backend.main import api_app
 
 
 def test_forensic_routes():

@@ -18,7 +18,7 @@ import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 from scripts.deduplicate_session import canonical_url
 
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
@@ -118,9 +118,9 @@ def main():
             links = dom.get("content", {}).get("links", [])
             print(f"  Links returned: {len(links)}")
 
-            for l in links:
-                href = l.get("href", "")
-                text = l.get("text", "").strip()
+            for lk in links:
+                href = lk.get("href", "")
+                text = lk.get("text", "").strip()
                 if not href.startswith("http"):
                     continue
                 if any(
@@ -183,8 +183,8 @@ def main():
 
             if has_name and has_rel:
                 # Find the sentence/snippet where his name appears
-                lines = [l.strip() for l in page_text.split("\n") if l.strip()]
-                name_snippets = [l for l in lines if name_matches(l)]
+                lines = [ln.strip() for ln in page_text.split("\n") if ln.strip()]
+                name_snippets = [ln for ln in lines if name_matches(ln)]
                 snippet = (
                     " ... ".join(name_snippets[:3]) if name_snippets else page_title
                 )

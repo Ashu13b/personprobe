@@ -52,7 +52,7 @@ def page_text(url: str) -> str:
             if ("pdf" in ctype or url.lower().endswith(".pdf")) and fitz is not None:
                 data = r.content[:12_000_000]
                 doc = fitz.open(stream=data, filetype="pdf")
-                return "\n\n".join(p.get_text() for p in doc)[:600_000]
+                return "\n\n".join(str(p.get_text()) for p in doc)[:600_000]
             if "pdf" not in ctype and not url.lower().endswith(".pdf"):
                 import re as _re
 
@@ -97,7 +97,10 @@ def cmd_main() -> None:
 
     by_source: dict[str, list[int]] = {}
     for i in indices:
-        by_source.setdefault(profile.claims[i].source_url, []).append(i)
+        src = profile.claims[i].source_url
+        if not src:
+            continue
+        by_source.setdefault(src, []).append(i)
 
     items, fetched = [], 0
     for url, idxs in list(by_source.items())[:max_sources]:

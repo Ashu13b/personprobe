@@ -268,7 +268,6 @@ def assess_namesake_risk(
             rf"\b([A-Za-z]+)\s+{re.escape(subject_name.split()[-1])}\b", content, re.I
         )
         for first in spelled_out:
-            first_low = first.lower()
             # same-surname sibling only if the preceding token is a given name
             # that is not part of the subject's own name (e.g. "Singh Yadav")
             if first.lower() not in subject_tokens and len(first) > 2:

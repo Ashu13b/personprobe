@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 
 API_BASE = "http://127.0.0.1:3890/api"
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
@@ -81,7 +81,7 @@ def main():
             )
 
             try:
-                r = api_post(
+                api_post(
                     "/research/add-source-paste",
                     {
                         "profile_name": SESSION_ID,

@@ -1,5 +1,6 @@
 """Tests for the Name Verification and Disambiguation Gate."""
 
+from engine.models import KnownNamesake
 from engine.name_verifier import generate_name_variants, verify_name_in_content
 
 
@@ -25,7 +26,7 @@ def test_verify_name_in_content_exact_and_initials():
     text = "The breakthrough buffalo research was supervised by Dr. P. S. Yadav at the research institute."
     res = verify_name_in_content("Prem Singh Yadav", text, affiliation="CIRB")
     assert res.matched is True
-    assert "P. S. Yadav" in res.variant
+    assert res.variant and "P. S. Yadav" in res.variant
     assert "breakthrough buffalo research" in res.snippet
 
 
@@ -35,7 +36,7 @@ def test_verify_name_in_content_devanagari():
         "Prem Singh Yadav", text, affiliation="CIRB", nationality="Indian"
     )
     assert res.matched is True
-    assert "प्रेम सिंह यादव" in res.variant
+    assert res.variant and "प्रेम सिंह यादव" in res.variant
 
 
 def test_verify_name_no_match():
@@ -129,14 +130,11 @@ def test_coauthor_profile_network_screen():
     assert s.name_hit_variant
 
     # unrelated namesake page must be dropped by the session gate
-    class NS:
-        display_name = "Other Yadav"
-        signature_terms = ["Bharadwaj"]
-
-    nsnap = []
-    ns = type(
-        "NS", (), {"display_name": "Other Yadav", "signature_terms": ["Bharadwaj"]}
-    )()
+    ns = KnownNamesake(
+        namesake_id="ns-other",
+        display_name="Other Yadav",
+        signature_terms=["Bharadwaj"],
+    )
     profile.known_namesakes = [ns]
     got2 = coauthor_source_batch(
         profile,

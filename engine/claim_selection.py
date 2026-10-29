@@ -91,16 +91,12 @@ def build_claim_clusters(profile: PersonProfile) -> list[dict]:
     sources_by_url = {s.url: s for s in profile.sources}
     out: list[dict] = []
     for cluster in cluster_claims(profile.claims):
-        canonical = (
-            profile.claims[cluster.claim_indices[0]] if cluster.claim_indices else None
-        )
         # cluster_claims picks the longest text as canonical; find its index
         canon_idx = (
             max(cluster.claim_indices, key=lambda i: len(profile.claims[i].text))
             if cluster.claim_indices
             else None
         )
-        canon_claim = profile.claims[canon_idx] if canon_idx is not None else None
         ranked = rank_sources_for_fact(cluster.corroborating_sources, sources_by_url)
         approved = [
             i for i in cluster.claim_indices if profile.claims[i].draft_approved

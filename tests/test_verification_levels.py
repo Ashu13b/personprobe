@@ -45,7 +45,7 @@ def test_verification_log_entry_models():
     assert entry1.level == "liveness"
 
     # Log L2 Identity by Human
-    entry2 = log_source_verification(
+    log_source_verification(
         source,
         level="identity",
         actor="human",

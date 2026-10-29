@@ -11,7 +11,7 @@ from engine import fetch_telemetry as ft  # noqa: E402
 
 rows = []
 if ft.LOG_PATH.exists():
-    rows = [json.loads(l) for l in ft.LOG_PATH.read_text().splitlines() if l.strip()]
+    rows = [json.loads(ln) for ln in ft.LOG_PATH.read_text().splitlines() if ln.strip()]
 
 print(f"telemetry rows : {len(rows)}")
 lat = [r["latency_ms"] for r in rows if r.get("latency_ms")]

@@ -8,7 +8,7 @@ import urllib.parse
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/Expeei/android-browser")
-from openscrape_client import MobileBrowserClient
+from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 
 SESSION_ID = "py-prem-singh-yadav-569e5aea"
 SESSION_FILE = Path(f"/home/ubuntu/Expeei/personprobe/sessions/{SESSION_ID}.json")
@@ -80,7 +80,6 @@ def main():
             time.sleep(2)
             dom = client.extract_dom(include_text=True, include_links=True)
             links = dom.get("content", {}).get("links", [])
-            body_text = dom.get("content", {}).get("text", "")
 
             # Filter relevant result links
             candidate_links = []
@@ -119,9 +118,9 @@ def main():
     for inq_id, links in discovered_by_inquiry.items():
         if inq_id in inq_map and links:
             existing_links = inq_map[inq_id].get("corroborating_links", [])
-            for l in links:
-                if l not in existing_links:
-                    existing_links.append(l)
+            for lk in links:
+                if lk not in existing_links:
+                    existing_links.append(lk)
             inq_map[inq_id]["corroborating_links"] = existing_links[:5]
             if len(existing_links) > 0 and inq_map[inq_id]["status"] == "probed":
                 inq_map[inq_id]["status"] = "confirmed"

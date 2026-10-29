@@ -103,6 +103,19 @@ def test_isbn_not_falsely_flagged_as_phone():
     assert len(blp_violations) == 0
 
 
+def test_live_link_check_blocks_ssrf_to_metadata_endpoint():
+    # A citation pointing at the cloud-metadata / internal address must be
+    # refused outright, never fetched, even with live-link checking enabled.
+    draft = VALID_DRAFT + (
+        '\n<ref name="ssrf">{{cite web|url=http://169.254.169.254/latest/meta-data/'
+        "|title=internal|website=x}}</ref>"
+    )
+    report = check_wiki_draft(draft, check_live_links=True, timeout=2)
+    unsafe = [a for a in report.link_audits if a.status == "blocked_unsafe"]
+    assert any("169.254.169.254" in a.url for a in unsafe)
+    assert "unsafe_citation_url" in {f.rule_id for f in report.findings}
+
+
 def test_api_checker_endpoint():
     from fastapi.testclient import TestClient
     from backend.main import app

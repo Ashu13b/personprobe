@@ -36,7 +36,7 @@ def api_post(path: str, payload: dict, timeout: int = 120) -> dict:
 
 
 def client():
-    from openscrape_client import MobileBrowserClient
+    from openscrape_client import MobileBrowserClient  # pyright: ignore[reportMissingImports]
 
     return MobileBrowserClient()
 
@@ -114,6 +114,7 @@ def cmd_session() -> None:
     from collections import Counter
 
     data = _load_session_file(SESSIONS_DIR / f"{session_id()}.json")
+    assert data is not None
     p = PersonProfile(**data["profile"])
     print(
         "sources:",
@@ -132,6 +133,7 @@ def cmd_cleanup() -> None:
     from collections import Counter
 
     data = _load_session_file(SESSIONS_DIR / f"{session_id()}.json")
+    assert data is not None
     p = PersonProfile(**data["profile"])
     for s in p.sources:
         if (

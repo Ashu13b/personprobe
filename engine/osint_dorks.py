@@ -34,10 +34,8 @@ def generate_osint_dorks(profile: PersonProfile) -> list[OsintDork]:
     initials_dotted = (
         f"{name_parts[0][0]}.{name_parts[-1]}" if len(name_parts) > 1 else name
     )
-    surname = name_parts[-1] if name_parts else ""
 
     inst = (profile.affiliation or "CIRB").strip()
-    loc = "Hisar" if "hisar" in (profile.affiliation or "").lower() else "Haryana"
 
     dorks: list[OsintDork] = []
 

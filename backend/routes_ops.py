@@ -26,9 +26,7 @@ def get_fetch_telemetry(limit: int = 200) -> dict:
         except Exception:
             rows = []
 
-    latencies = [
-        r.get("latency_ms") for r in rows if isinstance(r.get("latency_ms"), int)
-    ]
+    latencies = [v for r in rows if isinstance((v := r.get("latency_ms")), int)]
     throttled = [r for r in rows if r.get("throttled")]
     by_transport: dict[str, dict] = {}
     for r in rows:

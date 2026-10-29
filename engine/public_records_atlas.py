@@ -718,9 +718,6 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
     is_maharashtra = any(
         k in all_context for k in ["maharashtra", "mumbai", "pune", "nagpur", "cife"]
     )
-    is_punjab = any(
-        k in all_context for k in ["punjab", "ludhiana", "pau", "gadvasu", "chandigarh"]
-    )
 
     has_hisar = "hisar" in all_context or "cirb" in all_context or "hau" in all_context
     has_rewari = "rewari" in all_context or "nimoth" in all_context

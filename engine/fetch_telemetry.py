@@ -74,7 +74,7 @@ class _Timer:
     def __init__(self, transport: str, url: str):
         self.transport = transport
         self.url = url
-        self.status = None
+        self.status: int | str | None = None
         self.throttled = False
         self.note = ""
         self._t0 = 0.0

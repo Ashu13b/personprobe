@@ -93,10 +93,6 @@
   `DraftPage.tsx` prepends submission template for direct Wikipedia submission.
 - Complete documentation & quality conventions: `README.md` authoring, house style
   conventions in `.context-kit/conventions`, and test suite purposing.
-- Intelligent Being Wikipedia Draft Engine (`adapters/wiki/intelligent_draft.py`):
-  Server-owned intelligent draft synthesis that arranges verified facts into coherent,
-  fluid encyclopedic prose adhering strictly to WP:MOS, WP:BLP, WP:PROF, and WP:NPOV,
-  with 100% inline footnote citations on every prose sentence.
 - Standalone Deterministic & Intelligence Wiki Draft Checker (`wiki_draft_checker.py`):
   Independent CLI and library to audit wikitext from any external tool, process, or author
   for empty links, dead links (concurrent HTTP probe), ungrounded sentences, link-text

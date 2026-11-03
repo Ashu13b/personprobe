@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-10-29 11:25 UTC · sha 07ae07d · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-11-03 16:08 UTC · sha a4a0fda · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 115 files · 1014 symbols
+- Python — 116 files · 1024 symbols
 - TypeScript — 35 files · 293 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 155 files · 1310 symbols across 6 languages._
+_Total: 156 files · 1320 symbols across 6 languages._
 
 
 ## Compartments
@@ -58,7 +58,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `engine/fetch_telemetry.py` — LOG_PATH, DEFAULT_DELAY_S, THROTTLE_DELAY_S, _THROTTLE_WINDOW_S, MAX_HOST_ATTEMPTS, def _host, def record, def timed, class _Timer(__init__, __enter__, __exit__), def recent_throttles, … +8 more
 - `engine/fetcher.py` — HEADERS, BOT_HEADERS, TIMEOUT, MAX_FETCH_BYTES, BOT_WALL_RE, def is_safe_public_url, def check_liveness, def get_wayback_url, class FetchResult(__init__), _BROWSER_BASES, … +9 more
 - `engine/fetcher_browser.py` — _SESSION_DIR, _LAUNCH_ARGS, _STEALTH_JS, _UA, def fetch_with_browser
-- `engine/forensics.py` — def generate_pivot_id, def generate_lead_id, def generate_inquiry_id, def seed_default_pivots, def generate_forensic_queries_for_pivot, def check_subject_mention, def build_forensic_sweep_leads, def _enrich_inquiry_dual_track, def generate_deductive_inquiries
+- `engine/forensics.py` — class LifeEvent, class SubjectContext, def get_valid_indian_states, def _extract_field_keywords, def build_subject_context, def generate_pivot_id, def generate_lead_id, def generate_inquiry_id, def seed_default_pivots, def generate_forensic_queries_for_pivot, … +4 more
 - `engine/identifier.py` — HEADERS, WIKI_API, WIKIDATA_API, def fetch_wikidata_photo_by_id, def find_candidates, _HONORIFICS, def _significant_tokens, def _name_matches, def _search_wikipedia, def _search_wikidata, … +5 more
 - `engine/lifecycle_audit.py` — class StageAuditItem, class FullLifecycleAudit, def _host, def audit_discovery_stage, def audit_provenance_stage, def audit_claims_stage, def audit_draft_stage, def audit_full_lifecycle
 - `engine/link_extractor.py` — _PROFILE_DOMAINS, _PROFILE_PATH_FRAGMENTS, def extract_profile_links
@@ -164,6 +164,6 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls, def test_network_guard_rejects_untrusted_client_addresses
 
 ### Collapsed Directories (Fractal Router)
-- 📁 `tests/` — 11 file(s) (test_domain_trust_classification, test_source_provenance_classification, test_academic_indexes_never_count_as_independent_news, test_search_discovery_does_not_make_unknown_site_independent…) · `ck show tests/` lists them
+- 📁 `tests/` — 12 file(s) (test_domain_trust_classification, test_source_provenance_classification, test_academic_indexes_never_count_as_independent_news, test_search_discovery_does_not_make_unknown_site_independent…) · `ck show tests/` lists them
 
-_Router mode: 134 of 145 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._
+_Router mode: 134 of 146 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._

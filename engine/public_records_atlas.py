@@ -312,7 +312,7 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         digitization_status="retrospectively_scanned_partial",
         portal_url="https://krishikosh.egranth.ac.in",
         search_query_template='site:krishikosh.egranth.ac.in "{name}" OR "Major Advisor" OR "Director Nominee"',
-        offline_repository_name="University Central Library Historical Theses Archive (e.g. CCSHAU Nehru Library / LUVAS Library)",
+        offline_repository_name="University Central Library Historical Theses Archive",
         offline_custodian="University Librarian & Dean, Postgraduate Studies",
         offline_retrieval_method="Physical reading room access request in Thesis Section (Stack Room II) with Call/Accession Number; or RTI to University SPIO for examination committee sign-off certificate.",
         required_identifiers=[
@@ -483,10 +483,10 @@ BUILTIN_REPOSITORIES: list[PublicRecordRepository] = [
         offline_cutoff_year=2016,
         digitization_status="digitized_id_required",
         portal_url="https://cpao.nic.in",
-        search_query_template='site:cpao.nic.in "{name}" "ICAR"',
-        offline_repository_name="CPAO Archives, Trikoot-II, Bhikaji Cama Place, New Delhi & ICAR Establishment Pension Cell",
-        offline_custodian="Chief Controller of Pensions (CPAO) & Drawing & Disbursing Officer (DDO), ICAR-CIRB",
-        offline_retrieval_method="RTI Act 2005 Sec 6(1) to CPIO CPAO or CPIO ICAR HQ for Pension Payment Order (PPO) number, qualifying service computation, and superannuation gratuity schedule.",
+        search_query_template='site:cpao.nic.in "{name}"',
+        offline_repository_name="CPAO Archives, Trikoot-II, Bhikaji Cama Place, New Delhi & Cadre Pension Cell",
+        offline_custodian="Chief Controller of Pensions (CPAO) & Drawing & Disbursing Officer (DDO)",
+        offline_retrieval_method="RTI Act 2005 Sec 6(1) to CPIO CPAO or CPIO Cadre HQ for Pension Payment Order (PPO) number, qualifying service computation, and superannuation gratuity schedule.",
         required_identifiers=[
             "Pension Payment Order (PPO) No.",
             "PAN / Date of Retirement",
@@ -659,6 +659,9 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
     Determines which public records are digitally reachable online vs. which fall
     before the historical digitization horizon and must be flagged as offline physical archives.
     """
+    from engine.forensics import build_subject_context
+    context = build_subject_context(profile)
+
     # Extract subject timeline hints
     birth_year: Optional[int] = None
     if profile.birth_date:
@@ -667,61 +670,6 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
                 birth_year = int(token)
                 break
 
-    # Check geographical and institutional context
-    all_context = " ".join(
-        filter(
-            None,
-            [
-                profile.name,
-                profile.birth_place,
-                profile.affiliation,
-                profile.field,
-                profile.full_name,
-            ]
-            + [c.text for c in profile.claims if c.text],
-        )
-    ).lower()
-
-    # Detect active jurisdictions
-    is_haryana = any(
-        k in all_context
-        for k in [
-            "haryana",
-            "hisar",
-            "rewari",
-            "bhiwani",
-            "karnal",
-            "rohtak",
-            "hau",
-            "luvas",
-            "cirb",
-        ]
-    )
-    is_up = any(
-        k in all_context
-        for k in [
-            "uttar pradesh",
-            "lucknow",
-            "kanpur",
-            "varanasi",
-            "meerut",
-            "agra",
-            "ivri",
-            "bareilly",
-            "mathura",
-        ]
-    )
-    is_delhi = any(
-        k in all_context
-        for k in ["delhi", "new delhi", "pusa", "iari", "icar hq", "krishi bhavan"]
-    )
-    is_maharashtra = any(
-        k in all_context for k in ["maharashtra", "mumbai", "pune", "nagpur", "cife"]
-    )
-
-    has_hisar = "hisar" in all_context or "cirb" in all_context or "hau" in all_context
-    has_rewari = "rewari" in all_context or "nimoth" in all_context
-
     online_reachable: list[dict] = []
     offline_archives: list[dict] = []
     id_required_portals: list[dict] = []
@@ -729,21 +677,33 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
     active_atlas = get_public_records_atlas()
 
     for repo in active_atlas:
-        # Check geographical relevance
-        if repo.state == "Haryana" and not is_haryana:
-            continue
-        if repo.state == "Uttar Pradesh" and not is_up:
-            continue
-        if repo.state == "Delhi / NCR" and not is_delhi:
-            continue
-        if repo.state == "Maharashtra" and not is_maharashtra:
-            continue
-        if (
-            repo.district_or_city
-            and "Hisar" in repo.district_or_city
-            and not (has_hisar or is_haryana)
-        ):
-            continue
+        # Check non-Indian subjects
+        if not context.is_indian:
+            if repo.jurisdiction_level in ("state", "district") or (repo.state and (repo.state.startswith("Central") or repo.state.startswith("National"))):
+                continue
+
+        # Check state & district relevance
+        if repo.jurisdiction_level in ("state", "district"):
+            if not context.state:
+                # Fall back to national repositories only if state unknown
+                continue
+            st_matches = False
+            if repo.state and context.state:
+                if (
+                    repo.state.lower() == context.state.lower()
+                    or repo.state.lower() in context.state.lower()
+                    or context.state.lower() in repo.state.lower()
+                ):
+                    st_matches = True
+            if not st_matches:
+                continue
+
+            if repo.district_or_city:
+                target_geo = f"{context.district} {context.city}".strip().lower()
+                if target_geo:
+                    repo_cities = [c.strip().lower() for c in repo.district_or_city.split("/")]
+                    if not any(rc in target_geo or target_geo in rc for rc in repo_cities):
+                        continue
 
         repo_dict = repo.model_dump()
         template = repo.search_query_template or ""
@@ -751,18 +711,18 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             template.replace("{name}", profile.name)
             .replace(
                 "{district}",
-                "Hisar" if has_hisar else ("Rewari" if has_rewari else "Haryana"),
+                context.district or context.city or context.state or "",
             )
             .replace(
-                "{city}", "Hisar" if has_hisar else ("Rewari" if has_rewari else "")
+                "{city}", context.city or context.district or ""
             )
-            .replace("{village}", "Nimoth" if has_rewari else "")
-            .replace("{institution}", profile.affiliation or "ICAR")
+            .replace("{village}", context.village or "")
+            .replace("{institution}", context.primary_institution or profile.affiliation or "")
             .replace(
                 "{state}",
-                "Haryana" if is_haryana else ("Uttar Pradesh" if is_up else "India"),
+                context.state or ("India" if context.is_indian else ""),
             )
-            .replace("{address}", profile.birth_place or "Hisar")
+            .replace("{address}", context.address or context.village or context.city or context.district or "")
         )
 
         # Categorize into digital vs offline vs id-gated
@@ -792,27 +752,14 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             )
             offline_archives.append(repo_dict_pre)
 
-    primary_state = (
-        "Haryana"
-        if is_haryana
-        else (
-            "Uttar Pradesh"
-            if is_up
-            else (
-                "Delhi / NCR"
-                if is_delhi
-                else ("Maharashtra" if is_maharashtra else "National")
-            )
-        )
-    )
+    primary_state = context.state or ("National" if context.is_indian else "International")
+    primary_districts = [d for d in [context.district, context.city] if d]
 
     return {
         "profile_name": profile.name,
         "birth_year": birth_year,
         "primary_state": primary_state,
-        "primary_districts": [
-            d for d, flag in [("Hisar", has_hisar), ("Rewari", has_rewari)] if flag
-        ],
+        "primary_districts": primary_districts,
         "online_reachable_count": len(online_reachable),
         "id_required_count": len(id_required_portals),
         "offline_archives_count": len(offline_archives),
@@ -829,100 +776,94 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
     civic_inquiries: list[ForensicInquiry] = []
     s_name = profile.name
 
-    all_context = " ".join(
-        filter(
-            None,
-            [
-                profile.name,
-                profile.birth_place,
-                profile.affiliation,
-                profile.field,
-            ]
-            + [c.text for c in profile.claims if c.text],
-        )
-    ).lower()
+    from engine.forensics import build_subject_context
+    context = build_subject_context(profile)
+
+    if not context.is_indian:
+        return civic_inquiries
+
+    loc_name = context.district or context.city or context.state or "Domicile"
 
     # 1. Electoral Roll Domicile Inquiry
     if "electoral roll" not in " ".join(existing_anchors):
-        district = (
-            "Hisar"
-            if "hisar" in all_context
-            else ("Rewari" if "rewari" in all_context else "Haryana")
-        )
+        portal_query = f'site:voters.eci.gov.in "{s_name}" "{context.state or ""}"'.strip()
+        if context.state == "Haryana":
+            portal_query = f'site:ceoharyana.gov.in "{loc_name}" "{s_name}"'
         civic_inquiries.append(
             ForensicInquiry(
                 inquiry_id=generate_inquiry_id(),
-                fact_anchor=f"Electoral Roll & Domicile Registration in District {district} (CEO Haryana)",
+                fact_anchor=f"Electoral Roll & Domicile Registration in {loc_name}",
                 domain="civic_electoral",
-                deductive_question=f"If {s_name} is a long-term registered voter in {district} (Haryana), which Assembly Constituency and Polling Station voter roll lists their family household?",
+                deductive_question=f"If {s_name} is a long-term registered voter in {loc_name}, which Assembly Constituency and Polling Station voter roll lists their family household?",
                 expected_paper_trails=[
-                    "Election Commission of India (ECI) / CEO Haryana Assembly Constituency Electoral Roll (PDF)",
+                    f"Election Commission of India (ECI) / CEO {context.state or 'State'} Assembly Constituency Electoral Roll (PDF)",
                     "Electoral Photo Identity Card (EPIC) Central Database Registration Record",
                     "Form 6 New Voter Enrollment Verification / Booth Level Officer (BLO) Inspection Report",
                 ],
                 probe_queries=[
-                    f'site:ceoharyana.gov.in "{district}" "{s_name}"',
-                    f'site:voters.eci.gov.in "{s_name}" "{district}"',
-                    f'"Electoral Roll" "{district}" "{s_name}"',
+                    portal_query,
+                    f'site:voters.eci.gov.in "{s_name}" "{context.district or context.city or ""}"'.strip(),
+                    f'"Electoral Roll" "{loc_name}" "{s_name}"',
                 ],
                 status="open",
                 actor_logged="system",
                 created_at=now_iso,
                 online_probe_status="open",
                 offline_archive_flag=True,
-                offline_archive_location=f"District Election Office & Tehsildar (Election) Record Room, Mini Secretariat, {district}",
-                offline_custodian=f"District Election Officer (Deputy Commissioner) & Tehsildar (Election), {district}",
-                offline_retrieval_method="Inspection of Pre-2009 Historical Electoral Rolls (1952–2008) in District Election Archives; or RTI Act 2005 Sec 6(1) to SPIO Office of Chief Electoral Officer.",
+                offline_archive_location=f"District Election Office & Tehsildar (Election) Record Room, Mini Secretariat, {loc_name}",
+                offline_custodian=f"District Election Officer (Deputy Commissioner) & Tehsildar (Election), {loc_name}",
+                offline_retrieval_method="Inspection of Historical Electoral Rolls in District Election Archives; or RTI Act 2005 Sec 6(1) to SPIO Office of Chief Electoral Officer.",
             )
         )
 
-    # 2. Electricity / Discom Connection (DHBVN)
-    if "electricity" not in " ".join(existing_anchors) and (
-        "hisar" in all_context or "rewari" in all_context or "cirb" in all_context
-    ):
+    # 2. Electricity / Discom Connection (offered only for Haryana or if state utility exists)
+    if "electricity" not in " ".join(existing_anchors) and context.state == "Haryana":
+        geo_name = context.city or context.district or "Haryana"
         civic_inquiries.append(
             ForensicInquiry(
                 inquiry_id=generate_inquiry_id(),
-                fact_anchor="Residential Electricity Utility Meter & Connection (DHBVN Hisar / Residential Complex)",
+                fact_anchor=f"Residential Electricity Utility Meter & Connection (DHBVN/UHBVN {geo_name})",
                 domain="utility_electricity",
-                deductive_question=f"If {s_name} maintained a residential electrical connection in Hisar, what meter ledger and Discom consumer records verify premises occupation?",
+                deductive_question=f"If {s_name} maintained a residential electrical connection in {geo_name}, what meter ledger and Discom consumer records verify premises occupation?",
                 expected_paper_trails=[
-                    "Dakshin Haryana Bijli Vitran Nigam (DHBVN) Consumer Account (CA) Ledger & Monthly Energy Bills",
-                    "DHBVN Agreement & Application (A&A) Form for Domestic Electric Connection",
+                    "Electricity Distribution Company (Discom) Consumer Account (CA) Ledger & Monthly Energy Bills",
+                    "Discom Agreement & Application (A&A) Form for Domestic Electric Connection",
                     "Sub-Divisional Office (SDO 'OP') Meter Test & Installation Verification Sheet",
                 ],
                 probe_queries=[
-                    f'site:dhbvn.org.in "Hisar" "{s_name}"',
-                    f'"DHBVN" "Hisar" electricity "{s_name}"',
+                    f'site:dhbvn.org.in "{geo_name}" "{s_name}"',
+                    f'"electricity" "{geo_name}" "{s_name}"',
                 ],
                 status="open",
                 actor_logged="system",
                 created_at=now_iso,
                 online_probe_status="open",
                 offline_archive_flag=True,
-                offline_archive_location="Sub-Divisional Office (SDO 'OP' Sub-Division), DHBVN, Hisar",
-                offline_custodian="Sub-Divisional Officer (Operations) & Executive Engineer (XEN), DHBVN Hisar",
-                offline_retrieval_method="Inspection of Consumer Service Ledger (खाता बही) at local Sub-Division; or RTI Sec 6(1) to SPIO DHBVN requesting connection sanction and load verification.",
+                offline_archive_location=f"Sub-Divisional Office (SDO 'OP' Sub-Division), Electricity Discom, {geo_name}",
+                offline_custodian=f"Sub-Divisional Officer (Operations) & Executive Engineer (XEN), {geo_name}",
+                offline_retrieval_method="Inspection of Consumer Service Ledger at local Sub-Division; or RTI Sec 6(1) to SPIO Discom requesting connection sanction and load verification.",
             )
         )
 
     # 3. Official Gazette of India (Central Appointment & Cadre Notifications)
     if "gazette of india" not in " ".join(existing_anchors):
+        inst_label = context.primary_institution or "Central Government / Cadre"
+        inst_query = f'site:egazette.gov.in "{s_name}" "{context.primary_institution}"' if context.primary_institution else f'site:egazette.gov.in "{s_name}" "cadre"'
         civic_inquiries.append(
             ForensicInquiry(
                 inquiry_id=generate_inquiry_id(),
-                fact_anchor="The Gazette of India Central Government Notifications (ICAR / DARE Appointment & Cadre)",
+                fact_anchor=f"The Gazette of India Central Government Notifications ({inst_label})",
                 domain="gazette_official",
-                deductive_question=f"If {s_name} served as a Group-A scientific officer in the Government of India / ICAR for 32 years, what statutory notifications exist in The Gazette of India?",
+                deductive_question=f"If {s_name} served in a Group-A or gazetted scientific capacity ({inst_label}), what statutory notifications exist in The Gazette of India?",
                 expected_paper_trails=[
                     "The Gazette of India (Part I, Section 2: Notifications regarding Appointments, Promotions, Leave, etc. of Officers)",
-                    "Department of Agricultural Research & Education (DARE) Statutory Office Memorandum in Gazette",
+                    "Statutory Office Memorandum in Official Gazette",
                     "Government of India Press Historical Gazette Register (New Delhi)",
                 ],
                 probe_queries=[
-                    f'site:egazette.gov.in "{s_name}" "ICAR" filetype:pdf',
-                    f'site:egazette.gov.in "{s_name}" "Buffalo" OR "CIRB"',
-                    '"Gazette of India" "Prem Singh Yadav" "ICAR"',
+                    f'site:egazette.gov.in "{s_name}" filetype:pdf',
+                    inst_query,
+                    f'"Gazette of India" "{s_name}"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -931,7 +872,7 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
                 offline_archive_flag=True,
                 offline_archive_location="National Archives of India, Janpath, New Delhi - 110001 & Central Secretariat Library",
                 offline_custodian="Director General of Archives, National Archives of India & Controller of Publications, Delhi",
-                offline_retrieval_method="Archival research in National Archives Gazette Collection (Stack Room III) for Pre-2008 gazette issues; or online search on e-Gazette portal for 2008–present.",
+                offline_retrieval_method="Archival research in National Archives Gazette Collection for Pre-2008 gazette issues; or online search on e-Gazette portal for 2008–present.",
             )
         )
 

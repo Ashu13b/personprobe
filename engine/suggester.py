@@ -528,25 +528,16 @@ def _run_search_queries(
             expected = [seeking] if seeking else []
             if "birth_date" in expected:
                 text_lower = (r.title + " " + r.snippet).lower()
-                animal_kws = [
-                    "cloned",
-                    "cloning",
-                    "animal",
-                    "buffalo",
-                    "calf",
-                    "cow",
-                    "bull",
-                    "sheep",
-                    "goat",
-                    "offspring",
-                    "garima",
-                    "samrupa",
-                    "ganga",
-                    "dolly",
-                ]
-                if any(akw in text_lower for akw in animal_kws):
+                context_kws: set[str] = set()
+                stopwords = {"research", "science", "studies", "department", "division", "institute", "central"}
+                for src in (field, profile.known_for):
+                    if src:
+                        for w in re.findall(r"\b[a-zA-Z]{4,}\b", src.lower()):
+                            if w not in stopwords:
+                                context_kws.add(w)
+                if context_kws and any(kw in text_lower for kw in context_kws):
                     expected = ["known_for"]
-                    reason = "Likely has: cloning contribution"
+                    reason = f"Likely has: {field or 'major'} contribution"
             is_prof = is_profile_url(r.url)
             prio = 0 if "site:" in query else (1 if is_prof else 2)
             stype = "profile" if is_prof else _classify_source_type(r.url, r.title)

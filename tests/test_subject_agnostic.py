@@ -63,9 +63,17 @@ def test_prem_singh_yadav_category_parity():
     categories_found = set()
     for inq in inquiries:
         # Every anchor must quote text present in claims or profile fields
-        in_claims = any(inq.fact_anchor in ct or ct in inq.fact_anchor for ct in claim_texts)
-        in_profile = inq.fact_anchor in profile_text or any(part in inq.fact_anchor for part in [profile.birth_place, profile.affiliation] if part)
-        assert in_claims or in_profile, f"Anchor not quoted from claims/fields: {inq.fact_anchor}"
+        in_claims = any(
+            inq.fact_anchor in ct or ct in inq.fact_anchor for ct in claim_texts
+        )
+        in_profile = inq.fact_anchor in profile_text or any(
+            part in inq.fact_anchor
+            for part in [profile.birth_place, profile.affiliation]
+            if part
+        )
+        assert in_claims or in_profile, (
+            f"Anchor not quoted from claims/fields: {inq.fact_anchor}"
+        )
 
         anchor_l = inq.fact_anchor.lower()
         if inq.domain == "academic_degree":
@@ -75,7 +83,10 @@ def test_prem_singh_yadav_category_parity():
         elif inq.domain == "service_entry":
             categories_found.add("service_entry")
         elif inq.domain == "research_grant":
-            if any(k in anchor_l for k in ("associateship", "deputation", "fellow", "daad", "dbt")):
+            if any(
+                k in anchor_l
+                for k in ("associateship", "deputation", "fellow", "daad", "dbt")
+            ):
                 categories_found.add("deputation")
             else:
                 categories_found.add("grant")
@@ -97,7 +108,9 @@ def test_prem_singh_yadav_category_parity():
         "award",
         "origins",
     }
-    assert required_categories.issubset(categories_found), f"Missing categories: {required_categories - categories_found}"
+    assert required_categories.issubset(categories_found), (
+        f"Missing categories: {required_categories - categories_found}"
+    )
 
 
 def test_negative_discriminating_subject():
@@ -114,10 +127,22 @@ def test_negative_discriminating_subject():
         field="Medical Microbiology & Mycobacterial Diseases",
         known_for="Molecular diagnosis and multidrug regimens for leprosy",
         claims=[
-            Claim(field="education", text="Completed Ph.D in Medical Microbiology in 1963 at University of Delhi."),
-            Claim(field="position", text="Appointed Director-General of Indian Council of Medical Research (ICMR)."),
-            Claim(field="award", text="Conferred Padma Shri in Medicine for distinguished contributions to medical science."),
-            Claim(field="career", text="Superannuated after 35 years of civil medical service in 2015."),
+            Claim(
+                field="education",
+                text="Completed Ph.D in Medical Microbiology in 1963 at University of Delhi.",
+            ),
+            Claim(
+                field="position",
+                text="Appointed Director-General of Indian Council of Medical Research (ICMR).",
+            ),
+            Claim(
+                field="award",
+                text="Conferred Padma Shri in Medicine for distinguished contributions to medical science.",
+            ),
+            Claim(
+                field="career",
+                text="Superannuated after 35 years of civil medical service in 2015.",
+            ),
         ],
     )
 
@@ -158,7 +183,9 @@ def test_negative_discriminating_subject():
     full_output = " ".join(combined_outputs).lower()
 
     violations = [term for term in BLOCKLIST if term in full_output]
-    assert violations == [], f"Found blocklist terms in discovery output for non-Haryana subject: {violations}"
+    assert violations == [], (
+        f"Found blocklist terms in discovery output for non-Haryana subject: {violations}"
+    )
 
 
 def test_non_indian_subject_clean_isolation():
@@ -172,7 +199,10 @@ def test_non_indian_subject_clean_isolation():
         field="Physics and Chemistry",
         known_for="Radioactivity discovery and isolation of radium",
         claims=[
-            Claim(field="education", text="Awarded Ph.D from the University of Paris in 1903."),
+            Claim(
+                field="education",
+                text="Awarded Ph.D from the University of Paris in 1903.",
+            ),
             Claim(field="award", text="Awarded Nobel Prize in Physics in 1903."),
         ],
     )
@@ -186,4 +216,9 @@ def test_non_indian_subject_clean_isolation():
     matrix = derive_subject_record_matrix(profile)
     assert matrix["primary_state"] == "International"
     for r in matrix["online_reachable"]:
-        assert r.get("state") not in ("Haryana", "Uttar Pradesh", "Delhi / NCR", "Maharashtra")
+        assert r.get("state") not in (
+            "Haryana",
+            "Uttar Pradesh",
+            "Delhi / NCR",
+            "Maharashtra",
+        )

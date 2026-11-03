@@ -55,10 +55,12 @@ def get_valid_indian_states(active_atlas: list | None = None) -> list[str]:
     if active_atlas is None:
         try:
             from engine.public_records_atlas import get_public_records_atlas
+
             active_atlas = get_public_records_atlas()
         except Exception:
             try:
                 from engine.public_records_atlas import BUILTIN_REPOSITORIES
+
                 active_atlas = BUILTIN_REPOSITORIES
             except Exception:
                 active_atlas = []
@@ -73,14 +75,33 @@ def get_valid_indian_states(active_atlas: list | None = None) -> list[str]:
     return states
 
 
-def _extract_field_keywords(field_val: str | None, known_for_val: str | None) -> list[str]:
+def _extract_field_keywords(
+    field_val: str | None, known_for_val: str | None
+) -> list[str]:
     combined = f"{field_val or ''} {known_for_val or ''}"
     words = re.findall(r"\b[A-Za-z]{4,}\b", combined)
     stopwords = {
-        "research", "institute", "central", "department", "division",
-        "university", "technology", "studies", "science", "sciences",
-        "about", "with", "from", "into", "their", "under", "team",
-        "national", "international", "indian", "development",
+        "research",
+        "institute",
+        "central",
+        "department",
+        "division",
+        "university",
+        "technology",
+        "studies",
+        "science",
+        "sciences",
+        "about",
+        "with",
+        "from",
+        "into",
+        "their",
+        "under",
+        "team",
+        "national",
+        "international",
+        "indian",
+        "development",
     }
     keywords: list[str] = []
     seen: set[str] = set()
@@ -115,6 +136,7 @@ def build_subject_context(profile: PersonProfile) -> SubjectContext:
         else:
             try:
                 from engine.multilingual_search import detect_languages
+
                 langs = detect_languages(None, profile.name)
                 context.is_indian = "hi" in langs
             except Exception:
@@ -157,14 +179,18 @@ def build_subject_context(profile: PersonProfile) -> SubjectContext:
                     context.state = p
 
         non_geo = [
-            p for p in parts
+            p
+            for p in parts
             if not (
                 "district" in p.lower()
                 or "dist." in p.lower()
                 or "village" in p.lower()
                 or "vill." in p.lower()
                 or p.lower() in ("india", "bharat")
-                or any(p.lower() == st.lower() or p.lower() in st.lower() for st in valid_states)
+                or any(
+                    p.lower() == st.lower() or p.lower() in st.lower()
+                    for st in valid_states
+                )
             )
         ]
         if non_geo:
@@ -195,12 +221,23 @@ def build_subject_context(profile: PersonProfile) -> SubjectContext:
         if len(affil_parts) >= 2:
             for part in affil_parts[1:]:
                 p_l = part.lower()
-                if any(p_l == st.lower() or p_l in st.lower() for st in valid_states) or p_l in ("india", "bharat"):
+                if any(
+                    p_l == st.lower() or p_l in st.lower() for st in valid_states
+                ) or p_l in ("india", "bharat"):
                     continue
                 cleaned = re.sub(r"-\s*\d+", "", part).strip()
                 if cleaned and not any(
                     w in cleaned.lower()
-                    for w in ("institute", "university", "centre", "center", "division", "college", "council", "department")
+                    for w in (
+                        "institute",
+                        "university",
+                        "centre",
+                        "center",
+                        "division",
+                        "college",
+                        "council",
+                        "department",
+                    )
                 ):
                     if not context.city:
                         context.city = cleaned
@@ -222,36 +259,191 @@ def build_subject_context(profile: PersonProfile) -> SubjectContext:
         date = c.date_context
 
         if fld == "education":
-            if any(k in t_l for k in ("ph.d", "phd", "doctorate", "doctoral", "dissertation")):
-                events.append(LifeEvent(category="phd", anchor_text=text, domain="doctoral_thesis", date_context=date, raw_text=text))
-            if any(k in t_l for k in ("b.sc", "m.sc", "bachelor", "master", "degree", "graduat", "college", "university")):
-                events.append(LifeEvent(category="education", anchor_text=text, domain="academic_degree", date_context=date, raw_text=text))
-            if not any(k in t_l for k in ("ph.d", "phd", "doctorate", "doctoral", "b.sc", "m.sc", "bachelor", "master")):
-                events.append(LifeEvent(category="education", anchor_text=text, domain="academic_degree", date_context=date, raw_text=text))
+            if any(
+                k in t_l
+                for k in ("ph.d", "phd", "doctorate", "doctoral", "dissertation")
+            ):
+                events.append(
+                    LifeEvent(
+                        category="phd",
+                        anchor_text=text,
+                        domain="doctoral_thesis",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
+            if any(
+                k in t_l
+                for k in (
+                    "b.sc",
+                    "m.sc",
+                    "bachelor",
+                    "master",
+                    "degree",
+                    "graduat",
+                    "college",
+                    "university",
+                )
+            ):
+                events.append(
+                    LifeEvent(
+                        category="education",
+                        anchor_text=text,
+                        domain="academic_degree",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
+            if not any(
+                k in t_l
+                for k in (
+                    "ph.d",
+                    "phd",
+                    "doctorate",
+                    "doctoral",
+                    "b.sc",
+                    "m.sc",
+                    "bachelor",
+                    "master",
+                )
+            ):
+                events.append(
+                    LifeEvent(
+                        category="education",
+                        anchor_text=text,
+                        domain="academic_degree",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
         elif fld in ("career", "position"):
             if any(k in t_l for k in ("retir", "superannuat", "farewell")):
-                events.append(LifeEvent(category="superannuation", anchor_text=text, domain="superannuation", date_context=date, raw_text=text))
-            elif any(k in t_l for k in ("overseas", "deputation", "daad", "fellowship", "research stay", "associateship", "visiting")):
-                events.append(LifeEvent(category="deputation", anchor_text=text, domain="research_grant", date_context=date, raw_text=text))
-            elif any(k in t_l for k in ("joined", "appointed", "selected", "principal scientist", "scientist", "head", "director", "professor", "cadre", "officer")):
-                events.append(LifeEvent(category="service_entry", anchor_text=text, domain="service_entry", date_context=date, raw_text=text))
+                events.append(
+                    LifeEvent(
+                        category="superannuation",
+                        anchor_text=text,
+                        domain="superannuation",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
+            elif any(
+                k in t_l
+                for k in (
+                    "overseas",
+                    "deputation",
+                    "daad",
+                    "fellowship",
+                    "research stay",
+                    "associateship",
+                    "visiting",
+                )
+            ):
+                events.append(
+                    LifeEvent(
+                        category="deputation",
+                        anchor_text=text,
+                        domain="research_grant",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
+            elif any(
+                k in t_l
+                for k in (
+                    "joined",
+                    "appointed",
+                    "selected",
+                    "principal scientist",
+                    "scientist",
+                    "head",
+                    "director",
+                    "professor",
+                    "cadre",
+                    "officer",
+                )
+            ):
+                events.append(
+                    LifeEvent(
+                        category="service_entry",
+                        anchor_text=text,
+                        domain="service_entry",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
             else:
-                events.append(LifeEvent(category="service_entry", anchor_text=text, domain="service_entry", date_context=date, raw_text=text))
+                events.append(
+                    LifeEvent(
+                        category="service_entry",
+                        anchor_text=text,
+                        domain="service_entry",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
         elif fld == "award":
-            events.append(LifeEvent(category="award", anchor_text=text, domain="general", date_context=date, raw_text=text))
+            events.append(
+                LifeEvent(
+                    category="award",
+                    anchor_text=text,
+                    domain="general",
+                    date_context=date,
+                    raw_text=text,
+                )
+            )
         elif fld in ("known_for", "project"):
-            if any(k in t_l for k in ("grant", "sanction", "fund", "project", "nasf", "dbt", "dst", "icar")):
-                events.append(LifeEvent(category="grant", anchor_text=text, domain="research_grant", date_context=date, raw_text=text))
+            if any(
+                k in t_l
+                for k in (
+                    "grant",
+                    "sanction",
+                    "fund",
+                    "project",
+                    "nasf",
+                    "dbt",
+                    "dst",
+                    "icar",
+                )
+            ):
+                events.append(
+                    LifeEvent(
+                        category="grant",
+                        anchor_text=text,
+                        domain="research_grant",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
         elif fld in ("birth_place", "birth_date", "ancestry"):
-            if not any(k in t_l for k in ("kg", "calf", "bull", "animal", "delivery", "litter", "offspring")):
-                events.append(LifeEvent(category="ancestry", anchor_text=text, domain="general", date_context=date, raw_text=text))
+            if not any(
+                k in t_l
+                for k in (
+                    "kg",
+                    "calf",
+                    "bull",
+                    "animal",
+                    "delivery",
+                    "litter",
+                    "offspring",
+                )
+            ):
+                events.append(
+                    LifeEvent(
+                        category="ancestry",
+                        anchor_text=text,
+                        domain="general",
+                        date_context=date,
+                        raw_text=text,
+                    )
+                )
 
     # Auxiliary leads fallback / additions
     def _extract_lead_clause(lead: AuxiliaryLead, kws: tuple[str, ...]) -> str:
         if any(k in lead.title.lower() for k in kws):
             return lead.title
         notes = lead.lead_notes or ""
-        parts = re.split(r',\s*|;\s*|\.\s+(?=[A-Z])|\s+and\s+(?=Ph\.?D)', notes)
+        parts = re.split(r",\s*|;\s*|\.\s+(?=[A-Z])|\s+and\s+(?=Ph\.?D)", notes)
         for p in parts:
             p_clean = p.strip()
             if any(k in p_clean.lower() for k in kws):
@@ -261,29 +453,84 @@ def build_subject_context(profile: PersonProfile) -> SubjectContext:
     for lead in profile.auxiliary_leads:
         full_lead = f"{lead.title} {lead.lead_notes or ''}".strip()
         fl_l = full_lead.lower()
-        if any(k in fl_l for k in ("b.sc", "m.sc", "bachelor", "master", "graduation", "graduated")):
+        if any(
+            k in fl_l
+            for k in ("b.sc", "m.sc", "bachelor", "master", "graduation", "graduated")
+        ):
             anchor = _extract_lead_clause(lead, ("b.sc", "m.sc", "graduat", "degree"))
-            events.append(LifeEvent(category="education", anchor_text=anchor, domain="academic_degree", raw_text=full_lead))
+            events.append(
+                LifeEvent(
+                    category="education",
+                    anchor_text=anchor,
+                    domain="academic_degree",
+                    raw_text=full_lead,
+                )
+            )
         if any(k in fl_l for k in ("ph.d", "phd", "doctoral", "dissertation")):
-            anchor = _extract_lead_clause(lead, ("ph.d", "phd", "doctoral", "dissertation"))
-            events.append(LifeEvent(category="phd", anchor_text=anchor, domain="doctoral_thesis", raw_text=full_lead))
+            anchor = _extract_lead_clause(
+                lead, ("ph.d", "phd", "doctoral", "dissertation")
+            )
+            events.append(
+                LifeEvent(
+                    category="phd",
+                    anchor_text=anchor,
+                    domain="doctoral_thesis",
+                    raw_text=full_lead,
+                )
+            )
         if any(k in fl_l for k in ("grant", "funded", "sanction")):
             anchor = _extract_lead_clause(lead, ("grant", "funded", "sanction"))
-            events.append(LifeEvent(category="grant", anchor_text=anchor, domain="research_grant", raw_text=full_lead))
+            events.append(
+                LifeEvent(
+                    category="grant",
+                    anchor_text=anchor,
+                    domain="research_grant",
+                    raw_text=full_lead,
+                )
+            )
         if any(k in fl_l for k in ("retir", "superannuat", "farewell")):
             anchor = _extract_lead_clause(lead, ("retir", "superannuat", "farewell"))
-            events.append(LifeEvent(category="superannuation", anchor_text=anchor, domain="superannuation", raw_text=full_lead))
+            events.append(
+                LifeEvent(
+                    category="superannuation",
+                    anchor_text=anchor,
+                    domain="superannuation",
+                    raw_text=full_lead,
+                )
+            )
         if any(k in fl_l for k in ("award", "medal", "honor", "prize")):
             anchor = _extract_lead_clause(lead, ("award", "medal", "honor", "prize"))
-            events.append(LifeEvent(category="award", anchor_text=anchor, domain="general", raw_text=full_lead))
+            events.append(
+                LifeEvent(
+                    category="award",
+                    anchor_text=anchor,
+                    domain="general",
+                    raw_text=full_lead,
+                )
+            )
 
     # Fallback origins from profile fields
     if profile.birth_place:
         anchor = f"Born {profile.birth_date + ' in ' if profile.birth_date else 'in '}{profile.birth_place}".strip()
-        events.append(LifeEvent(category="ancestry", anchor_text=anchor, domain="general", date_context=profile.birth_date, raw_text=profile.birth_place))
+        events.append(
+            LifeEvent(
+                category="ancestry",
+                anchor_text=anchor,
+                domain="general",
+                date_context=profile.birth_date,
+                raw_text=profile.birth_place,
+            )
+        )
     if profile.affiliation and not any(e.category == "service_entry" for e in events):
         anchor = f"Appointed at {profile.affiliation}".strip()
-        events.append(LifeEvent(category="service_entry", anchor_text=anchor, domain="service_entry", raw_text=profile.affiliation))
+        events.append(
+            LifeEvent(
+                category="service_entry",
+                anchor_text=anchor,
+                domain="service_entry",
+                raw_text=profile.affiliation,
+            )
+        )
 
     context.life_events = events
     return context
@@ -540,8 +787,12 @@ def _enrich_inquiry_dual_track(
         else:
             inq.online_probe_status = "open"
 
-    inst = (context.primary_institution if context else "") or "University / Institutional Headquarters"
-    geo = (context.city or context.district or context.state if context else "") or "Regional Headquarters"
+    inst = (
+        context.primary_institution if context else ""
+    ) or "University / Institutional Headquarters"
+    geo = (
+        context.city or context.district or context.state if context else ""
+    ) or "Regional Headquarters"
 
     domain = (inq.domain or "").lower()
     anchor_lower = (inq.fact_anchor or "").lower()
@@ -557,7 +808,9 @@ def _enrich_inquiry_dual_track(
         or "m.sc" in anchor_lower
     ):
         inq.offline_archive_location = f"Academic Branch Record Room & Central Library Historical Theses Archive, {inst}"
-        inq.offline_custodian = "Registrar (Academic & Examinations) & University Librarian"
+        inq.offline_custodian = (
+            "Registrar (Academic & Examinations) & University Librarian"
+        )
         inq.offline_retrieval_method = "Formal degree verification request; convocation degree register folio inspection; or RTI Act 2005 Sec 6(1) to SPIO for Tabulation Register (TR) excerpt."
     elif (
         domain == "superannuation"
@@ -579,7 +832,9 @@ def _enrich_inquiry_dual_track(
         or "deputation" in anchor_lower
     ):
         inq.offline_archive_location = f"Extramural Research Secretariat & Institutional Finance/Project Cell, {inst}"
-        inq.offline_custodian = "Funding Agency Section Officer / Head of Research Division"
+        inq.offline_custodian = (
+            "Funding Agency Section Officer / Head of Research Division"
+        )
         inq.offline_retrieval_method = "Grant Sanction Order & Utilization Certificate verification; or RTI Act 2005 to funding agency CPIO."
     elif (
         domain == "service_entry"
@@ -591,8 +846,12 @@ def _enrich_inquiry_dual_track(
         or "ars" in anchor_lower
         or "head" in anchor_lower
     ):
-        inq.offline_archive_location = f"Establishment Section & Administrative Record Room, {inst}"
-        inq.offline_custodian = "Head of Office / Senior Administrative Officer (Establishment)"
+        inq.offline_archive_location = (
+            f"Establishment Section & Administrative Record Room, {inst}"
+        )
+        inq.offline_custodian = (
+            "Head of Office / Senior Administrative Officer (Establishment)"
+        )
         inq.offline_retrieval_method = "Service Book (Part-I) inspection, joining verification order, or RTI Sec 6(1) to CPIO for cadre seniority and gazetted appointment records."
     elif (
         domain == "campus_quarters"
@@ -600,7 +859,9 @@ def _enrich_inquiry_dual_track(
         or "housing" in anchor_lower
         or "resided" in anchor_lower
     ):
-        inq.offline_archive_location = f"Estate Section & Housing Allotment Committee, {inst}"
+        inq.offline_archive_location = (
+            f"Estate Section & Housing Allotment Committee, {inst}"
+        )
         inq.offline_custodian = "Estate Officer / Chairman, House Allotment Committee"
         inq.offline_retrieval_method = "Staff Quarter Allotment Roster, License Fee deduction register in Service Book, or local Municipal Corporation utility files."
     elif (
@@ -611,18 +872,18 @@ def _enrich_inquiry_dual_track(
         inq.offline_archive_location = f"District Election Office & Tehsildar (Election) Record Room, Mini Secretariat, {geo}"
         inq.offline_custodian = f"District Election Officer (Deputy Commissioner) & Tehsildar (Election), {geo}"
         inq.offline_retrieval_method = "Inspection of Historical Electoral Rolls in District Election Archives; or RTI Act 2005 Sec 6(1) to SPIO Office of Chief Electoral Officer."
-    elif (
-        domain == "utility_electricity"
-        or "electricity" in anchor_lower
-    ):
-        inq.offline_archive_location = f"Sub-Divisional Office (Operations), Electricity Utility Discom, {geo}"
-        inq.offline_custodian = f"Sub-Divisional Officer (Operations) & Executive Engineer, {geo}"
+    elif domain == "utility_electricity" or "electricity" in anchor_lower:
+        inq.offline_archive_location = (
+            f"Sub-Divisional Office (Operations), Electricity Utility Discom, {geo}"
+        )
+        inq.offline_custodian = (
+            f"Sub-Divisional Officer (Operations) & Executive Engineer, {geo}"
+        )
         inq.offline_retrieval_method = "Inspection of Consumer Service Ledger at local Sub-Division; or RTI Sec 6(1) to Discom SPIO."
-    elif (
-        domain == "gazette_official"
-        or "gazette of india" in anchor_lower
-    ):
-        inq.offline_archive_location = "National Archives of India, New Delhi & Central Secretariat Library"
+    elif domain == "gazette_official" or "gazette of india" in anchor_lower:
+        inq.offline_archive_location = (
+            "National Archives of India, New Delhi & Central Secretariat Library"
+        )
         inq.offline_custodian = "Director General of Archives, National Archives of India & Controller of Publications"
         inq.offline_retrieval_method = "Archival research in National Archives Gazette Collection; or online search on e-Gazette portal."
     elif (
@@ -632,7 +893,9 @@ def _enrich_inquiry_dual_track(
         or "ancestral" in anchor_lower
     ):
         inq.offline_archive_location = f"Tehsil & District Record Room, Mini Secretariat {geo} & Gram Panchayat / Municipality Office"
-        inq.offline_custodian = "Tehsildar / District Revenue Officer & Gram Sachiv / Municipal Registrar"
+        inq.offline_custodian = (
+            "Tehsildar / District Revenue Officer & Gram Sachiv / Municipal Registrar"
+        )
         inq.offline_retrieval_method = "Physical Application for Certified Copy of Jamabandi / revenue records; or Family Register (Parivar Register) inspection."
     elif (
         "award" in anchor_lower
@@ -644,8 +907,12 @@ def _enrich_inquiry_dual_track(
         inq.offline_custodian = "Secretary (Coordination & Awards) & Chief Librarian"
         inq.offline_retrieval_method = "Public inspection of Foundation Day Annual Citation Volumes; or Record Verification Query to awarding body archives."
     else:
-        inq.offline_archive_location = f"Institutional Record Room & Central Library Historical Archives, {inst}"
-        inq.offline_custodian = "Head of Office / Registrar / Public Information Officer"
+        inq.offline_archive_location = (
+            f"Institutional Record Room & Central Library Historical Archives, {inst}"
+        )
+        inq.offline_custodian = (
+            "Head of Office / Registrar / Public Information Officer"
+        )
         inq.offline_retrieval_method = "Right to Information (RTI) Act 2005 application or certified archival document request."
 
 
@@ -691,7 +958,11 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
             reverse=True,
         )
         best_event = next(
-            (ev for ev in sorted_events if ev.anchor_text.lower() not in existing_anchors),
+            (
+                ev
+                for ev in sorted_events
+                if ev.anchor_text.lower() not in existing_anchors
+            ),
             None,
         )
         if not best_event:
@@ -714,9 +985,13 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                     "KrishiKosh / National Academic Thesis & Student Archive",
                 ],
                 probe_queries=[
-                    f'site:krishikosh.egranth.ac.in "{s_name}" OR "{last_name}"' if context.is_indian else f'"{s_name}" "convocation" OR "degree"',
+                    f'site:krishikosh.egranth.ac.in "{s_name}" OR "{last_name}"'
+                    if context.is_indian
+                    else f'"{s_name}" "convocation" OR "degree"',
                     f'"{inst_name}" "{s_name}" convocation OR alumni OR degree',
-                    f'"{state_name} Gazette" "{s_name}" examination OR degree' if state_name else f'"{s_name}" "degree" "convocation"',
+                    f'"{state_name} Gazette" "{s_name}" examination OR degree'
+                    if state_name
+                    else f'"{s_name}" "degree" "convocation"',
                 ],
                 status="open",
                 actor_logged="system",
@@ -735,7 +1010,9 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                     "Doctoral Viva Voce Notification and Degree Conferment Gazette",
                 ],
                 probe_queries=[
-                    f'site:shodhganga.inflibnet.ac.in "{s_name}" OR "{last_name}"' if context.is_indian else f'"{s_name}" thesis OR dissertation',
+                    f'site:shodhganga.inflibnet.ac.in "{s_name}" OR "{last_name}"'
+                    if context.is_indian
+                    else f'"{s_name}" thesis OR dissertation',
                     f'"{inst_name}" "{last_name}" thesis OR dissertation',
                 ],
                 status="open",
@@ -755,7 +1032,9 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                     "Service Book Record (Part-I) & Joining Verification Order",
                 ],
                 probe_queries=[
-                    f'site:egazette.gov.in "{s_name}" OR "{last_name}"' if context.is_indian else f'"{s_name}" "appointment" OR "gazette"',
+                    f'site:egazette.gov.in "{s_name}" OR "{last_name}"'
+                    if context.is_indian
+                    else f'"{s_name}" "appointment" OR "gazette"',
                     f'"{inst_name}" "{s_name}" appointment OR selection OR seniority',
                 ],
                 status="open",
@@ -840,7 +1119,13 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 created_at=now_iso,
             )
         elif cat == "ancestry":
-            geo_name = context.village or context.city or context.district or context.state or "domicile"
+            geo_name = (
+                context.village
+                or context.city
+                or context.district
+                or context.state
+                or "domicile"
+            )
             inq = ForensicInquiry(
                 inquiry_id=generate_inquiry_id(),
                 fact_anchor=anchor,
@@ -854,14 +1139,18 @@ def generate_deductive_inquiries(profile: PersonProfile) -> list[ForensicInquiry
                 ],
                 probe_queries=[
                     f'"{s_name}" "{geo_name}"',
-                    f'"{state_name} Gazette" "{s_name}" matriculation OR school' if state_name else f'"{s_name}" matriculation OR school',
+                    f'"{state_name} Gazette" "{s_name}" matriculation OR school'
+                    if state_name
+                    else f'"{s_name}" matriculation OR school',
                 ],
                 status="open",
                 actor_logged="system",
                 created_at=now_iso,
             )
         elif cat == "residence":
-            geo_name = context.city or context.district or context.state or "campus premises"
+            geo_name = (
+                context.city or context.district or context.state or "campus premises"
+            )
             inq = ForensicInquiry(
                 inquiry_id=generate_inquiry_id(),
                 fact_anchor=anchor,

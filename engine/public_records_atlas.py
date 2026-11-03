@@ -660,6 +660,7 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
     before the historical digitization horizon and must be flagged as offline physical archives.
     """
     from engine.forensics import build_subject_context
+
     context = build_subject_context(profile)
 
     # Extract subject timeline hints
@@ -679,7 +680,13 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
     for repo in active_atlas:
         # Check non-Indian subjects
         if not context.is_indian:
-            if repo.jurisdiction_level in ("state", "district") or (repo.state and (repo.state.startswith("Central") or repo.state.startswith("National"))):
+            if repo.jurisdiction_level in ("state", "district") or (
+                repo.state
+                and (
+                    repo.state.startswith("Central")
+                    or repo.state.startswith("National")
+                )
+            ):
                 continue
 
         # Check state & district relevance
@@ -701,8 +708,12 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             if repo.district_or_city:
                 target_geo = f"{context.district} {context.city}".strip().lower()
                 if target_geo:
-                    repo_cities = [c.strip().lower() for c in repo.district_or_city.split("/")]
-                    if not any(rc in target_geo or target_geo in rc for rc in repo_cities):
+                    repo_cities = [
+                        c.strip().lower() for c in repo.district_or_city.split("/")
+                    ]
+                    if not any(
+                        rc in target_geo or target_geo in rc for rc in repo_cities
+                    ):
                         continue
 
         repo_dict = repo.model_dump()
@@ -713,16 +724,24 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
                 "{district}",
                 context.district or context.city or context.state or "",
             )
-            .replace(
-                "{city}", context.city or context.district or ""
-            )
+            .replace("{city}", context.city or context.district or "")
             .replace("{village}", context.village or "")
-            .replace("{institution}", context.primary_institution or profile.affiliation or "")
+            .replace(
+                "{institution}",
+                context.primary_institution or profile.affiliation or "",
+            )
             .replace(
                 "{state}",
                 context.state or ("India" if context.is_indian else ""),
             )
-            .replace("{address}", context.address or context.village or context.city or context.district or "")
+            .replace(
+                "{address}",
+                context.address
+                or context.village
+                or context.city
+                or context.district
+                or "",
+            )
         )
 
         # Categorize into digital vs offline vs id-gated
@@ -752,7 +771,9 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             )
             offline_archives.append(repo_dict_pre)
 
-    primary_state = context.state or ("National" if context.is_indian else "International")
+    primary_state = context.state or (
+        "National" if context.is_indian else "International"
+    )
     primary_districts = [d for d in [context.district, context.city] if d]
 
     return {
@@ -777,6 +798,7 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
     s_name = profile.name
 
     from engine.forensics import build_subject_context
+
     context = build_subject_context(profile)
 
     if not context.is_indian:
@@ -786,7 +808,9 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
 
     # 1. Electoral Roll Domicile Inquiry
     if "electoral roll" not in " ".join(existing_anchors):
-        portal_query = f'site:voters.eci.gov.in "{s_name}" "{context.state or ""}"'.strip()
+        portal_query = (
+            f'site:voters.eci.gov.in "{s_name}" "{context.state or ""}"'.strip()
+        )
         if context.state == "Haryana":
             portal_query = f'site:ceoharyana.gov.in "{loc_name}" "{s_name}"'
         civic_inquiries.append(
@@ -848,7 +872,11 @@ def generate_civic_inquiries(profile: PersonProfile) -> list[ForensicInquiry]:
     # 3. Official Gazette of India (Central Appointment & Cadre Notifications)
     if "gazette of india" not in " ".join(existing_anchors):
         inst_label = context.primary_institution or "Central Government / Cadre"
-        inst_query = f'site:egazette.gov.in "{s_name}" "{context.primary_institution}"' if context.primary_institution else f'site:egazette.gov.in "{s_name}" "cadre"'
+        inst_query = (
+            f'site:egazette.gov.in "{s_name}" "{context.primary_institution}"'
+            if context.primary_institution
+            else f'site:egazette.gov.in "{s_name}" "cadre"'
+        )
         civic_inquiries.append(
             ForensicInquiry(
                 inquiry_id=generate_inquiry_id(),

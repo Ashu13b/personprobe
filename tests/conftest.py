@@ -19,7 +19,9 @@ def _isolated_sessions(tmp_path, monkeypatch):
     isolated_data.mkdir(exist_ok=True)
     monkeypatch.setattr(public_records_atlas, "REGISTRY_DIR", isolated_data)
     monkeypatch.setattr(
-        public_records_atlas, "REGISTRY_FILE", isolated_data / "public_records_registry.json"
+        public_records_atlas,
+        "REGISTRY_FILE",
+        isolated_data / "public_records_registry.json",
     )
     # TestClient's default client host is the string "testclient", not an IP, so
     # the network guard would 403 every request; trust all clients under test.

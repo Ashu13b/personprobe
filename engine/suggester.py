@@ -529,7 +529,15 @@ def _run_search_queries(
             if "birth_date" in expected:
                 text_lower = (r.title + " " + r.snippet).lower()
                 context_kws: set[str] = set()
-                stopwords = {"research", "science", "studies", "department", "division", "institute", "central"}
+                stopwords = {
+                    "research",
+                    "science",
+                    "studies",
+                    "department",
+                    "division",
+                    "institute",
+                    "central",
+                }
                 for src in (field, profile.known_for):
                     if src:
                         for w in re.findall(r"\b[a-zA-Z]{4,}\b", src.lower()):

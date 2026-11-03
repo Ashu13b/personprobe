@@ -65,7 +65,11 @@ def generate_osint_dorks(profile: PersonProfile) -> list[OsintDork]:
         )
 
     # 1. Academic Dissertations & Degrees (Solving the education gap)
-    inst_or_city = f'"{inst}" OR "{context.city}" OR ' if (inst and context.city) else (f'"{inst or context.city}" OR ' if (inst or context.city) else "")
+    inst_or_city = (
+        f'"{inst}" OR "{context.city}" OR '
+        if (inst and context.city)
+        else (f'"{inst or context.city}" OR ' if (inst or context.city) else "")
+    )
     dorks.append(
         _make_dork(
             category="academic_theses",
@@ -77,7 +81,11 @@ def generate_osint_dorks(profile: PersonProfile) -> list[OsintDork]:
         )
     )
 
-    kw_term = " OR ".join(f'"{kw}"' for kw in context.field_keywords[:4]) if context.field_keywords else '"thesis" OR "dissertation"'
+    kw_term = (
+        " OR ".join(f'"{kw}"' for kw in context.field_keywords[:4])
+        if context.field_keywords
+        else '"thesis" OR "dissertation"'
+    )
     dorks.append(
         _make_dork(
             category="academic_theses",
@@ -127,7 +135,11 @@ def generate_osint_dorks(profile: PersonProfile) -> list[OsintDork]:
     if context.state == "Haryana":
         state_title = "Haryana Government Gazette & University Notifications"
         state_portal = "Haryana State Gazette"
-        geo_terms = f' ("{context.city}" OR "{context.district}")' if (context.city or context.district) else ""
+        geo_terms = (
+            f' ("{context.city}" OR "{context.district}")'
+            if (context.city or context.district)
+            else ""
+        )
         state_query = f'site:csharyana.gov.in OR site:haryana.gov.in ("{name}" OR "{initials_variant}"){geo_terms}'
     elif context.state:
         state_title = f"{context.state} Government Gazette & University Notifications"
@@ -178,13 +190,17 @@ def generate_osint_dorks(profile: PersonProfile) -> list[OsintDork]:
     # 5. Regional Hindi / Vernacular Press
     dev_name = transliterate_name(name, "hi") if context.is_indian else None
     name_filter = f'("{name}" OR "{dev_name}")' if dev_name else f'"{name}"'
-    topic_terms = " OR ".join(f'"{kw}"' for kw in context.field_keywords[:3]) if context.field_keywords else '"अनुसंधान"'
+    topic_terms = (
+        " OR ".join(f'"{kw}"' for kw in context.field_keywords[:3])
+        if context.field_keywords
+        else '"अनुसंधान"'
+    )
     dorks.append(
         _make_dork(
             category="news_investigative",
             title="Hindi Daily Investigative Press (Bhaskar, Amar Ujala, Jagran)",
             portal="Regional Hindi Dailies",
-            query=f'(site:amarujala.com OR site:bhaskar.com OR site:jagran.com) {name_filter} ({topic_terms})',
+            query=f"(site:amarujala.com OR site:bhaskar.com OR site:jagran.com) {name_filter} ({topic_terms})",
             objective="Harvest regional press reporting on research breakthroughs and career milestones.",
             ev_type="news_article",
         )
@@ -209,7 +225,11 @@ def generate_osint_dorks(profile: PersonProfile) -> list[OsintDork]:
     )
 
     # 6. Patent & Intellectual Property Registry
-    field_term = " OR ".join(f'"{kw}"' for kw in context.field_keywords[:4]) if context.field_keywords else '"patent" OR "invention"'
+    field_term = (
+        " OR ".join(f'"{kw}"' for kw in context.field_keywords[:4])
+        if context.field_keywords
+        else '"patent" OR "invention"'
+    )
     dorks.append(
         _make_dork(
             category="patents_ipr",

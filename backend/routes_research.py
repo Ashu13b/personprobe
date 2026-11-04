@@ -41,9 +41,10 @@ from engine.researcher import (
     fetch_auto_sources,
     fetch_url_source,
     fetch_url_source_with_paste,
-    fetch_institution_sources,
+    fetch_institution_sources,  # re-exported for module API compatibility
     targeted_slot_search,
 )
+__all__ = ["fetch_institution_sources"]
 from engine.classifier import classify_sources
 from engine.notability import score_notability
 from engine.extractor import extract_claims, find_missing_slots
@@ -189,11 +190,20 @@ def _find_resumable_session(req: ResearchRequest) -> PersonProfile | None:
 def _enrich_and_flag_sources(
     sources: list, name: str, field: str = "", affiliation: str = ""
 ) -> list:
-    """Enrich sources with classification, DOI verification, and relevance flags."""
+    """Enrich sources with classification, DOI verification, and relevance flags.
+    Runs independent classification and DOI verification concurrently to minimize latency.
+    """
     if not sources:
         return sources
-    classified = classify_sources(sources, store.llm())
-    store._check_doi_sources(classified, name, affiliation or "")
+    from concurrent.futures import ThreadPoolExecutor
+
+    classified = sources
+    with ThreadPoolExecutor(max_workers=2) as post_ex:
+        f_classify = post_ex.submit(classify_sources, sources, store.llm())
+        f_doi = post_ex.submit(store._check_doi_sources, sources, name, affiliation or "")
+        classified = f_classify.result()
+        f_doi.result()
+
     flag_sources(classified, name, field or "", affiliation or "")
     return classified
 
@@ -201,18 +211,56 @@ def _enrich_and_flag_sources(
 def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> None:
     """Fetch, classify, and filter initial sources for a newly created session.
 
-    Fans out comprehensive automatic discovery:
+    Fans out comprehensive automatic discovery with fast execution:
     1. Base web/scholar discovery (Semantic Scholar, Google CSE / DDG / mobile bridge, news sweep).
     2. Active researcher-ID resolution & search (ORCID, Google Scholar, Scopus, ResearchGate).
     3. OpenAlex author resolution and automatic works import (up to 50 works).
-    4. Institution source crawling.
-    5. High-trust profile link crawling (bounded).
-    6. Canonical URL deduplication across all sources.
+    4. Heavy recursive crawls (institution and profile link crawling) deferred off synchronous path.
+    5. Deduplication via canonical_url and concurrent DOI verification.
     """
+    from concurrent.futures import ThreadPoolExecutor
     from engine.canonical_url import canonical_url
-
-    sources, s2_author_id = fetch_auto_sources(req.name, req.field, req.affiliation)
     from engine.researcher import LAST_WEB_SEARCH_TRANSPORT
+
+    # Run heavy external discovery legs concurrently to minimize start latency
+    def _leg_auto_sources():
+        return fetch_auto_sources(req.name, req.field, req.affiliation)
+
+    def _leg_active_ids():
+        try:
+            from engine.researcher_ids import search_researcher_ids
+            return search_researcher_ids(req.name, req.field, req.affiliation)
+        except Exception:
+            return {}
+
+    def _leg_openalex():
+        try:
+            from engine.openalex import search_author, select_best_author, get_author_works, convert_works_to_sources
+            oa_authors = search_author(req.name, req.affiliation)
+            if oa_authors:
+                best = select_best_author(
+                    oa_authors,
+                    req.name,
+                    affiliation_hint=req.affiliation,
+                    orcid_hint=profile.researcher_ids.get("orcid"),
+                )
+                if best and best.get("id"):
+                    works = get_author_works(best["id"], limit=50)
+                    sources = convert_works_to_sources(works, req.name)
+                    return best, sources
+        except Exception:
+            pass
+        return None, []
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        f_auto = executor.submit(_leg_auto_sources)
+        f_active_ids = executor.submit(_leg_active_ids)
+        f_openalex = executor.submit(_leg_openalex)
+
+        sources, s2_author_id = f_auto.result()
+        active_ids = f_active_ids.result()
+        best_oa, oa_sources = f_openalex.result()
+
     profile.discovery_legs["web_search"] = LAST_WEB_SEARCH_TRANSPORT
     if s2_author_id:
         profile.researcher_ids["semantic_scholar"] = s2_author_id
@@ -228,11 +276,8 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
     ).items():
         profile.researcher_ids[id_type] = id_val
 
-    # Active researcher-ID search (Google CSE / DDG / mobile bridge) for unpopulated IDs
+    # Validate active researcher-IDs discovered
     try:
-        from engine.researcher_ids import search_researcher_ids
-
-        active_ids = search_researcher_ids(req.name, req.field, req.affiliation)
         validated_active = validated_new_ids(
             {t: v for t, v in active_ids.items() if t not in profile.researcher_ids},
             req.name,
@@ -247,35 +292,15 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
 
     # Automatic OpenAlex works discovery
     try:
-        from engine.openalex import (
-            search_author,
-            select_best_author,
-            get_author_works,
-            convert_works_to_sources,
-        )
+        if best_oa:
+            openalex_author_id = best_oa.get("id")
+            if openalex_author_id:
+                profile.researcher_ids["openalex"] = openalex_author_id
+                if best_oa.get("orcid") and "orcid" not in profile.researcher_ids:
+                    orcid_val = best_oa["orcid"].split("/")[-1]
+                    profile.researcher_ids["orcid"] = orcid_val
 
-        openalex_author_id = profile.researcher_ids.get("openalex")
-        if not openalex_author_id:
-            oa_authors = search_author(req.name, req.affiliation)
-            if oa_authors:
-                best_oa = select_best_author(
-                    oa_authors,
-                    req.name,
-                    affiliation_hint=req.affiliation,
-                    orcid_hint=profile.researcher_ids.get("orcid"),
-                )
-                if best_oa:
-                    openalex_author_id = best_oa.get("id")
-                    if openalex_author_id:
-                        profile.researcher_ids["openalex"] = openalex_author_id
-                        if best_oa.get("orcid") and "orcid" not in profile.researcher_ids:
-                            orcid_val = best_oa["orcid"].split("/")[-1]
-                            profile.researcher_ids["orcid"] = orcid_val
-
-        if openalex_author_id:
-            oa_works = get_author_works(openalex_author_id, limit=50)
-            oa_sources = convert_works_to_sources(oa_works, req.name)
-            # Ensure safe initial state for auto-discovered sources
+        if oa_sources:
             for s in oa_sources:
                 s.identity_status = "unverified"
                 s.identity_by = None
@@ -285,98 +310,16 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
             sources.extend(oa_sources)
             profile.discovery_legs["openalex"] = f"imported_{len(oa_sources)}"
         else:
-            profile.discovery_legs["openalex"] = "no_author_match"
+            profile.discovery_legs["openalex"] = (
+                "imported_0" if best_oa else "no_author_match"
+            )
     except Exception as e:
         profile.discovery_legs["openalex"] = f"error: {str(e)[:50]}"
 
-    # Institution sources crawling
-    if req.affiliation:
-        try:
-            institution_sources = fetch_institution_sources(req.name, req.affiliation)
-            sources.extend(institution_sources)
-            profile.discovery_legs["institution_crawl"] = (
-                f"found_{len(institution_sources)}" if institution_sources else "none"
-            )
-        except Exception as e:
-            profile.discovery_legs["institution_crawl"] = f"error: {str(e)[:50]}"
-
-    # Bounded crawling from high-trust profile-shaped links
-    try:
-        from engine.link_extractor import extract_profile_links
-        from engine.fetcher import fetch_url
-        from engine.crawler import crawl
-
-        profile_seed_urls: list[str] = []
-
-        # 1. High-trust profile seeds from known researcher IDs
-        if "orcid" in profile.researcher_ids:
-            orcid_val = profile.researcher_ids["orcid"]
-            profile_seed_urls.append(f"https://orcid.org/{orcid_val}")
-
-        # 2. Add profile-shaped links found in already discovered sources
-        _PROFILE_URL_PATTERNS = (
-            "fellows.ias",
-            "insaindia.res.in",
-            "nasi.org.in",
-            "profiles.",
-            "/profile",
-            "/faculty",
-            "/people",
-            "/team",
-            "/staff",
-            "/researcher",
-            "/scientist",
-        )
-        for s in sources:
-            if not s.url:
-                continue
-            s_url_lower = s.url.lower()
-            if any(pat in s_url_lower for pat in _PROFILE_URL_PATTERNS):
-                if s.url not in profile_seed_urls:
-                    profile_seed_urls.append(s.url)
-            if len(profile_seed_urls) >= 5:
-                break
-
-        # 3. Check if any initial sources contain profile links in HTML
-        if len(profile_seed_urls) < 3:
-            for s in sources[:10]:
-                if not s.url:
-                    continue
-                res = fetch_url(s.url)
-                if res.raw_html:
-                    ext_links = extract_profile_links(res.raw_html, req.name, s.url)
-                    for lk in ext_links:
-                        if lk not in profile_seed_urls:
-                            profile_seed_urls.append(lk)
-                if len(profile_seed_urls) >= 3:
-                    break
-
-        if profile_seed_urls:
-            keywords = [p for p in (req.affiliation or "").split() if len(p) > 3] + [
-                p for p in (req.field or "").split() if len(p) > 3
-            ]
-            c_graph = crawl(
-                seed_urls=profile_seed_urls[:3],
-                person_name=req.name,
-                keywords=keywords,
-                max_nodes=10,
-                max_depth=1,
-            )
-            c_sources = [
-                s for s in c_graph.to_sources(None)
-                if c_graph.relevance_hits.get(s.url, 0) > 0
-            ]
-            for cs in c_sources:
-                cs.fetched_by = "crawler_profile"
-                cs.identity_status = "unverified"
-                cs.identity_by = None
-                cs.liveness_by = None
-            sources.extend(c_sources)
-            profile.discovery_legs["profile_crawl"] = f"found_{len(c_sources)}"
-        else:
-            profile.discovery_legs["profile_crawl"] = "no_seeds"
-    except Exception as e:
-        profile.discovery_legs["profile_crawl"] = f"error: {str(e)[:50]}"
+    # Defer heavy recursive crawling from synchronous start path
+    # Heavy institution crawling and profile link crawling occur on-demand via POST /api/research/crawl.
+    profile.discovery_legs["institution_crawl"] = "deferred"
+    profile.discovery_legs["profile_crawl"] = "deferred"
 
     # Deduplicate all sources strictly via canonical_url
     seen_canon: set[str] = set()

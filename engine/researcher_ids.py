@@ -52,46 +52,48 @@ def search_researcher_ids(
     name: str,
     field: str | None = None,
     affiliation: str | None = None,
+    quick_mode: bool = True,
 ) -> dict[str, str]:
-    """Actively search for researcher profile IDs via web search."""
+    """Actively search for researcher profile IDs via parallelized web search.
+
+    In quick_mode (used during synchronous research/start), queries high-yield
+    endpoints (ORCID, ResearchGate) with concurrent execution, avoiding endpoints
+    like Scopus/Google Scholar that consistently block or exceed latency budgets.
+    """
+    from concurrent.futures import ThreadPoolExecutor
     from .researcher import _search_web
 
+    context = (affiliation or field or "").split()[0] if (affiliation or field) else ""
+
+    if quick_mode:
+        targets = [
+            ("orcid", f'"{name}" site:orcid.org', _ORCID_RE),
+            ("researchgate", f'"{name}" {context} site:researchgate.net/profile'.strip(), _RESEARCHGATE_RE),
+        ]
+    else:
+        targets = [
+            ("orcid", f'"{name}" site:orcid.org', _ORCID_RE),
+            ("google_scholar", f'"{name}" {context} site:scholar.google.com'.strip(), _SCHOLAR_RE),
+            ("scopus", f'"{name}" site:scopus.com/authid', _SCOPUS_RE),
+            ("researchgate", f'"{name}" {context} site:researchgate.net/profile'.strip(), _RESEARCHGATE_RE),
+        ]
+
+    def _find_id(target):
+        id_type, query, regex = target
+        try:
+            hits = _search_web(query)
+            for s in hits:
+                if m := regex.search(s.url):
+                    return id_type, m.group(1)
+        except Exception:
+            pass
+        return id_type, None
+
     ids: dict[str, str] = {}
-    context = affiliation or field or ""
-
-    # ORCID search
-    if not ids.get("orcid"):
-        orcid_hits = _search_web(f'"{name}" site:orcid.org')
-        for s in orcid_hits:
-            if m := _ORCID_RE.search(s.url):
-                ids["orcid"] = m.group(1)
-                break
-
-    # Google Scholar search
-    if not ids.get("google_scholar"):
-        gs_hits = _search_web(f'"{name}" {context} site:scholar.google.com'.strip())
-        for s in gs_hits:
-            if m := _SCHOLAR_RE.search(s.url):
-                ids["google_scholar"] = m.group(1)
-                break
-
-    # Scopus search
-    if not ids.get("scopus"):
-        sc_hits = _search_web(f'"{name}" site:scopus.com/authid')
-        for s in sc_hits:
-            if m := _SCOPUS_RE.search(s.url):
-                ids["scopus"] = m.group(1)
-                break
-
-    # ResearchGate search (lower priority, often unreliable identity)
-    if not ids.get("researchgate"):
-        rg_hits = _search_web(
-            f'"{name}" {context} site:researchgate.net/profile'.strip()
-        )
-        for s in rg_hits:
-            if m := _RESEARCHGATE_RE.search(s.url):
-                ids["researchgate"] = m.group(1)
-                break
+    with ThreadPoolExecutor(max_workers=len(targets)) as executor:
+        for id_type, val in executor.map(_find_id, targets):
+            if val:
+                ids[id_type] = val
 
     return ids
 

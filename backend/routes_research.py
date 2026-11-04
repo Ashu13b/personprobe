@@ -212,6 +212,8 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
     from engine.canonical_url import canonical_url
 
     sources, s2_author_id = fetch_auto_sources(req.name, req.field, req.affiliation)
+    from engine.researcher import LAST_WEB_SEARCH_TRANSPORT
+    profile.discovery_legs["web_search"] = LAST_WEB_SEARCH_TRANSPORT
     if s2_author_id:
         profile.researcher_ids["semantic_scholar"] = s2_author_id
         profile.discovery_legs["semantic_scholar"] = "ok"
@@ -245,19 +247,30 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
 
     # Automatic OpenAlex works discovery
     try:
-        from engine.openalex import search_author, get_author_works, convert_works_to_sources
+        from engine.openalex import (
+            search_author,
+            select_best_author,
+            get_author_works,
+            convert_works_to_sources,
+        )
 
         openalex_author_id = profile.researcher_ids.get("openalex")
         if not openalex_author_id:
             oa_authors = search_author(req.name, req.affiliation)
             if oa_authors:
-                top_oa = oa_authors[0]
-                openalex_author_id = top_oa.get("id")
-                if openalex_author_id:
-                    profile.researcher_ids["openalex"] = openalex_author_id
-                    if top_oa.get("orcid") and "orcid" not in profile.researcher_ids:
-                        orcid_val = top_oa["orcid"].split("/")[-1]
-                        profile.researcher_ids["orcid"] = orcid_val
+                best_oa = select_best_author(
+                    oa_authors,
+                    req.name,
+                    affiliation_hint=req.affiliation,
+                    orcid_hint=profile.researcher_ids.get("orcid"),
+                )
+                if best_oa:
+                    openalex_author_id = best_oa.get("id")
+                    if openalex_author_id:
+                        profile.researcher_ids["openalex"] = openalex_author_id
+                        if best_oa.get("orcid") and "orcid" not in profile.researcher_ids:
+                            orcid_val = best_oa["orcid"].split("/")[-1]
+                            profile.researcher_ids["orcid"] = orcid_val
 
         if openalex_author_id:
             oa_works = get_author_works(openalex_author_id, limit=50)
@@ -294,18 +307,49 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
         from engine.crawler import crawl
 
         profile_seed_urls: list[str] = []
-        # Check if any initial sources are profile pages or contain profile links
-        for s in sources[:15]:
+
+        # 1. High-trust profile seeds from known researcher IDs
+        if "orcid" in profile.researcher_ids:
+            orcid_val = profile.researcher_ids["orcid"]
+            profile_seed_urls.append(f"https://orcid.org/{orcid_val}")
+
+        # 2. Add profile-shaped links found in already discovered sources
+        _PROFILE_URL_PATTERNS = (
+            "fellows.ias",
+            "insaindia.res.in",
+            "nasi.org.in",
+            "profiles.",
+            "/profile",
+            "/faculty",
+            "/people",
+            "/team",
+            "/staff",
+            "/researcher",
+            "/scientist",
+        )
+        for s in sources:
             if not s.url:
                 continue
-            res = fetch_url(s.url)
-            if res.raw_html:
-                ext_links = extract_profile_links(res.raw_html, req.name, s.url)
-                for lk in ext_links:
-                    if lk not in profile_seed_urls:
-                        profile_seed_urls.append(lk)
-            if len(profile_seed_urls) >= 3:
+            s_url_lower = s.url.lower()
+            if any(pat in s_url_lower for pat in _PROFILE_URL_PATTERNS):
+                if s.url not in profile_seed_urls:
+                    profile_seed_urls.append(s.url)
+            if len(profile_seed_urls) >= 5:
                 break
+
+        # 3. Check if any initial sources contain profile links in HTML
+        if len(profile_seed_urls) < 3:
+            for s in sources[:10]:
+                if not s.url:
+                    continue
+                res = fetch_url(s.url)
+                if res.raw_html:
+                    ext_links = extract_profile_links(res.raw_html, req.name, s.url)
+                    for lk in ext_links:
+                        if lk not in profile_seed_urls:
+                            profile_seed_urls.append(lk)
+                if len(profile_seed_urls) >= 3:
+                    break
 
         if profile_seed_urls:
             keywords = [p for p in (req.affiliation or "").split() if len(p) > 3] + [

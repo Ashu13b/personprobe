@@ -225,19 +225,37 @@ def _find_session_on_disk(pred) -> tuple[dict, Path] | None:
 
 
 def _check_doi_sources(sources: list, person_name: str, affiliation: str) -> None:
-    """In-place: run author check on every source whose URL contains a DOI."""
+    """In-place: run author check on every source whose URL contains a DOI.
+    Uses concurrent workers to bound latency when checking many DOIs.
+    """
     from engine.author_check import check_doi_authors, extract_doi
+    from concurrent.futures import ThreadPoolExecutor
 
+    doi_targets = []
     for source in sources:
         doi = extract_doi(source.url)
-        if not doi:
-            continue
-        result = check_doi_authors(doi, person_name, affiliation)
-        source.author_match_status = result["status"]
-        source.author_match_name = result["matched_author"]
-        source.author_match_affiliation = result["matched_affiliation"]
-        source.all_paper_authors = result["all_authors"]
-        if result.get("paper_title") and (
-            source.title == source.url or not source.title
-        ):
-            source.title = result["paper_title"]
+        if doi:
+            doi_targets.append((source, doi))
+
+    if not doi_targets:
+        return
+
+    def _check(item):
+        src, doi = item
+        try:
+            return src, check_doi_authors(doi, person_name, affiliation)
+        except Exception:
+            return src, None
+
+    with ThreadPoolExecutor(max_workers=min(10, len(doi_targets))) as executor:
+        for source, result in executor.map(_check, doi_targets):
+            if not result:
+                continue
+            source.author_match_status = result.get("status")
+            source.author_match_name = result.get("matched_author")
+            source.author_match_affiliation = result.get("matched_affiliation")
+            source.all_paper_authors = result.get("all_authors")
+            if result.get("paper_title") and (
+                source.title == source.url or not source.title
+            ):
+                source.title = result["paper_title"]

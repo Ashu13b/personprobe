@@ -123,9 +123,11 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     assert profile.researcher_ids.get("google_scholar") == "GS12345"
 
     # B. Discovery legs tracked
+    assert profile.discovery_legs.get("web_search") in ("none", "duckduckgo", "google_cse", "mobile_bridge", "failed_all")
     assert profile.discovery_legs.get("active_id_search") == "ok"
     assert profile.discovery_legs.get("openalex") == "imported_2"
     assert "institution_crawl" in profile.discovery_legs
+    assert "profile_crawl" in profile.discovery_legs
 
     # C. Sources merged and deduplicated via canonical_url:
     # base_source_1 (doi:10.1016/j.lep.2020.01) and W1 (dx.doi.org/10.1016/j.lep.2020.01/) should dedup to 1
@@ -152,10 +154,10 @@ def test_graceful_degradation_without_cse(monkeypatch):
     monkeypatch.delenv("GOOGLE_CSE_KEY", raising=False)
     monkeypatch.delenv("GOOGLE_CSE_CX", raising=False)
 
-    # Mock DDGS failure
-    def mock_search_web(query):
-        return []
-    monkeypatch.setattr(res_mod, "_search_web", mock_search_web)
+    # Mock fetch_auto_sources, researcher_ids, and institution sources to prevent slow live network calls
+    monkeypatch.setattr(rr, "fetch_auto_sources", lambda name, field, affil: ([], None))
+    monkeypatch.setattr(rr, "fetch_institution_sources", lambda name, affil: [])
+    monkeypatch.setattr(r_ids, "search_researcher_ids", lambda name, field, affil: {})
 
     # Mock OpenAlex working via API
     monkeypatch.setattr(
@@ -204,3 +206,48 @@ def test_mobile_bridge_search_fallback(monkeypatch):
     assert len(results) == 1
     assert results[0].url == "https://pubmed.ncbi.nlm.nih.gov/12345/"
     assert results[0].fetched_by == "mobile_bridge_search"
+
+
+def test_openalex_namesake_guard_rejects_decoy():
+    """Verify select_best_author rejects namesake decoys and prioritizes matching author or ORCID."""
+    from engine.openalex import select_best_author
+
+    authors = [
+        {"id": "A_DECOY", "display_name": "Kiran Katoch", "relevance_score": 100.0, "works_count": 500},
+        {
+            "id": "A_REAL",
+            "display_name": "Vishwa Mohan Katoch",
+            "relevance_score": 10.0,
+            "works_count": 150,
+            "affiliations": ["National JALMA Institute for Leprosy"],
+        },
+    ]
+
+    # Must select A_REAL despite lower base relevance score because A_DECOY has different given name
+    best = select_best_author(authors, "Dr. Vishwa Mohan Katoch", affiliation_hint="National JALMA Institute")
+    assert best is not None
+    assert best["id"] == "A_REAL"
+
+    # With distinct ORCID hint, matches ORCID
+    orcid_authors = [
+        {"id": "A_OTHER", "display_name": "Vishwa Katoch", "relevance_score": 200.0},
+        {"id": "A_ORCID", "display_name": "V. M. Katoch", "orcid": "https://orcid.org/0000-0002-7892-2764"},
+    ]
+    best_orcid = select_best_author(orcid_authors, "Vishwa Mohan Katoch", orcid_hint="0000-0002-7892-2764")
+    assert best_orcid is not None
+    assert best_orcid["id"] == "A_ORCID"
+
+
+def test_researcher_id_namesake_guard_rejects_decoy():
+    """Verify validated_new_ids rejects namesake collision decoys like 'Kiran-Katoch-2'."""
+    from engine.researcher_ids import validated_new_ids
+
+    # Conflicting given name for same surname must be dropped
+    candidate_ids = {
+        "researchgate": "Kiran-Katoch-2",
+        "google_scholar": "VM_Katoch_Agra",
+    }
+    validated = validated_new_ids(candidate_ids, "Dr. Vishwa Mohan Katoch")
+    assert "researchgate" not in validated, "Namesake decoy Kiran Katoch must be rejected!"
+    assert validated.get("google_scholar") == "VM_Katoch_Agra"
+

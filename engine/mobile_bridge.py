@@ -127,33 +127,37 @@ def search_via_mobile_bridge(
         return []
 
     from urllib.parse import quote_plus, parse_qs, urlsplit
-    from bs4 import BeautifulSoup
 
     search_url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
-    res = fetch_via_mobile_bridge(search_url, wait_seconds=3)
+    res = fetch_via_mobile_bridge(search_url, wait_seconds=2)
     if not res:
         return []
 
-    html = res.get("raw_html") or res.get("text", "")
-    if not html:
-        return []
-
-    soup = BeautifulSoup(html, "html.parser")
+    links = res.get("links", [])
     results: list[dict[str, str]] = []
-    for item in soup.select(".result"):
-        a_title = item.select_one("a.result__a, h2 a")
-        snippet_elem = item.select_one(".result__snippet")
-        if a_title:
-            href_val = a_title.get("href")
-            href = str(href_val) if href_val else ""
-            if "uddg=" in href:
-                qs = parse_qs(urlsplit(href).query)
-                if "uddg" in qs and qs["uddg"]:
-                    href = qs["uddg"][0]
-            title = a_title.get_text(" ", strip=True)
-            snippet = snippet_elem.get_text(" ", strip=True) if snippet_elem else ""
-            if href and title:
-                results.append({"url": href, "title": title, "snippet": snippet})
-                if len(results) >= max_results:
-                    break
+    seen_urls: set[str] = set()
+
+    for lk in links:
+        href = lk.get("href", "")
+        text = lk.get("text", "").strip()
+        if not href or href.startswith("https://html.duckduckgo.com"):
+            continue
+
+        actual_url = href
+        if "uddg=" in href:
+            qs = parse_qs(urlsplit(href).query)
+            if "uddg" in qs and qs["uddg"]:
+                actual_url = qs["uddg"][0]
+
+        if not actual_url.startswith(("http://", "https://")):
+            continue
+        if "duckduckgo.com" in actual_url:
+            continue
+
+        if actual_url not in seen_urls and text:
+            seen_urls.add(actual_url)
+            results.append({"url": actual_url, "title": text, "snippet": text})
+            if len(results) >= max_results:
+                break
+
     return results

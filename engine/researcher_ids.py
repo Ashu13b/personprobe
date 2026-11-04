@@ -181,15 +181,49 @@ def validated_new_ids(
     ORCID is checked against the public API; a 404 or name/affiliation mismatch
     means it belongs to someone else and must not be stored. Semantic Scholar
     ids are checked against the S2 author profile name (first+last token).
-    Other id types have no deterministic validator yet and pass through for
-    human confirmation.
+    Every other researcher ID (ResearchGate, Google Scholar, Scopus) is gated
+    against namesake collision risk (e.g. rejecting 'Kiran-Katoch-2' for 'Vishwa Mohan Katoch').
     """
+    from .name_verifier import assess_namesake_risk
+
+    clean_target = re.sub(
+        r"^(dr\.?|prof\.?|shri|smt\.?|mr\.?|ms\.?|mrs\.?)\s+",
+        "",
+        name.strip(),
+        flags=re.I,
+    ).strip()
+    target_tokens = [t.lower().rstrip(".,") for t in clean_target.split() if len(t) > 1]
+    target_first = target_tokens[0] if target_tokens else ""
+    target_last = target_tokens[-1] if target_tokens else ""
+
     valid: dict[str, str] = {}
     for id_type, id_val in ids.items():
         if id_type == "orcid" and not validate_orcid(id_val, name, affiliation):
             continue
         if id_type == "semantic_scholar" and not validate_s2_author(id_val, name):
             continue
+
+        # Namesake risk audit for slug-based IDs (e.g. ResearchGate "Kiran-Katoch-2")
+        id_text = str(id_val).replace("-", " ").replace("_", " ")
+        id_words = [w.lower() for w in re.findall(r"[A-Za-z]{2,}", id_text)]
+        if id_words and target_last and target_last in id_words:
+            # Contains target's surname; verify given name is not a different sibling
+            if target_first and len(target_first) > 2:
+                other_first = id_words[0]
+                if (
+                    len(other_first) > 2
+                    and other_first != target_first
+                    and other_first != target_last
+                    and not target_first.startswith(other_first)
+                    and not other_first.startswith(target_first)
+                ):
+                    # Conflicting given name for same surname -> reject namesake decoy!
+                    continue
+
+        risk, _ = assess_namesake_risk(id_text, name, [])
+        if risk in ("known_conflict", "possible"):
+            continue
+
         valid[id_type] = id_val
     return valid
 

@@ -106,6 +106,7 @@ def fetch_via_mobile_bridge(
                 "text": text,
                 "url": dom.get("url", url),
                 "links": content.get("links", []),
+                "raw_html": content.get("html", "") or dom.get("html", ""),
                 "has_captcha": captcha,
             }
         except Exception as e:
@@ -113,3 +114,46 @@ def fetch_via_mobile_bridge(
             t.status = "exception"
             t.note = str(e)[:120]
             return None
+
+
+def search_via_mobile_bridge(
+    query: str, max_results: int = 10
+) -> list[dict[str, str]]:
+    """Execute a web search query via the mobile browser bridge (e.g. DDG HTML) to bypass bot-walls.
+
+    Returns list of dicts with {"url": str, "title": str, "snippet": str}.
+    """
+    if not is_mobile_bridge_available():
+        return []
+
+    from urllib.parse import quote_plus, parse_qs, urlsplit
+    from bs4 import BeautifulSoup
+
+    search_url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
+    res = fetch_via_mobile_bridge(search_url, wait_seconds=3)
+    if not res:
+        return []
+
+    html = res.get("raw_html") or res.get("text", "")
+    if not html:
+        return []
+
+    soup = BeautifulSoup(html, "html.parser")
+    results: list[dict[str, str]] = []
+    for item in soup.select(".result"):
+        a_title = item.select_one("a.result__a, h2 a")
+        snippet_elem = item.select_one(".result__snippet")
+        if a_title:
+            href_val = a_title.get("href")
+            href = str(href_val) if href_val else ""
+            if "uddg=" in href:
+                qs = parse_qs(urlsplit(href).query)
+                if "uddg" in qs and qs["uddg"]:
+                    href = qs["uddg"][0]
+            title = a_title.get_text(" ", strip=True)
+            snippet = snippet_elem.get_text(" ", strip=True) if snippet_elem else ""
+            if href and title:
+                results.append({"url": href, "title": title, "snippet": snippet})
+                if len(results) >= max_results:
+                    break
+    return results

@@ -333,10 +333,14 @@ def find_openalex_id_for_person(
     openalex_authorships: list[dict],
 ) -> str | None:
     """Given the authorship list from a paper, find the OpenAlex author ID for person_name."""
-    name_tokens = [t.lower() for t in person_name.split() if len(t) > 2]
+    name_tokens = [
+        t.lower().rstrip(".,")
+        for t in person_name.split()
+        if len(t) > 2 and t.lower().rstrip(".,") not in ("dr", "prof", "shri", "smt")
+    ]
     for auth in openalex_authorships:
         name = auth.get("name", "").lower()
-        if all(t in name for t in name_tokens):
+        if name_tokens and all(t in name for t in name_tokens):
             return auth.get("openalex_id")
     return None
 

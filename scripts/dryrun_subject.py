@@ -306,34 +306,42 @@ def run_dryrun(
     gen_parts: list[str] = []
     for p in pivots:
         gen_parts.extend(
-            [p.get("title", ""), p.get("description", ""), p.get("location", "")]
+            [
+                p.get("title") or "",
+                p.get("description") or "",
+                p.get("location") or "",
+            ]
         )
     for inq in all_inquiries:
         gen_parts.extend(
             [
-                inq.get("fact_anchor", ""),
-                inq.get("deductive_question", ""),
-                inq.get("offline_archive_location", ""),
-                inq.get("offline_custodian", ""),
+                inq.get("fact_anchor") or "",
+                inq.get("deductive_question") or "",
+                inq.get("offline_archive_location") or "",
+                inq.get("offline_custodian") or "",
             ]
         )
-        gen_parts.extend(inq.get("probe_queries", []))
-        gen_parts.extend(inq.get("expected_paper_trails", []))
+        gen_parts.extend([q for q in (inq.get("probe_queries") or []) if q])
+        gen_parts.extend([t for t in (inq.get("expected_paper_trails") or []) if t])
     for r in atlas_online + atlas_offline:
         gen_parts.extend(
             [
-                r.get("category_name", ""),
-                r.get("offline_repository_name", ""),
-                r.get("offline_custodian", ""),
-                r.get("custom_search_query", ""),
+                r.get("category_name") or "",
+                r.get("offline_repository_name") or "",
+                r.get("offline_custodian") or "",
+                r.get("custom_search_query") or "",
             ]
         )
     for d in dorks:
         gen_parts.extend(
-            [d.get("title", ""), d.get("query", ""), d.get("description", "")]
+            [
+                d.get("title") or "",
+                d.get("query") or "",
+                d.get("description") or "",
+            ]
         )
 
-    generated_text = " ".join(gen_parts)
+    generated_text = " ".join(str(p) for p in gen_parts if p)
 
     # Subject's own input text (legitimate context)
     sub_parts: list[str] = [

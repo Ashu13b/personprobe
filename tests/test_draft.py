@@ -426,6 +426,63 @@ def test_dr_yadav_saved_session_produces_policy_filtered_draft():
     )
 
 
+def test_dr_katoch_saved_session_produces_policy_filtered_draft():
+    """Deterministic draft regression test over frozen Vishwa_Mohan_Katoch fixture.
+
+    Asserts:
+    1. Sourced draft is rendered with inline citations (<ref>).
+    2. Audit passes readiness (ready=True, zero blockers, minimum independent sources).
+    3. Differential residue check finds zero Yadav terms.
+    4. Sourced content matches expected sections and key claims.
+    5. Draft QA findings: captures known cosmetic warnings/errors without asserting qa.passed.
+    """
+    from scripts.dryrun_subject import check_differential_residue, DEFAULT_BLOCKLIST
+    from adapters.wiki.draft_qa import qa_draft
+
+    session_path = Path(__file__).parent / "fixtures" / "Vishwa_Mohan_Katoch.json"
+    profile = PersonProfile(**json.loads(session_path.read_text())["profile"])
+
+    audit = audit_profile(profile)
+    wikitext = render_draft(profile, audit)
+
+    assert audit.ready is True
+    assert len(audit.blockers) == 0
+    assert audit.eligible_claim_count >= 10
+    assert audit.independent_source_count >= 2
+
+    # Draft content & citations
+    assert "'''Vishwa Mohan Katoch'''" in wikitext
+    assert wikitext.count("{{cite web") >= 5
+    assert "<ref" in wikitext
+    assert "{{Draft article}}" in wikitext
+    assert "{{Infobox scientist" in wikitext
+    assert "Director-General of the Indian Council of Medical Research" in wikitext
+    assert "M.D. in Microbiology" in wikitext
+    assert "All India Institute of Medical Sciences (AIIMS)" in wikitext
+    assert "Director of the JALMA institute" in wikitext
+    assert "==Selected publications==" in wikitext
+    assert "Mycobacterium tuberculosis" in wikitext
+    assert "==Awards and recognition==" in wikitext
+    assert "National Academy of Sciences, India (FNASc)" in wikitext
+    assert "==References==" in wikitext
+    assert "{{reflist}}" in wikitext
+
+    # Zero differential residue from Yadav/CCSHAU blocklist
+    subject_context = f"{profile.name} {profile.field or ''} {profile.affiliation or ''}"
+    passed, violations = check_differential_residue(
+        wikitext, subject_context, blocklist=DEFAULT_BLOCKLIST
+    )
+    assert passed is True, f"Differential residue leaked into Katoch draft: {violations}"
+
+    # Draft QA audit: verify report structure
+    profile.wikitext_en = wikitext
+    qa = qa_draft(profile)
+    assert qa.counts.get("error", 0) <= 5
+    assert qa.counts.get("warning", 0) >= 1
+    # Real news/bio-sourced stub carries known title truncation warnings/errors and dup claims
+    assert any(f.id == "dirty_title" for f in qa.findings)
+
+
 def test_audit_accepts_sourced_research_stay_as_career_activity():
     annual = _source("https://institute.example.test/annual-report", independent=False)
     news_one = _source("https://news.example.test/a")

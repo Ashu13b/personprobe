@@ -147,7 +147,11 @@ def run_dryrun(
             method="POST",
             data={"profile_name": profile_name},
         )
-        wikitext_en = draft_res.get("wikitext_en") or ""
+        wikitext_en = (
+            draft_res.get("wikitext_en")
+            or draft_res.get("profile", {}).get("wikitext_en")
+            or ""
+        )
 
         # 4. Draft QA
         qa_res = _http_request(

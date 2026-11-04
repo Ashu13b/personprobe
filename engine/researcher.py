@@ -81,10 +81,8 @@ def _sweep_news(
     limit: int = 20,
 ) -> list[Source]:
     """Site-restricted searches across major national outlets plus multilingual queries.
-    Parallelizes top outlet queries with bounded concurrency to keep discovery fast.
+    Bounded query sequence across top outlets to keep discovery fast.
     """
-    from concurrent.futures import ThreadPoolExecutor
-
     disambig = _disambiguator(affiliation, field)
     # Target top national English & vernacular dailies
     primary_outlets = (
@@ -101,14 +99,13 @@ def _sweep_news(
     sources: list[Source] = []
     seen: set[str] = set()
 
-    with ThreadPoolExecutor(max_workers=min(5, len(queries))) as executor:
-        for hits in executor.map(_search_web, queries):
-            for result in hits:
-                if result.url not in seen:
-                    seen.add(result.url)
-                    sources.append(result)
-            if len(sources) >= limit:
-                break
+    for query in queries:
+        for result in _search_web(query):
+            if result.url not in seen:
+                seen.add(result.url)
+                sources.append(result)
+        if len(sources) >= limit:
+            break
     return sources
 
 

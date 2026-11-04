@@ -126,8 +126,8 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     assert profile.discovery_legs.get("web_search") in ("none", "duckduckgo", "google_cse", "mobile_bridge", "failed_all")
     assert profile.discovery_legs.get("active_id_search") == "ok"
     assert profile.discovery_legs.get("openalex") == "imported_2"
-    assert "institution_crawl" in profile.discovery_legs
-    assert "profile_crawl" in profile.discovery_legs
+    assert profile.discovery_legs.get("institution_crawl") == "deferred"
+    assert profile.discovery_legs.get("profile_crawl") == "deferred"
 
     # C. Sources merged and deduplicated via canonical_url:
     # base_source_1 (doi:10.1016/j.lep.2020.01) and W1 (dx.doi.org/10.1016/j.lep.2020.01/) should dedup to 1
@@ -135,9 +135,8 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     doi_sources = [u for u in urls if "10.1016/j.lep.2020.01" in u]
     assert len(doi_sources) == 1, f"Expected 1 canonical DOI source, found: {doi_sources}"
 
-    # D. OpenAlex distinct work and crawled pages present
+    # D. OpenAlex distinct work present and crawl deferred
     assert any("Distinct OpenAlex Work" in s.title for s in profile.sources)
-    assert any("institution.edu" in s.url for s in profile.sources)
 
     # E. HARD RULE 1: Sources ONLY. Zero claims created or approved.
     assert len(profile.claims) == 0, "No claims should be created by research_start discovery!"
@@ -250,4 +249,32 @@ def test_researcher_id_namesake_guard_rejects_decoy():
     validated = validated_new_ids(candidate_ids, "Dr. Vishwa Mohan Katoch")
     assert "researchgate" not in validated, "Namesake decoy Kiran Katoch must be rejected!"
     assert validated.get("google_scholar") == "VM_Katoch_Agra"
+
+
+def test_research_start_defers_crawl_and_fetch(monkeypatch):
+    """Verify research/start discovery defers heavy recursive crawl off synchronous path."""
+    import engine.crawler as crawler_mod
+
+    # Track if crawler or heavy fetcher are called during start
+    crawl_called = False
+    def fail_crawl(*args, **kwargs):
+        nonlocal crawl_called
+        crawl_called = True
+        raise AssertionError("crawl should not be called synchronously during research_start!")
+
+    monkeypatch.setattr(crawler_mod, "crawl", fail_crawl)
+
+    # Mock auto sources & IDs to keep unit test isolated
+    monkeypatch.setattr(rr, "fetch_auto_sources", lambda name, field, affil: ([], None))
+    monkeypatch.setattr(r_ids, "search_researcher_ids", lambda name, field, affil: {})
+    monkeypatch.setattr(oa, "search_author", lambda name, affil: [])
+
+    profile = PersonProfile(name="Test Fast Start")
+    req = ResearchRequest(name="Test Fast Start", field="Physics")
+    _populate_initial_sources(profile, req)
+
+    assert crawl_called is False, "Inline crawl must be deferred off synchronous path!"
+    assert profile.discovery_legs.get("profile_crawl") == "deferred"
+    assert profile.discovery_legs.get("institution_crawl") == "deferred"
+
 

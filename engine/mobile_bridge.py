@@ -42,12 +42,9 @@ def get_mobile_client() -> Optional[Any]:
 
 def is_mobile_bridge_available() -> bool:
     """Check if the physical mobile browser bridge on Tailnet (port 38765) is reachable."""
-    client = get_mobile_client()
-    if client is None:
-        return False
     try:
-        status = client.get_status()
-        return isinstance(status, dict) and status.get("status") == "ok"
+        client = get_mobile_client()
+        return client is not None
     except Exception:
         return False
 

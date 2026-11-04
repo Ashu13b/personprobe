@@ -80,7 +80,10 @@ def _sweep_news(
     nationality: str | None = None,
     limit: int = 20,
 ) -> list[Source]:
-    """Site-restricted searches across major national & regional outlets plus multilingual queries."""
+    """Site-restricted searches across major national & regional outlets plus multilingual queries.
+    Parallelizes outlet queries and bounds total search latency to keep discovery fast.
+    """
+    from concurrent.futures import ThreadPoolExecutor
     from .multilingual_search import build_bilingual_queries, get_regional_news_outlets
 
     disambig = _disambiguator(affiliation, field)
@@ -106,13 +109,14 @@ def _sweep_news(
 
     sources: list[Source] = []
     seen: set[str] = set()
-    for query in queries:
-        if len(sources) >= limit:
-            break
-        for result in _search_web(query):
-            if result.url not in seen:
-                seen.add(result.url)
-                sources.append(result)
+
+    # Query major outlets in parallel with bounded workers to prevent serialized timeout crawl
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        for hits in executor.map(_search_web, queries[:12]):
+            for result in hits:
+                if result.url not in seen:
+                    seen.add(result.url)
+                    sources.append(result)
             if len(sources) >= limit:
                 break
     return sources
@@ -123,14 +127,12 @@ def fetch_auto_sources(
     field: str | None = None,
     affiliation: str | None = None,
 ) -> tuple[list[Source], str | None]:
-    """Returns (sources, s2_author_id). s2_author_id is None if no S2 match found."""
+    """Returns (sources, s2_author_id). s2_author_id is None if no S2 match found.
+    Parallelizes S2, academic DDG, bio search, and news sweep to keep start fast.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
     sources: list[Source] = []
-    s2_sources, s2_author_id = _semantic_scholar(name, affiliation)
-    sources.extend(s2_sources)
-    # Academic-context search (field + affiliation)
-    sources.extend(_google_cse(name, field, affiliation))
-    sources.extend(_duckduckgo_html(name, field, affiliation))
-    # News/biography search — name + one disambiguator to avoid wrong-person results
     disambig = (
         (affiliation or "").split()[0]
         if affiliation
@@ -139,13 +141,40 @@ def fetch_auto_sources(
         else ""
     )
     bio_query = f'"{name}" {disambig}'.strip()
-    bio_sources = _search_web(bio_query)
+
+    def _get_s2():
+        return _semantic_scholar(name, affiliation)
+
+    def _get_academic_ddg():
+        academic_sources: list[Source] = []
+        academic_sources.extend(_google_cse(name, field, affiliation))
+        academic_sources.extend(_duckduckgo_html(name, field, affiliation))
+        return academic_sources
+
+    def _get_bio():
+        return _search_web(bio_query)
+
+    def _get_news():
+        return _sweep_news(name, affiliation, field)
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        f_s2 = executor.submit(_get_s2)
+        f_acad = executor.submit(_get_academic_ddg)
+        f_bio = executor.submit(_get_bio)
+        f_news = executor.submit(_get_news)
+
+        s2_sources, s2_author_id = f_s2.result()
+        acad_sources = f_acad.result()
+        bio_sources = f_bio.result()
+        news_sources = f_news.result()
+
+    sources.extend(s2_sources)
+    sources.extend(acad_sources)
     seen = {s.url for s in sources}
     sources.extend(s for s in bio_sources if s.url not in seen)
+    seen.update(s.url for s in bio_sources)
+    sources.extend(s for s in news_sources if s.url not in seen)
 
-    # National-outlet sweep for independent news coverage (finding all reliable links)
-    news_sweep = _sweep_news(name, affiliation, field)
-    sources.extend(s for s in news_sweep if s.url not in seen)
     sources = [s for s in sources if not is_junk_source_url(s.url)]
     return sources, s2_author_id
 
@@ -399,7 +428,7 @@ def _duckduckgo_html(
     try:
         from ddgs import DDGS
 
-        with DDGS(timeout=3) as ddgs:
+        with DDGS(timeout=2) as ddgs:
             results = list(ddgs.text(query, max_results=10))
         if results:
             LAST_WEB_SEARCH_TRANSPORT = "duckduckgo"
@@ -407,12 +436,15 @@ def _duckduckgo_html(
         results = []
 
     if not results:
-        # Fall back to mobile bridge if DDG library failed or was blocked
+        # Fall back to mobile bridge if DDG library failed or was blocked (time-boxed to 2.5s)
         try:
+            from concurrent.futures import ThreadPoolExecutor
             from .mobile_bridge import is_mobile_bridge_available, search_via_mobile_bridge
 
             if is_mobile_bridge_available():
-                results = search_via_mobile_bridge(query, max_results=10)
+                with ThreadPoolExecutor(max_workers=1) as bridge_ex:
+                    future = bridge_ex.submit(search_via_mobile_bridge, query, max_results=10)
+                    results = future.result(timeout=2.5)
                 if results:
                     LAST_WEB_SEARCH_TRANSPORT = "mobile_bridge"
         except Exception:
@@ -502,7 +534,7 @@ def _search_web(query: str) -> list[Source]:
     try:
         from ddgs import DDGS
 
-        with DDGS(timeout=3) as ddgs:
+        with DDGS(timeout=2) as ddgs:
             results = list(ddgs.text(query, max_results=8))
         if results:
             LAST_WEB_SEARCH_TRANSPORT = "duckduckgo"
@@ -522,10 +554,14 @@ def _search_web(query: str) -> list[Source]:
         pass
 
     try:
+        from concurrent.futures import ThreadPoolExecutor
         from .mobile_bridge import is_mobile_bridge_available, search_via_mobile_bridge
 
         if is_mobile_bridge_available():
-            bridge_results = search_via_mobile_bridge(query, max_results=8)
+            with ThreadPoolExecutor(max_workers=1) as bridge_ex:
+                future = bridge_ex.submit(search_via_mobile_bridge, query, max_results=8)
+                bridge_results = future.result(timeout=2.5)
+
             if bridge_results:
                 LAST_WEB_SEARCH_TRANSPORT = "mobile_bridge"
                 return [

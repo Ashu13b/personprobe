@@ -366,11 +366,14 @@ def do_answer(
     job_dict = json.loads(job_path.read_text(encoding="utf-8"))
 
     # Resolve input: either path to JSON file or raw JSON string
-    p = Path(json_input)
-    if p.exists() and p.is_file():
-        answer_str = p.read_text(encoding="utf-8").strip()
-    else:
-        answer_str = json_input.strip()
+    answer_str = json_input.strip()
+    if not (answer_str.startswith("{") or answer_str.startswith("[")):
+        try:
+            p = Path(json_input)
+            if p.exists() and p.is_file():
+                answer_str = p.read_text(encoding="utf-8").strip()
+        except OSError:
+            pass
 
     validate_answer(job_dict, answer_str)
     # Re-serialize to canonical JSON string
@@ -483,7 +486,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
-    repo_path = args.repo or ROOT_DIR
+    repo_path = resolve_repo_root(args.repo)
     jobs_dir = repo_path / "agent_jobs"
 
     if args.command == "list":
@@ -491,9 +494,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Pending jobs: {len(items)}")
         for it in items:
             print(f"- [{it['kind']}] {it['id']}")
+            if it.get("person"):
+                print(f"  Person: {it['person']}")
             if it["url"]:
                 print(f"  URL: {it['url']}")
-            print(f"  Content: {it['content_preview']}\n")
+            print(f"  Content: {it['content']}\n")
         return 0
 
     elif args.command == "answer":

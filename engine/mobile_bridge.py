@@ -106,6 +106,7 @@ def fetch_via_mobile_bridge(
                 "text": text,
                 "url": dom.get("url", url),
                 "links": content.get("links", []),
+                "raw_html": content.get("html", "") or dom.get("html", ""),
                 "has_captcha": captcha,
             }
         except Exception as e:
@@ -113,3 +114,50 @@ def fetch_via_mobile_bridge(
             t.status = "exception"
             t.note = str(e)[:120]
             return None
+
+
+def search_via_mobile_bridge(
+    query: str, max_results: int = 10
+) -> list[dict[str, str]]:
+    """Execute a web search query via the mobile browser bridge (e.g. DDG HTML) to bypass bot-walls.
+
+    Returns list of dicts with {"url": str, "title": str, "snippet": str}.
+    """
+    if not is_mobile_bridge_available():
+        return []
+
+    from urllib.parse import quote_plus, parse_qs, urlsplit
+
+    search_url = f"https://html.duckduckgo.com/html/?q={quote_plus(query)}"
+    res = fetch_via_mobile_bridge(search_url, wait_seconds=2)
+    if not res:
+        return []
+
+    links = res.get("links", [])
+    results: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+
+    for lk in links:
+        href = lk.get("href", "")
+        text = lk.get("text", "").strip()
+        if not href or href.startswith("https://html.duckduckgo.com"):
+            continue
+
+        actual_url = href
+        if "uddg=" in href:
+            qs = parse_qs(urlsplit(href).query)
+            if "uddg" in qs and qs["uddg"]:
+                actual_url = qs["uddg"][0]
+
+        if not actual_url.startswith(("http://", "https://")):
+            continue
+        if "duckduckgo.com" in actual_url:
+            continue
+
+        if actual_url not in seen_urls and text:
+            seen_urls.add(actual_url)
+            results.append({"url": actual_url, "title": text, "snippet": text})
+            if len(results) >= max_results:
+                break
+
+    return results

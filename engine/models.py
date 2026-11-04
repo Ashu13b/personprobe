@@ -431,6 +431,9 @@ class PersonProfile(BaseModel):
     # Which IDs have been validated against affiliation / ORCID API
     confirmed_ids: dict[str, bool] = Field(default_factory=dict)
 
+    # Diagnostic recording of discovery legs executed at research/start
+    discovery_legs: dict[str, str] = Field(default_factory=dict)
+
     # Draft outputs
     wikitext_en: Optional[str] = None
     wikitext_hi: Optional[str] = None

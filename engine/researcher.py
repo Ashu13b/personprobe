@@ -389,24 +389,43 @@ def _google_cse(name: str, field: str | None, affiliation: str | None) -> list[S
 def _duckduckgo_html(
     name: str, field: str | None, affiliation: str | None
 ) -> list[Source]:
-    """DuckDuckGo web search via ddgs library — fallback when Google CSE is not configured."""
+    """DuckDuckGo web search via ddgs library or mobile browser bridge fallback."""
+    global LAST_WEB_SEARCH_TRANSPORT
     if os.environ.get("GOOGLE_CSE_KEY"):
         return []  # skip if Google is available
 
     query = " ".join(filter(None, [f'"{name}"', field, affiliation]))
+    results = []
     try:
         from ddgs import DDGS
 
-        with DDGS() as ddgs:
+        with DDGS(timeout=3) as ddgs:
             results = list(ddgs.text(query, max_results=10))
+        if results:
+            LAST_WEB_SEARCH_TRANSPORT = "duckduckgo"
     except Exception:
-        return []
+        results = []
+
+    if not results:
+        # Fall back to mobile bridge if DDG library failed or was blocked
+        try:
+            from .mobile_bridge import is_mobile_bridge_available, search_via_mobile_bridge
+
+            if is_mobile_bridge_available():
+                results = search_via_mobile_bridge(query, max_results=10)
+                if results:
+                    LAST_WEB_SEARCH_TRANSPORT = "mobile_bridge"
+        except Exception:
+            pass
+
+    if not results and LAST_WEB_SEARCH_TRANSPORT == "none":
+        LAST_WEB_SEARCH_TRANSPORT = "failed_all"
 
     sources = []
     for r in results:
-        url = r.get("href", "")
+        url = r.get("href") or r.get("url") or ""
         title = r.get("title", "")
-        snippet = r.get("body", "")
+        snippet = r.get("body") or r.get("snippet") or ""
         if url and title:
             sources.append(
                 Source(
@@ -446,8 +465,13 @@ _SLOT_QUERIES: dict[str, str] = {
 }
 
 
+# Diagnostic tracking of the last active web search transport
+LAST_WEB_SEARCH_TRANSPORT: str = "none"
+
+
 def _search_web(query: str) -> list[Source]:
-    """Run an arbitrary query through Google CSE or DDG."""
+    """Run an arbitrary query through Google CSE, DDG, or mobile browser bridge."""
+    global LAST_WEB_SEARCH_TRANSPORT
     key = os.environ.get("GOOGLE_CSE_KEY")
     cx = os.environ.get("GOOGLE_CSE_CX")
     if key and cx:
@@ -459,6 +483,7 @@ def _search_web(query: str) -> list[Source]:
             )
             resp.raise_for_status()
             items = resp.json().get("items", [])
+            LAST_WEB_SEARCH_TRANSPORT = "google_cse"
             return [
                 Source(
                     url=item["link"],
@@ -477,22 +502,49 @@ def _search_web(query: str) -> list[Source]:
     try:
         from ddgs import DDGS
 
-        with DDGS() as ddgs:
+        with DDGS(timeout=3) as ddgs:
             results = list(ddgs.text(query, max_results=8))
-        return [
-            Source(
-                url=r["href"],
-                title=r.get("title", r["href"]),
-                publisher=_extract_publisher(r["href"]),
-                reliability=SourceReliability.primary,
-                snippet=r.get("body", "")[:400],
-                fetched_by="duckduckgo",
-            )
-            for r in results
-            if r.get("href")
-        ]
+        if results:
+            LAST_WEB_SEARCH_TRANSPORT = "duckduckgo"
+            return [
+                Source(
+                    url=r["href"],
+                    title=r.get("title", r["href"]),
+                    publisher=_extract_publisher(r["href"]),
+                    reliability=SourceReliability.primary,
+                    snippet=r.get("body", "")[:400],
+                    fetched_by="duckduckgo",
+                )
+                for r in results
+                if r.get("href")
+            ]
     except Exception:
-        return []
+        pass
+
+    try:
+        from .mobile_bridge import is_mobile_bridge_available, search_via_mobile_bridge
+
+        if is_mobile_bridge_available():
+            bridge_results = search_via_mobile_bridge(query, max_results=8)
+            if bridge_results:
+                LAST_WEB_SEARCH_TRANSPORT = "mobile_bridge"
+                return [
+                    Source(
+                        url=r["url"],
+                        title=r.get("title", r["url"]),
+                        publisher=_extract_publisher(r["url"]),
+                        reliability=SourceReliability.primary,
+                        snippet=r.get("snippet", "")[:400],
+                        fetched_by="mobile_bridge_search",
+                    )
+                    for r in bridge_results
+                    if r.get("url")
+                ]
+    except Exception:
+        pass
+
+    LAST_WEB_SEARCH_TRANSPORT = "failed_all"
+    return []
 
 
 def targeted_slot_search(

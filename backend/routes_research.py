@@ -41,9 +41,10 @@ from engine.researcher import (
     fetch_auto_sources,
     fetch_url_source,
     fetch_url_source_with_paste,
-    fetch_institution_sources,
+    fetch_institution_sources,  # re-exported for module API compatibility
     targeted_slot_search,
 )
+__all__ = ["fetch_institution_sources"]
 from engine.classifier import classify_sources
 from engine.notability import score_notability
 from engine.extractor import extract_claims, find_missing_slots

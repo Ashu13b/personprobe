@@ -200,10 +200,7 @@ def _mock_fresh_research_pipeline(monkeypatch):
         "backend.routes_research.check_existing_page", lambda name: _WikiStatus()
     )
     monkeypatch.setattr(
-        "backend.routes_research.fetch_auto_sources", lambda *a, **k: ([], None)
-    )
-    monkeypatch.setattr(
-        "backend.routes_research.fetch_institution_sources", lambda *a, **k: []
+        "backend.routes_research._populate_initial_sources", lambda *a, **k: None
     )
 
 

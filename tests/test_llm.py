@@ -16,6 +16,7 @@ def test_extract_claims_is_noop_under_stub():
 
 
 def test_get_provider_uses_vertex_when_available(monkeypatch):
+    monkeypatch.delenv("PERSONPROBE_LLM", raising=False)
     monkeypatch.setenv("ANTHROPIC_VERTEX_PROJECT_ID", "proj")
     monkeypatch.setenv("CLOUD_ML_REGION", "us-east5")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
@@ -38,6 +39,7 @@ def test_get_provider_uses_vertex_when_available(monkeypatch):
 
 
 def test_get_provider_falls_back_to_agent_when_vertex_unavailable(monkeypatch):
+    monkeypatch.delenv("PERSONPROBE_LLM", raising=False)
     monkeypatch.setenv("ANTHROPIC_VERTEX_PROJECT_ID", "proj")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     import anthropic

@@ -1,4 +1,4 @@
-<!-- context-kit DEPS_MAP · v0.2.0 · generated 2026-10-25 13:30 UTC · sha c1e5676 · host instance-trading-bot-restored -->
+<!-- context-kit DEPS_MAP · v0.2.0 · generated 2026-11-04 03:25 UTC · sha f2788d4 · host instance-trading-bot-restored -->
 
 # DEPS_MAP
 
@@ -53,5 +53,6 @@ External packages and required env keys (names only — no values).
 - `GEMINI_MODEL`
 - `GOOGLE_CSE_CX`
 - `GOOGLE_CSE_KEY`
+- `OPENAI_API_KEY`
 - `PERSONPROBE_HEADLESS`
 - `PERSONPROBE_LLM`

@@ -562,16 +562,80 @@ def _item_year(item: DraftEvidence) -> int | None:
     return None
 
 
+def _normalize_fact_key(field: str, text: str) -> tuple[str, str]:
+    """Normalize statement key by lowercasing, collapsing whitespace, and stripping trailing punctuation."""
+    cleaned = re.sub(r"\s+", " ", text).strip().rstrip(".,;:!?").lower()
+    return field, cleaned
+
+
+def _render_citations(items: Iterable[DraftEvidence], used_refs: set[str]) -> str:
+    """Render deduplicated and ranked citation tags for a group of evidence items.
+
+    Dedupes sources by normalized URL within the statement, ranks best/independent
+    first, and emits each citation via _citation(source, used_refs).
+    """
+    from engine.claim_selection import source_citation_rank
+
+    sources_by_url: dict[str, Source] = {}
+    for item in items:
+        norm_url = normalize_url(item.source.url)
+        if norm_url not in sources_by_url:
+            sources_by_url[norm_url] = item.source
+    distinct_sources = list(sources_by_url.values())
+    distinct_sources.sort(key=source_citation_rank, reverse=True)
+
+    seen_statement_refs: set[str] = set()
+    cites: list[str] = []
+    for source in distinct_sources:
+        ref_name = _ref_name(source.url)
+        if ref_name in seen_statement_refs:
+            continue
+        seen_statement_refs.add(ref_name)
+        cite = _citation(source, used_refs)
+        if cite:
+            cites.append(cite)
+    return "".join(cites)
+
+
+def _render_fact_citations(
+    target_item: DraftEvidence,
+    all_evidence: Iterable[DraftEvidence],
+    used_refs: set[str],
+) -> str:
+    key = _normalize_fact_key(target_item.claim.field, _claim_text(target_item))
+    matching = [
+        it
+        for it in all_evidence
+        if _normalize_fact_key(it.claim.field, _claim_text(it)) == key
+    ]
+    return _render_citations(matching or [target_item], used_refs)
+
+
 def _render_items(
     items: list[DraftEvidence],
     used_refs: set[str],
     limit: int | None = None,
     bulleted: bool = False,
+    used_facts: set[tuple[str, str]] | None = None,
 ) -> list[str]:
-    selected = items if limit is None else items[:limit]
-    rendered = [
-        f"{_claim_text(item)}{_citation(item.source, used_refs)}." for item in selected
-    ]
+    groups: dict[tuple[str, str], list[DraftEvidence]] = {}
+    for item in items:
+        k = _normalize_fact_key(item.claim.field, _claim_text(item))
+        if used_facts and k in used_facts:
+            continue
+        groups.setdefault(k, []).append(item)
+
+    selected_groups = (
+        list(groups.items()) if limit is None else list(groups.items())[:limit]
+    )
+    rendered = []
+    for k, group_items in selected_groups:
+        if used_facts is not None:
+            used_facts.add(k)
+        rep_text = _claim_text(group_items[0])
+        citations = _render_citations(group_items, used_refs)
+        rendered.append(f"{rep_text}{citations}.")
+
     if bulleted:
         return [f"* {line}" for line in rendered]
     return [" ".join(rendered)] if rendered else []
@@ -624,6 +688,7 @@ def render_draft(profile: PersonProfile, audit: DraftAudit | None = None) -> str
         by_field[item.claim.field].append(item)
 
     used_refs: set[str] = set()
+    used_facts: set[tuple[str, str]] = set()
     name = _display_name(profile)
     lead_parts: list[str] = []
 
@@ -635,10 +700,12 @@ def render_draft(profile: PersonProfile, audit: DraftAudit | None = None) -> str
     if field_item:
         article = "an" if nationality[:1].lower() in "aeiou" else "a"
         prefix = f"{nationality} " if nationality else ""
+        citations = _render_fact_citations(field_item, audit.evidence, used_refs)
         lead_parts.append(
             f"'''{name}''' is {article} {prefix}scientist whose research focuses on {_claim_text(field_item)}"
-            f"{_citation(field_item.source, used_refs)}."
+            f"{citations}."
         )
+        used_facts.add(_normalize_fact_key(field_item.claim.field, _claim_text(field_item)))
     else:
         lead_item = affiliation_item or position_item
         assert lead_item is not None
@@ -646,23 +713,31 @@ def render_draft(profile: PersonProfile, audit: DraftAudit | None = None) -> str
             f"'''{name}''' is a scientist{_citation(lead_item.source, used_refs)}."
         )
     if position_item:
+        citations = _render_fact_citations(position_item, audit.evidence, used_refs)
         lead_parts.append(
-            f"{_claim_text(position_item)}{_citation(position_item.source, used_refs)}."
+            f"{_claim_text(position_item)}{citations}."
         )
+        used_facts.add(_normalize_fact_key(position_item.claim.field, _claim_text(position_item)))
     elif affiliation_item:
+        citations = _render_fact_citations(affiliation_item, audit.evidence, used_refs)
         lead_parts.append(
-            f"{_claim_text(affiliation_item)}{_citation(affiliation_item.source, used_refs)}."
+            f"{_claim_text(affiliation_item)}{citations}."
         )
+        used_facts.add(_normalize_fact_key(affiliation_item.claim.field, _claim_text(affiliation_item)))
     known_item = next(iter(by_field.get("known_for", [])), None)
     if known_item:
+        citations = _render_fact_citations(known_item, audit.evidence, used_refs)
         lead_parts.append(
-            f"{_claim_text(known_item)}{_citation(known_item.source, used_refs)}."
+            f"{_claim_text(known_item)}{citations}."
         )
+        used_facts.add(_normalize_fact_key(known_item.claim.field, _claim_text(known_item)))
     award_item = next(iter(by_field.get("award", [])), None)
     if award_item:
+        citations = _render_fact_citations(award_item, audit.evidence, used_refs)
         lead_parts.append(
-            f"{_claim_text(award_item)}{_citation(award_item.source, used_refs)}."
+            f"{_claim_text(award_item)}{citations}."
         )
+        used_facts.add(_normalize_fact_key(award_item.claim.field, _claim_text(award_item)))
 
     lines = [
         "{{Draft article}}",
@@ -697,9 +772,11 @@ def render_draft(profile: PersonProfile, audit: DraftAudit | None = None) -> str
             items.sort(key=lambda item: _item_year(item) or 0, reverse=True)
         else:
             items.sort(key=lambda item: _item_year(item) or 9999)
-        lines.extend(
-            ["", f"=={title}==", *_render_items(items, used_refs, limit, bulleted)]
+        sec_lines = _render_items(
+            items, used_refs, limit, bulleted, used_facts=used_facts
         )
+        if sec_lines:
+            lines.extend(["", f"=={title}==", *sec_lines])
 
     lines.extend(
         [

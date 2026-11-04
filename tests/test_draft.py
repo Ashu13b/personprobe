@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -481,6 +482,120 @@ def test_dr_katoch_saved_session_produces_policy_filtered_draft():
     assert qa.counts.get("warning", 0) >= 1
     # Real news/bio-sourced stub carries known title truncation warnings/errors and dup claims
     assert any(f.id == "dirty_title" for f in qa.findings)
+
+    # Dedup assertions:
+    # 1. Statements must not repeat
+    lines = [
+        line
+        for line in wikitext.splitlines()
+        if not (
+            line.startswith("==")
+            or line.startswith("{{")
+            or line.startswith("[[")
+            or line.startswith("|")
+            or not line
+        )
+    ]
+    statements = []
+    for line in lines:
+        for s in re.split(r"\.\s+(?=[A-Z])", line):
+            plain = re.sub(r"<ref.*?(?:/>|</ref>)", "", s).strip().rstrip(".")
+            if plain:
+                statements.append(plain)
+    assert len(statements) == len(set(statements)), (
+        f"Duplicate statements found in draft: {[s for s in statements if statements.count(s) > 1]}"
+    )
+
+    # 2. No statement carries duplicate ref names / URLs
+    for match in re.finditer(r"((?:<ref[^>]*>(?:.*?</ref>)?)+)", wikitext):
+        refs = re.findall(r'<ref\s+name="([^"]+)"', match.group(1))
+        assert len(refs) == len(set(refs)), f"Duplicate ref in statement: {refs}"
+
+    # 3. Verified collapsed multi-citation statements
+    # M.D. in Microbiology should carry both Manipal and Lepra citations in a single statement
+    assert (
+        wikitext.count("Holds an M.D. in Microbiology") == 1
+    ), "Expected M.D. in Microbiology statement to appear exactly once"
+    # Find the citation string attached to Holds an M.D. in Microbiology
+    m = re.search(r"Holds an M\.D\. in Microbiology((?:<ref[^>]*>.*?</ref>|<ref[^>]*/>)+)\.", wikitext)
+    assert m is not None, "Holds an M.D. in Microbiology must be followed by refs"
+    refs = re.findall(r'<ref\s+name="([^"]+)"', m.group(1))
+    assert len(refs) == 2, f"Expected 2 distinct citations on M.D. in Microbiology, got: {refs}"
+
+
+def test_draft_dedup_collapses_repeated_facts_and_prevents_lead_leak():
+    """Verify that identical facts from distinct sources collapse into one statement with
+
+    multiple citations, and that facts rendered in the lead do not repeat in body sections.
+    """
+    s1 = _source("https://news1.example.com/item", independent=True)
+    s2 = _source("https://news2.example.com/item", independent=True)
+    s3 = _source("https://news3.example.com/item", independent=False)
+    s_lead = _source("https://univ.example.edu/profile", independent=False)
+
+    profile = PersonProfile(
+        name="Test Subject",
+        sources=[s1, s2, s3, s_lead],
+        claims=[
+            # Lead affiliation claim
+            Claim(
+                field="affiliation",
+                text="Test Subject is affiliated with Example University",
+                source_url=s_lead.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            # Career claim identical to lead affiliation: should NOT duplicate into Career section
+            Claim(
+                field="affiliation",
+                text="Test Subject is affiliated with Example University",
+                source_url=s1.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            # 3 distinct sources corroborating the SAME career fact
+            Claim(
+                field="career",
+                text="Served as Director of Institute from 2010 to 2015",
+                source_url=s1.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="career",
+                text="Served as Director of Institute from 2010 to 2015",
+                source_url=s2.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+            Claim(
+                field="career",
+                text="Served as Director of Institute from 2010 to 2015",
+                source_url=s3.url,
+                verification=VerificationState.confirmed,
+                draft_approved=True,
+            ),
+        ],
+    )
+
+    audit = audit_profile(profile)
+    wikitext = render_draft(profile, audit)
+
+    # 1. Career statement appears exactly ONCE
+    assert wikitext.count("Served as Director of Institute from 2010 to 2015") == 1
+
+    # 2. Career statement carries all 3 distinct citations
+    m = re.search(
+        r"Served as Director of Institute from 2010 to 2015((?:<ref[^>]*>.*?</ref>|<ref[^>]*/>)+)\.",
+        wikitext,
+    )
+    assert m is not None, "Career statement must have citations"
+    refs = re.findall(r'<ref\s+name="([^"]+)"', m.group(1))
+    assert len(refs) == 3, f"Expected 3 distinct refs, got {refs}"
+    assert len(refs) == len(set(refs)), f"Refs should be unique: {refs}"
+
+    # 3. Affiliation statement appears in the lead, but NOT duplicated in an affiliation/career section
+    assert wikitext.count("affiliated with Example University") == 1
 
 
 def test_audit_accepts_sourced_research_stay_as_career_activity():

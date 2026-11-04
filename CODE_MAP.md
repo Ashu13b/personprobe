@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-11-04 03:25 UTC · sha f2788d4 · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-11-04 03:42 UTC · sha abee5ac · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 118 files · 1035 symbols
+- Python — 118 files · 1036 symbols
 - TypeScript — 35 files · 293 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 158 files · 1331 symbols across 6 languages._
+_Total: 158 files · 1332 symbols across 6 languages._
 
 
 ## Compartments
@@ -154,7 +154,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_discarded_registry.py` — def test_record_discarded_canonical_dedup, def test_is_known_or_discarded, def test_get_known_and_discarded_canonical_urls, def test_recover_discarded, def test_get_discarded_by_reason
 - `tests/test_draft.py` — def _source, def _ready_profile, def test_audit_excludes_cv_animal_birth_and_unverified_sources, def test_audit_blocks_profiles_without_explicit_draft_approval, def test_audit_blocks_drafts_without_independent_secondary_coverage, def test_audit_warns_when_achievement_claim_rests_on_primary_source, def test_audit_no_achievement_warning_when_sources_are_independent, def test_research_action_rule_accepts_common_research_verbs, def test_birth_noise_rule_scans_source_title_too, def test_human_birth_claim_not_blocked_by_animal_rule, … +51 more
 - `tests/test_draft_hi.py` — def _sample_profile, def test_render_hindi_draft_contains_hindi_infobox_and_sections
-- `tests/test_dryrun_subject.py` — def test_differential_residue_clean, def test_differential_residue_planted_violation, def test_differential_residue_word_boundaries_and_legitimate_overlap, def test_custom_repository_state_gating, def test_harness_stage_report_mocked_http, def test_harness_resume_draft_mocked_http
+- `tests/test_dryrun_subject.py` — def test_differential_residue_clean, def test_differential_residue_planted_violation, def test_differential_residue_word_boundaries_and_legitimate_overlap, def test_custom_repository_state_gating, def test_national_umbrella_domain_relevance_gating, def test_harness_stage_report_mocked_http, def test_harness_resume_draft_mocked_http
 - `tests/test_fetcher_fallback.py` — def test_fetch_url_direct_success, def test_fetch_url_mobile_bridge_fallback, def test_fetch_url_browser_server_fallback_when_mobile_unavailable, def test_check_liveness_recovers_blocked_via_mobile_bridge, def test_fetch_telemetry_records_and_advises, def test_fetch_telemetry_cooldown_and_recheck, def test_liveness_stops_after_five_host_throttles, def test_looks_throttled_text_markers
 - `tests/test_forensics.py` — def test_seed_default_pivots_from_profile, def test_generate_forensic_queries, def test_forensic_routes, def test_generate_deductive_inquiries_unit, def test_forensic_inquiries_api
 - `tests/test_lifecycle_audit.py` — def test_audit_discovery_stage, def test_audit_provenance_stage, def test_audit_claims_stage, def test_audit_draft_stage_blocked_when_no_evidence, def test_audit_full_lifecycle

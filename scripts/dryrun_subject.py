@@ -91,7 +91,9 @@ def _http_request(
         req_headers["Content-Type"] = "application/json"
         encoded_data = json.dumps(data).encode("utf-8")
 
-    req = urllib.request.Request(url, data=encoded_data, headers=req_headers, method=method)
+    req = urllib.request.Request(
+        url, data=encoded_data, headers=req_headers, method=method
+    )
     try:
         with urllib.request.urlopen(req, timeout=45) as resp:
             body = resp.read().decode("utf-8")
@@ -119,7 +121,9 @@ def run_dryrun(
     # MODE 2: RESUME DRAFT (AFTER HUMAN APPROVAL IN UI)
     # ──────────────────────────────────────────────────────────────────────────
     if resume_draft_sid:
-        print(f"\n[RESUME DRAFT] Resuming session '{resume_draft_sid}' for subject '{name}'...")
+        print(
+            f"\n[RESUME DRAFT] Resuming session '{resume_draft_sid}' for subject '{name}'..."
+        )
         # 1. Resume session
         resume_res = _http_request(
             f"{api_base}/api/sessions/resume",
@@ -169,7 +173,9 @@ def run_dryrun(
             f"qa_passed={qa_passed}, qa_counts={qa_counts}, wikitext_chars={len(wikitext_en)}, residue={residue_str})"
         )
         if not res_passed:
-            print(f"ERROR: Differential Yadav residue detected in final draft: {violations}")
+            print(
+                f"ERROR: Differential Yadav residue detected in final draft: {violations}"
+            )
             return 1
         return 0
 
@@ -205,9 +211,7 @@ def run_dryrun(
     resolved_qid = (
         resolved_candidate.get("wikidata_id") if resolved_candidate else wikidata_id
     )
-    has_article = bool(
-        resolved_candidate and resolved_candidate.get("wikipedia_url")
-    )
+    has_article = bool(resolved_candidate and resolved_candidate.get("wikipedia_url"))
     cand_count = len(candidates)
 
     print(
@@ -218,11 +222,21 @@ def run_dryrun(
     start_payload: dict[str, Any] = {
         "name": name,
         "wikidata_id": resolved_qid,
-        "wikipedia_url": resolved_candidate.get("wikipedia_url") if resolved_candidate else None,
-        "field": (resolved_candidate.get("field") if resolved_candidate else None) or field,
-        "affiliation": (resolved_candidate.get("affiliation") if resolved_candidate else None) or affiliation,
-        "nationality": resolved_candidate.get("nationality") if resolved_candidate else None,
-        "birth_year": str(resolved_candidate.get("birth_year") or "") or None if resolved_candidate else None,
+        "wikipedia_url": resolved_candidate.get("wikipedia_url")
+        if resolved_candidate
+        else None,
+        "field": (resolved_candidate.get("field") if resolved_candidate else None)
+        or field,
+        "affiliation": (
+            resolved_candidate.get("affiliation") if resolved_candidate else None
+        )
+        or affiliation,
+        "nationality": resolved_candidate.get("nationality")
+        if resolved_candidate
+        else None,
+        "birth_year": str(resolved_candidate.get("birth_year") or "") or None
+        if resolved_candidate
+        else None,
     }
 
     research_res = _http_request(
@@ -275,7 +289,8 @@ def run_dryrun(
     all_inquiries = civic_res.get("inquiries", inquiries)
 
     matrix_res = _http_request(
-        f"{api_base}/api/forensics/atlas/matrix?profile_name={encoded_name}", method="GET"
+        f"{api_base}/api/forensics/atlas/matrix?profile_name={encoded_name}",
+        method="GET",
     )
     matrix = matrix_res.get("matrix", {})
     atlas_online = matrix.get("online_reachable", [])
@@ -290,25 +305,33 @@ def run_dryrun(
     # Collect all generated discovery text
     gen_parts: list[str] = []
     for p in pivots:
-        gen_parts.extend([p.get("title", ""), p.get("description", ""), p.get("location", "")])
+        gen_parts.extend(
+            [p.get("title", ""), p.get("description", ""), p.get("location", "")]
+        )
     for inq in all_inquiries:
-        gen_parts.extend([
-            inq.get("fact_anchor", ""),
-            inq.get("deductive_question", ""),
-            inq.get("offline_archive_location", ""),
-            inq.get("offline_custodian", ""),
-        ])
+        gen_parts.extend(
+            [
+                inq.get("fact_anchor", ""),
+                inq.get("deductive_question", ""),
+                inq.get("offline_archive_location", ""),
+                inq.get("offline_custodian", ""),
+            ]
+        )
         gen_parts.extend(inq.get("probe_queries", []))
         gen_parts.extend(inq.get("expected_paper_trails", []))
     for r in atlas_online + atlas_offline:
-        gen_parts.extend([
-            r.get("category_name", ""),
-            r.get("offline_repository_name", ""),
-            r.get("offline_custodian", ""),
-            r.get("custom_search_query", ""),
-        ])
+        gen_parts.extend(
+            [
+                r.get("category_name", ""),
+                r.get("offline_repository_name", ""),
+                r.get("offline_custodian", ""),
+                r.get("custom_search_query", ""),
+            ]
+        )
     for d in dorks:
-        gen_parts.extend([d.get("title", ""), d.get("query", ""), d.get("description", "")])
+        gen_parts.extend(
+            [d.get("title", ""), d.get("query", ""), d.get("description", "")]
+        )
 
     generated_text = " ".join(gen_parts)
 
@@ -322,7 +345,13 @@ def run_dryrun(
     for cl in profile_data.get("claims", []):
         sub_parts.append(cl.get("text", "") or "")
     for s in sources:
-        sub_parts.extend([s.get("title", "") or "", s.get("url", "") or "", s.get("snippet", "") or ""])
+        sub_parts.extend(
+            [
+                s.get("title", "") or "",
+                s.get("url", "") or "",
+                s.get("snippet", "") or "",
+            ]
+        )
 
     subject_context_text = " ".join(sub_parts)
 
@@ -345,7 +374,7 @@ def run_dryrun(
         f"\n[GATE] Session ID: {session_id} — Awaiting human verify/approve in UI.\n"
         f"Source verification and claim approval are reserved for the human editor.\n"
         f"To resume draft generation after human review in the UI, run:\n"
-        f"    python scripts/dryrun_subject.py --name \"{name}\" --resume-draft {session_id}\n"
+        f'    python scripts/dryrun_subject.py --name "{name}" --resume-draft {session_id}\n'
     )
     return 0
 
@@ -360,9 +389,15 @@ def main() -> None:
         default="http://localhost:3890",
         help="Base URL of running PersonProbe server (default: http://localhost:3890)",
     )
-    parser.add_argument("--wikidata", default=None, help="Wikidata QID hint (e.g. Q131160362)")
-    parser.add_argument("--field", default=None, help="Subject academic/professional field")
-    parser.add_argument("--affiliation", default=None, help="Subject institutional affiliation")
+    parser.add_argument(
+        "--wikidata", default=None, help="Wikidata QID hint (e.g. Q131160362)"
+    )
+    parser.add_argument(
+        "--field", default=None, help="Subject academic/professional field"
+    )
+    parser.add_argument(
+        "--affiliation", default=None, help="Subject institutional affiliation"
+    )
     parser.add_argument(
         "--resume-draft",
         default=None,

@@ -11,14 +11,20 @@ from engine.public_records_atlas import (
     register_public_repository,
     derive_subject_record_matrix,
 )
-from scripts.dryrun_subject import check_differential_residue, run_dryrun, DEFAULT_BLOCKLIST
+from scripts.dryrun_subject import (
+    check_differential_residue,
+    run_dryrun,
+    DEFAULT_BLOCKLIST,
+)
 
 
 def test_differential_residue_clean():
     """Clean generated text with no blocklist tokens must pass."""
     gen_text = "Dr. Katoch studied leprosy and mycobacterial immunology at JALMA Agra and AIIMS New Delhi."
     sub_text = "Vishwa Mohan Katoch Agra Uttar Pradesh Leprosy"
-    passed, violations = check_differential_residue(gen_text, sub_text, DEFAULT_BLOCKLIST)
+    passed, violations = check_differential_residue(
+        gen_text, sub_text, DEFAULT_BLOCKLIST
+    )
     assert passed is True
     assert violations == []
 
@@ -27,7 +33,9 @@ def test_differential_residue_planted_violation():
     """Planted blocklist term not in subject context must be flagged as violation."""
     gen_text = "Examined doctoral thesis repository at CIRB Hisar campus."
     sub_text = "Vishwa Mohan Katoch Agra Uttar Pradesh Leprosy"
-    passed, violations = check_differential_residue(gen_text, sub_text, DEFAULT_BLOCKLIST)
+    passed, violations = check_differential_residue(
+        gen_text, sub_text, DEFAULT_BLOCKLIST
+    )
     assert passed is False
     assert "cirb" in violations
     assert "hisar" in violations
@@ -36,7 +44,9 @@ def test_differential_residue_planted_violation():
 def test_differential_residue_word_boundaries_and_legitimate_overlap():
     """Word boundary matching prevents false positives like 'hau' inside Chauhan or Hauz Khas."""
     # 'hau' must not match inside 'Chauhan'
-    gen_text = "Co-authored publication with Dr. B. S. Chauhan at Hauz Khas IIT Delhi campus."
+    gen_text = (
+        "Co-authored publication with Dr. B. S. Chauhan at Hauz Khas IIT Delhi campus."
+    )
     sub_text = "Vishwa Mohan Katoch Leprosy Research"
     passed, violations = check_differential_residue(gen_text, sub_text, ["hau"])
     assert passed is True
@@ -85,7 +95,9 @@ def test_custom_repository_state_gating():
         birth_place="Agra, Uttar Pradesh",
     )
     katoch_matrix = derive_subject_record_matrix(katoch)
-    katoch_all_repos = katoch_matrix["online_reachable"] + katoch_matrix["offline_archives"]
+    katoch_all_repos = (
+        katoch_matrix["online_reachable"] + katoch_matrix["offline_archives"]
+    )
     katoch_ids = {r["category_id"] for r in katoch_all_repos}
 
     assert "test_custom_haryana_land_records" not in katoch_ids, (
@@ -114,6 +126,77 @@ def test_custom_repository_state_gating():
     }
     assert "test_custom_haryana_land_records" in yadav_ids, (
         "Haryana custom repo should be present for Haryana subject!"
+    )
+
+
+def test_national_umbrella_domain_relevance_gating():
+    """Verify that discipline-specialized national umbrella repos (e.g. KrishiKosh)
+    are gated by subject domain/discipline relevance.
+
+    For example, KrishiKosh with CCSHAU in its offline repository name must NOT leak
+    into a medical subject (Katoch) matrix, but MUST be present for an agricultural
+    subject (Yadav).
+    """
+    agri_umbrella = PublicRecordRepository(
+        category_id="test_krishikosh_agri_repository",
+        category_name="KrishiKosh Test Institutional Repository",
+        domain="academic_theses_and_faculty_publications",
+        jurisdiction_level="national",
+        state="Central / Agricultural Universities",
+        online_since_year=2010,
+        offline_cutoff_year=2009,
+        digitization_status="digitized_open_search",
+        portal_url="https://krishikosh.egranth.ac.in",
+        search_query_template='site:krishikosh.egranth.ac.in "{name}"',
+        offline_repository_name="ICAR-SAU Library / CCSHAU Nehru Library Archive",
+        offline_custodian="University Librarian",
+        offline_retrieval_method="Inter-library loan",
+        required_identifiers=["Thesis Accession No"],
+        forensic_utility_notes="MSc/PhD theses submitted to Indian agricultural universities.",
+        is_custom=True,
+    )
+    register_public_repository(agri_umbrella)
+
+    # 1. UP Medical Subject: Dr. Katoch (medical microbiology / leprosy)
+    katoch = PersonProfile(
+        name="Dr. Vishwa Mohan Katoch",
+        field="Medical Microbiology, Leprosy",
+        affiliation="National JALMA Institute for Leprosy, Agra, Uttar Pradesh",
+        birth_place="Agra, Uttar Pradesh",
+    )
+    katoch_matrix = derive_subject_record_matrix(katoch)
+    katoch_all = (
+        katoch_matrix["online_reachable"] + katoch_matrix["offline_archives"]
+    )
+    katoch_ids = {r["category_id"] for r in katoch_all}
+
+    assert "test_krishikosh_agri_repository" not in katoch_ids, (
+        "Agricultural repository must NOT be included for medical subject Katoch!"
+    )
+
+    katoch_matrix_text = " ".join(
+        f"{r.get('category_name', '')} {r.get('offline_repository_name', '')} {r.get('custom_search_query', '')}"
+        for r in katoch_all
+    )
+    katoch_context = f"{katoch.name} {katoch.affiliation} {katoch.birth_place}"
+    passed, violations = check_differential_residue(katoch_matrix_text, katoch_context)
+    assert passed is True, f"CCSHAU/Yadav residue leaked into Katoch matrix: {violations}"
+    assert "ccshau" not in katoch_matrix_text.lower(), "ccshau leaked into Katoch matrix!"
+
+    # 2. Agricultural Subject: Yadav (animal biotechnology / CIRB)
+    yadav = PersonProfile(
+        name="Prem Singh Yadav",
+        field="Animal Biotechnology, Cryopreservation",
+        affiliation="ICAR - Central Institute for Research on Buffaloes, Hisar, Haryana",
+        birth_place="Nimoth, Rewari, Haryana",
+    )
+    yadav_matrix = derive_subject_record_matrix(yadav)
+    yadav_ids = {
+        r["category_id"]
+        for r in (yadav_matrix["online_reachable"] + yadav_matrix["offline_archives"])
+    }
+    assert "test_krishikosh_agri_repository" in yadav_ids, (
+        "Agricultural repository MUST be included for agricultural/animal biotech subject Yadav!"
     )
 
 
@@ -252,7 +335,10 @@ def test_harness_stage_report_mocked_http(capsys):
     assert "research(sources=2" in captured
     assert "discovery(" in captured
     assert "residue=PASS" in captured
-    assert "[GATE] Session ID: katoch-sess-test1 — Awaiting human verify/approve in UI" in captured
+    assert (
+        "[GATE] Session ID: katoch-sess-test1 — Awaiting human verify/approve in UI"
+        in captured
+    )
 
 
 def test_harness_resume_draft_mocked_http(capsys):
@@ -264,7 +350,9 @@ def test_harness_resume_draft_mocked_http(capsys):
             "field": "Microbiology",
             "affiliation": "National JALMA Institute for Leprosy, Agra",
             "claims": [
-                {"text": "Dr. Katoch served as Director-General of ICMR from 2008 to 2015."}
+                {
+                    "text": "Dr. Katoch served as Director-General of ICMR from 2008 to 2015."
+                }
             ],
         }
     }

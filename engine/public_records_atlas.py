@@ -693,14 +693,12 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
         is_umbrella = bool(
             repo.state
             and any(
-                repo.state.startswith(p)
-                for p in ("Central", "National", "All-India")
+                repo.state.startswith(p) for p in ("Central", "National", "All-India")
             )
         )
         is_state_specific = (
             repo.jurisdiction_level in ("state", "district")
             or bool(repo.state and not is_umbrella)
-            or bool(repo.is_custom and repo.state and not is_umbrella)
         )
 
         if is_state_specific:
@@ -728,6 +726,41 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
                         rc in target_geo or target_geo in rc for rc in repo_cities
                     ):
                         continue
+
+        # Check domain/discipline relevance for specialized national umbrella repositories
+        repo_disc_text = (
+            f"{repo.category_id} {repo.category_name} {repo.domain} {repo.state or ''}"
+        ).lower()
+        is_agri_repo = any(
+            w in repo_disc_text
+            for w in ("krishikosh", "agricultural", "agriculture", "icar-sau")
+        )
+        if is_agri_repo:
+            sub_field_text = (
+                f"{profile.field or ''} {profile.known_for or ''} "
+                f"{profile.affiliation or ''} {' '.join(context.field_keywords)}"
+            ).lower()
+            agri_tokens = (
+                "agricultur",
+                "agri",
+                "crop",
+                "soil",
+                "horticultur",
+                "agronom",
+                "animal",
+                "buffalo",
+                "cattle",
+                "veterinar",
+                "dairy",
+                "icar",
+                "husbandry",
+                "farm",
+                "fishery",
+                "silvicultur",
+                "forestry",
+            )
+            if not any(t in sub_field_text for t in agri_tokens):
+                continue
 
         repo_dict = repo.model_dump()
         template = repo.search_query_template or ""

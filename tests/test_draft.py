@@ -469,11 +469,15 @@ def test_dr_katoch_saved_session_produces_policy_filtered_draft():
     assert "{{reflist}}" in wikitext
 
     # Zero differential residue from Yadav/CCSHAU blocklist
-    subject_context = f"{profile.name} {profile.field or ''} {profile.affiliation or ''}"
+    subject_context = (
+        f"{profile.name} {profile.field or ''} {profile.affiliation or ''}"
+    )
     passed, violations = check_differential_residue(
         wikitext, subject_context, blocklist=DEFAULT_BLOCKLIST
     )
-    assert passed is True, f"Differential residue leaked into Katoch draft: {violations}"
+    assert passed is True, (
+        f"Differential residue leaked into Katoch draft: {violations}"
+    )
 
     # Draft QA audit: verify report structure
     profile.wikitext_en = wikitext
@@ -513,14 +517,19 @@ def test_dr_katoch_saved_session_produces_policy_filtered_draft():
 
     # 3. Verified collapsed multi-citation statements
     # M.D. in Microbiology should carry both Manipal and Lepra citations in a single statement
-    assert (
-        wikitext.count("Holds an M.D. in Microbiology") == 1
-    ), "Expected M.D. in Microbiology statement to appear exactly once"
+    assert wikitext.count("Holds an M.D. in Microbiology") == 1, (
+        "Expected M.D. in Microbiology statement to appear exactly once"
+    )
     # Find the citation string attached to Holds an M.D. in Microbiology
-    m = re.search(r"Holds an M\.D\. in Microbiology((?:<ref[^>]*>.*?</ref>|<ref[^>]*/>)+)\.", wikitext)
+    m = re.search(
+        r"Holds an M\.D\. in Microbiology((?:<ref[^>]*>.*?</ref>|<ref[^>]*/>)+)\.",
+        wikitext,
+    )
     assert m is not None, "Holds an M.D. in Microbiology must be followed by refs"
     refs = re.findall(r'<ref\s+name="([^"]+)"', m.group(1))
-    assert len(refs) == 2, f"Expected 2 distinct citations on M.D. in Microbiology, got: {refs}"
+    assert len(refs) == 2, (
+        f"Expected 2 distinct citations on M.D. in Microbiology, got: {refs}"
+    )
 
 
 def test_draft_dedup_collapses_repeated_facts_and_prevents_lead_leak():

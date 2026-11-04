@@ -705,7 +705,9 @@ def render_draft(profile: PersonProfile, audit: DraftAudit | None = None) -> str
             f"'''{name}''' is {article} {prefix}scientist whose research focuses on {_claim_text(field_item)}"
             f"{citations}."
         )
-        used_facts.add(_normalize_fact_key(field_item.claim.field, _claim_text(field_item)))
+        used_facts.add(
+            _normalize_fact_key(field_item.claim.field, _claim_text(field_item))
+        )
     else:
         lead_item = affiliation_item or position_item
         assert lead_item is not None
@@ -714,30 +716,32 @@ def render_draft(profile: PersonProfile, audit: DraftAudit | None = None) -> str
         )
     if position_item:
         citations = _render_fact_citations(position_item, audit.evidence, used_refs)
-        lead_parts.append(
-            f"{_claim_text(position_item)}{citations}."
+        lead_parts.append(f"{_claim_text(position_item)}{citations}.")
+        used_facts.add(
+            _normalize_fact_key(position_item.claim.field, _claim_text(position_item))
         )
-        used_facts.add(_normalize_fact_key(position_item.claim.field, _claim_text(position_item)))
     elif affiliation_item:
         citations = _render_fact_citations(affiliation_item, audit.evidence, used_refs)
-        lead_parts.append(
-            f"{_claim_text(affiliation_item)}{citations}."
+        lead_parts.append(f"{_claim_text(affiliation_item)}{citations}.")
+        used_facts.add(
+            _normalize_fact_key(
+                affiliation_item.claim.field, _claim_text(affiliation_item)
+            )
         )
-        used_facts.add(_normalize_fact_key(affiliation_item.claim.field, _claim_text(affiliation_item)))
     known_item = next(iter(by_field.get("known_for", [])), None)
     if known_item:
         citations = _render_fact_citations(known_item, audit.evidence, used_refs)
-        lead_parts.append(
-            f"{_claim_text(known_item)}{citations}."
+        lead_parts.append(f"{_claim_text(known_item)}{citations}.")
+        used_facts.add(
+            _normalize_fact_key(known_item.claim.field, _claim_text(known_item))
         )
-        used_facts.add(_normalize_fact_key(known_item.claim.field, _claim_text(known_item)))
     award_item = next(iter(by_field.get("award", [])), None)
     if award_item:
         citations = _render_fact_citations(award_item, audit.evidence, used_refs)
-        lead_parts.append(
-            f"{_claim_text(award_item)}{citations}."
+        lead_parts.append(f"{_claim_text(award_item)}{citations}.")
+        used_facts.add(
+            _normalize_fact_key(award_item.claim.field, _claim_text(award_item))
         )
-        used_facts.add(_normalize_fact_key(award_item.claim.field, _claim_text(award_item)))
 
     lines = [
         "{{Draft article}}",

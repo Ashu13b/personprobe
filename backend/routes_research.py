@@ -44,6 +44,7 @@ from engine.researcher import (
     fetch_institution_sources,  # re-exported for module API compatibility
     targeted_slot_search,
 )
+
 __all__ = ["fetch_institution_sources"]
 from engine.classifier import classify_sources
 from engine.notability import score_notability
@@ -200,7 +201,9 @@ def _enrich_and_flag_sources(
     classified = sources
     with ThreadPoolExecutor(max_workers=2) as post_ex:
         f_classify = post_ex.submit(classify_sources, sources, store.llm())
-        f_doi = post_ex.submit(store._check_doi_sources, sources, name, affiliation or "")
+        f_doi = post_ex.submit(
+            store._check_doi_sources, sources, name, affiliation or ""
+        )
         classified = f_classify.result()
         f_doi.result()
 
@@ -229,13 +232,20 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
     def _leg_active_ids():
         try:
             from engine.researcher_ids import search_researcher_ids
+
             return search_researcher_ids(req.name, req.field, req.affiliation)
         except Exception:
             return {}
 
     def _leg_openalex():
         try:
-            from engine.openalex import search_author, select_best_author, get_author_works, convert_works_to_sources
+            from engine.openalex import (
+                search_author,
+                select_best_author,
+                get_author_works,
+                convert_works_to_sources,
+            )
+
             oa_authors = search_author(req.name, req.affiliation)
             if oa_authors:
                 best = select_best_author(
@@ -286,7 +296,9 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
         for t, v in validated_active.items():
             if t not in profile.researcher_ids:
                 profile.researcher_ids[t] = v
-        profile.discovery_legs["active_id_search"] = "ok" if validated_active else "no_ids"
+        profile.discovery_legs["active_id_search"] = (
+            "ok" if validated_active else "no_ids"
+        )
     except Exception as e:
         profile.discovery_legs["active_id_search"] = f"error: {str(e)[:50]}"
 

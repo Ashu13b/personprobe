@@ -128,9 +128,7 @@ def fetch_via_mobile_bridge(
             return None
 
 
-def search_via_mobile_bridge(
-    query: str, max_results: int = 10
-) -> list[dict[str, str]]:
+def search_via_mobile_bridge(query: str, max_results: int = 10) -> list[dict[str, str]]:
     """Execute a web search query via the mobile browser bridge (e.g. DDG HTML) to bypass bot-walls.
 
     Returns list of dicts with {"url": str, "title": str, "snippet": str}.

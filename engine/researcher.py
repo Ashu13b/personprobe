@@ -94,7 +94,8 @@ def _sweep_news(
         "hindustantimes.com",
     )
     queries = [
-        f'"{person_name}" {disambig} site:{outlet}'.strip() for outlet in primary_outlets
+        f'"{person_name}" {disambig} site:{outlet}'.strip()
+        for outlet in primary_outlets
     ]
 
     sources: list[Source] = []
@@ -428,11 +429,16 @@ def _duckduckgo_html(
         # Fall back to mobile bridge if DDG library failed or was blocked (time-boxed to 2.5s)
         try:
             from concurrent.futures import ThreadPoolExecutor
-            from .mobile_bridge import is_mobile_bridge_available, search_via_mobile_bridge
+            from .mobile_bridge import (
+                is_mobile_bridge_available,
+                search_via_mobile_bridge,
+            )
 
             if is_mobile_bridge_available():
                 with ThreadPoolExecutor(max_workers=1) as bridge_ex:
-                    future = bridge_ex.submit(search_via_mobile_bridge, query, max_results=10)
+                    future = bridge_ex.submit(
+                        search_via_mobile_bridge, query, max_results=10
+                    )
                     results = future.result(timeout=2.5)
                 if results:
                     LAST_WEB_SEARCH_TRANSPORT = "mobile_bridge"
@@ -548,7 +554,9 @@ def _search_web(query: str) -> list[Source]:
 
         if is_mobile_bridge_available():
             with ThreadPoolExecutor(max_workers=1) as bridge_ex:
-                future = bridge_ex.submit(search_via_mobile_bridge, query, max_results=8)
+                future = bridge_ex.submit(
+                    search_via_mobile_bridge, query, max_results=8
+                )
                 bridge_results = future.result(timeout=2.5)
 
             if bridge_results:

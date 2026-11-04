@@ -97,7 +97,9 @@ def select_best_author(
         target_name.strip(),
         flags=re.I,
     ).strip()
-    target_tokens = [t.lower().rstrip(".,") for t in clean_target.split() if t.rstrip(".,")]
+    target_tokens = [
+        t.lower().rstrip(".,") for t in clean_target.split() if t.rstrip(".,")
+    ]
     if not target_tokens:
         return None
 
@@ -139,9 +141,7 @@ def select_best_author(
         # Affiliation match boost
         if affiliation_hint and a.get("affiliations"):
             aff_text = " ".join(a["affiliations"]).lower()
-            hint_tokens = [
-                t.lower() for t in affiliation_hint.split() if len(t) > 3
-            ]
+            hint_tokens = [t.lower() for t in affiliation_hint.split() if len(t) > 3]
             if any(t in aff_text for t in hint_tokens):
                 score += 5.0
 

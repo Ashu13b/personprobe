@@ -696,9 +696,8 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
                 repo.state.startswith(p) for p in ("Central", "National", "All-India")
             )
         )
-        is_state_specific = (
-            repo.jurisdiction_level in ("state", "district")
-            or bool(repo.state and not is_umbrella)
+        is_state_specific = repo.jurisdiction_level in ("state", "district") or bool(
+            repo.state and not is_umbrella
         )
 
         if is_state_specific:

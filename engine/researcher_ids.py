@@ -68,14 +68,26 @@ def search_researcher_ids(
     if quick_mode:
         targets = [
             ("orcid", f'"{name}" site:orcid.org', _ORCID_RE),
-            ("researchgate", f'"{name}" {context} site:researchgate.net/profile'.strip(), _RESEARCHGATE_RE),
+            (
+                "researchgate",
+                f'"{name}" {context} site:researchgate.net/profile'.strip(),
+                _RESEARCHGATE_RE,
+            ),
         ]
     else:
         targets = [
             ("orcid", f'"{name}" site:orcid.org', _ORCID_RE),
-            ("google_scholar", f'"{name}" {context} site:scholar.google.com'.strip(), _SCHOLAR_RE),
+            (
+                "google_scholar",
+                f'"{name}" {context} site:scholar.google.com'.strip(),
+                _SCHOLAR_RE,
+            ),
             ("scopus", f'"{name}" site:scopus.com/authid', _SCOPUS_RE),
-            ("researchgate", f'"{name}" {context} site:researchgate.net/profile'.strip(), _RESEARCHGATE_RE),
+            (
+                "researchgate",
+                f'"{name}" {context} site:researchgate.net/profile'.strip(),
+                _RESEARCHGATE_RE,
+            ),
         ]
 
     def _find_id(target):

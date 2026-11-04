@@ -29,8 +29,7 @@ def test_guess_job_kind():
         == "classification"
     )
     assert (
-        guess_job_kind("Generate 6 targeted web search queries")
-        == "query_generation"
+        guess_job_kind("Generate 6 targeted web search queries") == "query_generation"
     )
     assert guess_job_kind("Unknown system instruction") == "other"
 
@@ -140,7 +139,9 @@ def test_validate_answer_classification():
 
 def test_worker_roundtrip_with_agent_provider(test_jobs_dir: Path):
     provider = AgentProvider(jobs_dir=test_jobs_dir)
-    system = "Extract structured facts about a person from a source for a Wikipedia article."
+    system = (
+        "Extract structured facts about a person from a source for a Wikipedia article."
+    )
     user = (
         "Person: Vishwa Mohan Katoch\n"
         "Source URL: https://icmr.gov.in\n"
@@ -188,9 +189,7 @@ def test_worker_prune_unanswered_jobs(test_jobs_dir: Path):
 
     # Create an old unanswered job
     old_job = test_jobs_dir / "old123.job.json"
-    old_job.write_text(
-        json.dumps({"id": "old123", "system": "test", "user": "test"})
-    )
+    old_job.write_text(json.dumps({"id": "old123", "system": "test", "user": "test"}))
     # Set mtime to 10 days ago
     ten_days_ago = time.time() - (10 * 86400)
     import os

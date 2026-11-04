@@ -37,7 +37,5 @@ def _isolated_sessions(tmp_path, monkeypatch):
     monkeypatch.setattr(
         "engine.lifecycle_audit.is_mobile_bridge_available", lambda: False
     )
-    monkeypatch.setattr(
-        "engine.fetcher.is_mobile_bridge_available", lambda: False
-    )
+    monkeypatch.setattr("engine.fetcher.is_mobile_bridge_available", lambda: False)
     yield

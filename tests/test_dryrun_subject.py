@@ -165,9 +165,7 @@ def test_national_umbrella_domain_relevance_gating():
         birth_place="Agra, Uttar Pradesh",
     )
     katoch_matrix = derive_subject_record_matrix(katoch)
-    katoch_all = (
-        katoch_matrix["online_reachable"] + katoch_matrix["offline_archives"]
-    )
+    katoch_all = katoch_matrix["online_reachable"] + katoch_matrix["offline_archives"]
     katoch_ids = {r["category_id"] for r in katoch_all}
 
     assert "test_krishikosh_agri_repository" not in katoch_ids, (
@@ -180,8 +178,12 @@ def test_national_umbrella_domain_relevance_gating():
     )
     katoch_context = f"{katoch.name} {katoch.affiliation} {katoch.birth_place}"
     passed, violations = check_differential_residue(katoch_matrix_text, katoch_context)
-    assert passed is True, f"CCSHAU/Yadav residue leaked into Katoch matrix: {violations}"
-    assert "ccshau" not in katoch_matrix_text.lower(), "ccshau leaked into Katoch matrix!"
+    assert passed is True, (
+        f"CCSHAU/Yadav residue leaked into Katoch matrix: {violations}"
+    )
+    assert "ccshau" not in katoch_matrix_text.lower(), (
+        "ccshau leaked into Katoch matrix!"
+    )
 
     # 2. Agricultural Subject: Yadav (animal biotechnology / CIRB)
     yadav = PersonProfile(

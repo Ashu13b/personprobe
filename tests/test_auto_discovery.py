@@ -45,7 +45,10 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     monkeypatch.setattr(
         r_ids,
         "search_researcher_ids",
-        lambda name, field, affil: {"orcid": "0000-0002-7892-2764", "google_scholar": "GS12345"},
+        lambda name, field, affil: {
+            "orcid": "0000-0002-7892-2764",
+            "google_scholar": "GS12345",
+        },
     )
     monkeypatch.setattr(
         r_ids,
@@ -58,7 +61,11 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
         oa,
         "search_author",
         lambda name, affil: [
-            {"id": "A5019627093", "display_name": "Vishwa Mohan Katoch", "orcid": "https://orcid.org/0000-0002-7892-2764"}
+            {
+                "id": "A5019627093",
+                "display_name": "Vishwa Mohan Katoch",
+                "orcid": "https://orcid.org/0000-0002-7892-2764",
+            }
         ],
     )
     monkeypatch.setattr(
@@ -133,7 +140,13 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     assert profile.researcher_ids.get("google_scholar") == "GS12345"
 
     # B. Discovery legs tracked
-    assert profile.discovery_legs.get("web_search") in ("none", "duckduckgo", "google_cse", "mobile_bridge", "failed_all")
+    assert profile.discovery_legs.get("web_search") in (
+        "none",
+        "duckduckgo",
+        "google_cse",
+        "mobile_bridge",
+        "failed_all",
+    )
     assert profile.discovery_legs.get("active_id_search") == "ok"
     assert profile.discovery_legs.get("openalex") == "imported_2"
     assert profile.discovery_legs.get("institution_crawl") == "deferred"
@@ -143,13 +156,17 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     # base_source_1 (doi:10.1016/j.lep.2020.01) and W1 (dx.doi.org/10.1016/j.lep.2020.01/) should dedup to 1
     urls = [s.url for s in profile.sources]
     doi_sources = [u for u in urls if "10.1016/j.lep.2020.01" in u]
-    assert len(doi_sources) == 1, f"Expected 1 canonical DOI source, found: {doi_sources}"
+    assert len(doi_sources) == 1, (
+        f"Expected 1 canonical DOI source, found: {doi_sources}"
+    )
 
     # D. OpenAlex distinct work present and crawl deferred
     assert any("Distinct OpenAlex Work" in s.title for s in profile.sources)
 
     # E. HARD RULE 1: Sources ONLY. Zero claims created or approved.
-    assert len(profile.claims) == 0, "No claims should be created by research_start discovery!"
+    assert len(profile.claims) == 0, (
+        "No claims should be created by research_start discovery!"
+    )
     for s in profile.sources:
         assert s.human_verified is False
         assert s.identity_status != "confirmed" or s.fetched_by != "openalex"
@@ -178,7 +195,12 @@ def test_graceful_degradation_without_cse(monkeypatch):
         oa,
         "get_author_works",
         lambda author_id, limit: [
-            {"id": "W999", "doi": "https://doi.org/10.999/paper", "title": "Paper 999", "publisher": "Nature"}
+            {
+                "id": "W999",
+                "doi": "https://doi.org/10.999/paper",
+                "title": "Paper 999",
+                "publisher": "Nature",
+            }
         ],
     )
     monkeypatch.setattr(
@@ -208,6 +230,7 @@ def test_mobile_bridge_search_fallback(monkeypatch):
 
     # Mock DDGS failure
     import ddgs
+
     monkeypatch.setattr(ddgs, "DDGS", MagicMock(side_effect=Exception("DDGS blocked")))
 
     # Mock mobile bridge available and returning search results
@@ -216,7 +239,11 @@ def test_mobile_bridge_search_fallback(monkeypatch):
         mb,
         "search_via_mobile_bridge",
         lambda q, max_results: [
-            {"url": "https://pubmed.ncbi.nlm.nih.gov/12345/", "title": "PubMed Leprosy Study", "snippet": "Study on M. leprae"}
+            {
+                "url": "https://pubmed.ncbi.nlm.nih.gov/12345/",
+                "title": "PubMed Leprosy Study",
+                "snippet": "Study on M. leprae",
+            }
         ],
     )
 
@@ -231,7 +258,12 @@ def test_openalex_namesake_guard_rejects_decoy():
     from engine.openalex import select_best_author
 
     authors = [
-        {"id": "A_DECOY", "display_name": "Kiran Katoch", "relevance_score": 100.0, "works_count": 500},
+        {
+            "id": "A_DECOY",
+            "display_name": "Kiran Katoch",
+            "relevance_score": 100.0,
+            "works_count": 500,
+        },
         {
             "id": "A_REAL",
             "display_name": "Vishwa Mohan Katoch",
@@ -242,16 +274,24 @@ def test_openalex_namesake_guard_rejects_decoy():
     ]
 
     # Must select A_REAL despite lower base relevance score because A_DECOY has different given name
-    best = select_best_author(authors, "Dr. Vishwa Mohan Katoch", affiliation_hint="National JALMA Institute")
+    best = select_best_author(
+        authors, "Dr. Vishwa Mohan Katoch", affiliation_hint="National JALMA Institute"
+    )
     assert best is not None
     assert best["id"] == "A_REAL"
 
     # With distinct ORCID hint, matches ORCID
     orcid_authors = [
         {"id": "A_OTHER", "display_name": "Vishwa Katoch", "relevance_score": 200.0},
-        {"id": "A_ORCID", "display_name": "V. M. Katoch", "orcid": "https://orcid.org/0000-0002-7892-2764"},
+        {
+            "id": "A_ORCID",
+            "display_name": "V. M. Katoch",
+            "orcid": "https://orcid.org/0000-0002-7892-2764",
+        },
     ]
-    best_orcid = select_best_author(orcid_authors, "Vishwa Mohan Katoch", orcid_hint="0000-0002-7892-2764")
+    best_orcid = select_best_author(
+        orcid_authors, "Vishwa Mohan Katoch", orcid_hint="0000-0002-7892-2764"
+    )
     assert best_orcid is not None
     assert best_orcid["id"] == "A_ORCID"
 
@@ -266,7 +306,9 @@ def test_researcher_id_namesake_guard_rejects_decoy():
         "google_scholar": "VM_Katoch_Agra",
     }
     validated = validated_new_ids(candidate_ids, "Dr. Vishwa Mohan Katoch")
-    assert "researchgate" not in validated, "Namesake decoy Kiran Katoch must be rejected!"
+    assert "researchgate" not in validated, (
+        "Namesake decoy Kiran Katoch must be rejected!"
+    )
     assert validated.get("google_scholar") == "VM_Katoch_Agra"
 
 
@@ -276,10 +318,13 @@ def test_research_start_defers_crawl_and_fetch(monkeypatch):
 
     # Track if crawler or heavy fetcher are called during start
     crawl_called = False
+
     def fail_crawl(*args, **kwargs):
         nonlocal crawl_called
         crawl_called = True
-        raise AssertionError("crawl should not be called synchronously during research_start!")
+        raise AssertionError(
+            "crawl should not be called synchronously during research_start!"
+        )
 
     monkeypatch.setattr(crawler_mod, "crawl", fail_crawl)
 
@@ -295,5 +340,3 @@ def test_research_start_defers_crawl_and_fetch(monkeypatch):
     assert crawl_called is False, "Inline crawl must be deferred off synchronous path!"
     assert profile.discovery_legs.get("profile_crawl") == "deferred"
     assert profile.discovery_legs.get("institution_crawl") == "deferred"
-
-

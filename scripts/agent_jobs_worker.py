@@ -451,9 +451,7 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Path to repository root (overrides top-level --repo)",
     )
-    list_p.add_argument(
-        "--limit", type=int, default=None, help="Max jobs to display"
-    )
+    list_p.add_argument("--limit", type=int, default=None, help="Max jobs to display")
 
     # answer
     ans_p = subparsers.add_parser("answer", help="Validate and answer a job")

@@ -1,0 +1,4 @@
+# baton-dev subscription marker.
+# Presence of this file at the repo root subscribes the repo to baton multi-agent
+# coordination: sessions entering it auto-deploy a repo-scoped, role-scoped sidecar
+# watcher (see baton/presence_hook.py and AGENTS.md §7). Committed so it travels.

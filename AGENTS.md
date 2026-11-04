@@ -103,3 +103,39 @@ the way it is, or what was tried and rejected, write it there.
 ## 5. Development protocol
 See @WORKFLOW.md — the loop is profiled (`light`/`standard`/`strict`). Don't
 refactor opportunistically. Verify via the actual CLI/UI when possible.
+
+## 6. Multi-agent coordination (baton)
+This repo coordinates multi-agent work through the local `baton` layer (SQLite at
+`../baton/baton.db`). Coordination is decoupled from git — work-in-progress, review
+verdicts, and task queues live in baton; only approved, merged feature commits touch
+main.
+- **Roles**:
+  - **Claude Code → `planner-reviewer`**: plans slices, breaks down work, opens tasks,
+    audits submitted work out-of-band via `git diff main...<sha>`, records a verdict
+    with `review`. Does not normally implement handed-off tasks.
+  - **Antigravity / Cursor / Codex → `implementer`**: claims an open task, works on a
+    dedicated feature branch in an **isolated git worktree** (never the main tree),
+    commits the *why* in the commit body, runs tests, then `submit_for_review`.
+- **Discovery / presence**: at session start each agent calls
+  `hello(repo="/home/ubuntu/Expeei/wikimaker")`. Presence is keyed by that absolute
+  repo path — an agent only sees peers and open tasks for **the same cwd**, and rows
+  older than 180s are treated offline. The reply lists peers online + open tasks;
+  `heartbeat()` keeps you visible. Implementers block on
+  `cli.py watch --role implementer --repo /home/ubuntu/Expeei/wikimaker` to be woken
+  when an `open`/`changes_requested`/`needs_info` event lands for this repo.
+- **Auto-briefing on startup**: a baton `SessionStart` hook (`baton/presence_hook.py`)
+  announces each agent's presence *and* injects a short briefing of this repo's
+  actionable tasks for your role — so you enter already aware, no prompting needed.
+- **Subscription + auto sidecar watcher**: a `.baton` marker at the repo root subscribes
+  this repo to coordination. On entering a subscribed repo, the hook additionally injects a
+  **repo-scoped, role-scoped reactive-loop directive**: the reviewer runs a background
+  `watch --role reviewer --repo <this> --cursor-file <per-repo>` and acts on `submitted`
+  events; the implementer follows its watch loop for this repo. Presence/`solo`
+  are repo-scoped, so two subscribed agents here → coordinated dev, one → solo. Each session
+  stays single-repo — no cross-repo contamination.
+- **Lifecycle**: `open → claim → (needs_info?) → submitted → done | changes_requested`.
+- **Solo is the normal fallback, not an error**: a peer is not always online. If
+  `hello`/`heartbeat` reports `solo: true` (no implementer present for this repo),
+  just do the work directly per @WORKFLOW.md — don't park it in an `open` task that
+  nothing will claim.
+

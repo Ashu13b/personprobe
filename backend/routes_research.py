@@ -41,6 +41,7 @@ from engine.researcher import (
     fetch_auto_sources,
     fetch_url_source,
     fetch_url_source_with_paste,
+    fetch_institution_sources,
     targeted_slot_search,
 )
 from engine.classifier import classify_sources

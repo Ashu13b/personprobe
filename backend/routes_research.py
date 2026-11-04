@@ -190,11 +190,20 @@ def _find_resumable_session(req: ResearchRequest) -> PersonProfile | None:
 def _enrich_and_flag_sources(
     sources: list, name: str, field: str = "", affiliation: str = ""
 ) -> list:
-    """Enrich sources with classification, DOI verification, and relevance flags."""
+    """Enrich sources with classification, DOI verification, and relevance flags.
+    Runs independent classification and DOI verification concurrently to minimize latency.
+    """
     if not sources:
         return sources
-    classified = classify_sources(sources, store.llm())
-    store._check_doi_sources(classified, name, affiliation or "")
+    from concurrent.futures import ThreadPoolExecutor
+
+    classified = sources
+    with ThreadPoolExecutor(max_workers=2) as post_ex:
+        f_classify = post_ex.submit(classify_sources, sources, store.llm())
+        f_doi = post_ex.submit(store._check_doi_sources, sources, name, affiliation or "")
+        classified = f_classify.result()
+        f_doi.result()
+
     flag_sources(classified, name, field or "", affiliation or "")
     return classified
 
@@ -226,27 +235,31 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
 
     def _leg_openalex():
         try:
-            from engine.openalex import search_author, select_best_author
+            from engine.openalex import search_author, select_best_author, get_author_works, convert_works_to_sources
             oa_authors = search_author(req.name, req.affiliation)
             if oa_authors:
-                return select_best_author(
+                best = select_best_author(
                     oa_authors,
                     req.name,
                     affiliation_hint=req.affiliation,
                     orcid_hint=profile.researcher_ids.get("orcid"),
                 )
+                if best and best.get("id"):
+                    works = get_author_works(best["id"], limit=50)
+                    sources = convert_works_to_sources(works, req.name)
+                    return best, sources
         except Exception:
             pass
-        return None
+        return None, []
 
     with ThreadPoolExecutor(max_workers=3) as executor:
         f_auto = executor.submit(_leg_auto_sources)
         f_active_ids = executor.submit(_leg_active_ids)
-        f_openalex_author = executor.submit(_leg_openalex)
+        f_openalex = executor.submit(_leg_openalex)
 
         sources, s2_author_id = f_auto.result()
         active_ids = f_active_ids.result()
-        best_oa = f_openalex_author.result()
+        best_oa, oa_sources = f_openalex.result()
 
     profile.discovery_legs["web_search"] = LAST_WEB_SEARCH_TRANSPORT
     if s2_author_id:
@@ -279,10 +292,7 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
 
     # Automatic OpenAlex works discovery
     try:
-        from engine.openalex import get_author_works, convert_works_to_sources
-
-        openalex_author_id = profile.researcher_ids.get("openalex")
-        if not openalex_author_id and best_oa:
+        if best_oa:
             openalex_author_id = best_oa.get("id")
             if openalex_author_id:
                 profile.researcher_ids["openalex"] = openalex_author_id
@@ -290,9 +300,7 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
                     orcid_val = best_oa["orcid"].split("/")[-1]
                     profile.researcher_ids["orcid"] = orcid_val
 
-        if openalex_author_id:
-            oa_works = get_author_works(openalex_author_id, limit=50)
-            oa_sources = convert_works_to_sources(oa_works, req.name)
+        if oa_sources:
             for s in oa_sources:
                 s.identity_status = "unverified"
                 s.identity_by = None
@@ -302,7 +310,9 @@ def _populate_initial_sources(profile: PersonProfile, req: ResearchRequest) -> N
             sources.extend(oa_sources)
             profile.discovery_legs["openalex"] = f"imported_{len(oa_sources)}"
         else:
-            profile.discovery_legs["openalex"] = "no_author_match"
+            profile.discovery_legs["openalex"] = (
+                "imported_0" if best_oa else "no_author_match"
+            )
     except Exception as e:
         profile.discovery_legs["openalex"] = f"error: {str(e)[:50]}"
 

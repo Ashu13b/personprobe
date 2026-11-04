@@ -20,13 +20,26 @@ if ANDROID_BROWSER_DIR.exists() and str(ANDROID_BROWSER_DIR) not in sys.path:
 logger = logging.getLogger(__name__)
 
 _client: Optional[Any] = None
+_bridge_checked: bool = False
 
 
 def get_mobile_client() -> Optional[Any]:
     """Return a singleton MobileBrowserClient instance if available, else None."""
-    global _client
-    if _client is not None:
+    global _client, _bridge_checked
+    if _bridge_checked:
         return _client
+
+    import socket
+
+    # Fast socket pre-check to avoid multi-second urllib connect timeouts when bridge is down
+    try:
+        s = socket.create_connection(("100.72.202.86", 38765), timeout=0.3)
+        s.close()
+    except Exception:
+        _bridge_checked = True
+        _client = None
+        return None
+
     try:
         from openscrape_client import MobileBrowserClient  # type: ignore
 
@@ -34,10 +47,12 @@ def get_mobile_client() -> Optional[Any]:
         status = client.get_status()
         if isinstance(status, dict) and status.get("status") == "ok":
             _client = client
-            return _client
     except Exception as e:
         logger.debug("MobileBrowserClient unavailable: %s", e)
-    return None
+        _client = None
+
+    _bridge_checked = True
+    return _client
 
 
 def is_mobile_bridge_available() -> bool:

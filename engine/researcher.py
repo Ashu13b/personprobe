@@ -80,39 +80,28 @@ def _sweep_news(
     nationality: str | None = None,
     limit: int = 20,
 ) -> list[Source]:
-    """Site-restricted searches across major national & regional outlets plus multilingual queries.
-    Parallelizes outlet queries and bounds total search latency to keep discovery fast.
+    """Site-restricted searches across major national outlets plus multilingual queries.
+    Parallelizes top outlet queries with bounded concurrency to keep discovery fast.
     """
     from concurrent.futures import ThreadPoolExecutor
-    from .multilingual_search import build_bilingual_queries, get_regional_news_outlets
 
     disambig = _disambiguator(affiliation, field)
-    all_outlets: list[str] = list(_NEWS_OUTLETS)
-    for regional in get_regional_news_outlets(nationality, person_name):
-        if regional not in all_outlets:
-            all_outlets.append(regional)
-
-    queries = [
-        f'"{person_name}" {disambig} site:{outlet}'.strip() for outlet in all_outlets
-    ]
-    # Add bilingual / vernacular queries for native language press discovery
-    bilingual_queries = build_bilingual_queries(
-        name=person_name,
-        nationality=nationality,
-        affiliation=affiliation,
-        field=field,
-        limit=6,
+    # Target top national English & vernacular dailies
+    primary_outlets = (
+        "timesofindia.indiatimes.com",
+        "thehindu.com",
+        "indianexpress.com",
+        "hindustantimes.com",
     )
-    for bq in bilingual_queries:
-        if bq not in queries:
-            queries.append(bq)
+    queries = [
+        f'"{person_name}" {disambig} site:{outlet}'.strip() for outlet in primary_outlets
+    ]
 
     sources: list[Source] = []
     seen: set[str] = set()
 
-    # Query major outlets in parallel with bounded workers to prevent serialized timeout crawl
-    with ThreadPoolExecutor(max_workers=6) as executor:
-        for hits in executor.map(_search_web, queries[:12]):
+    with ThreadPoolExecutor(max_workers=min(4, len(queries))) as executor:
+        for hits in executor.map(_search_web, queries):
             for result in hits:
                 if result.url not in seen:
                     seen.add(result.url)

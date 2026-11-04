@@ -247,7 +247,7 @@ def _check_doi_sources(sources: list, person_name: str, affiliation: str) -> Non
         except Exception:
             return src, None
 
-    with ThreadPoolExecutor(max_workers=min(10, len(doi_targets))) as executor:
+    with ThreadPoolExecutor(max_workers=min(20, len(doi_targets))) as executor:
         for source, result in executor.map(_check, doi_targets):
             if not result:
                 continue

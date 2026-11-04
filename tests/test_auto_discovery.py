@@ -107,6 +107,16 @@ def test_auto_discovery_chains_openalex_ids_crawl_and_dedups(monkeypatch):
     mock_graph.relevance_hits = {crawl_node.url: 3}
     monkeypatch.setattr(cr, "crawl", lambda **kwargs: mock_graph)
 
+    monkeypatch.setattr(
+        rr,
+        "_enrich_and_flag_sources",
+        lambda sources, *a, **k: sources,
+    )
+    monkeypatch.setattr(
+        "backend.store._check_doi_sources",
+        lambda *a, **k: None,
+    )
+
     # 5. Execute _populate_initial_sources
     profile = PersonProfile(name="Vishwa Mohan Katoch")
     req = ResearchRequest(
@@ -170,6 +180,15 @@ def test_graceful_degradation_without_cse(monkeypatch):
         lambda author_id, limit: [
             {"id": "W999", "doi": "https://doi.org/10.999/paper", "title": "Paper 999", "publisher": "Nature"}
         ],
+    )
+    monkeypatch.setattr(
+        rr,
+        "_enrich_and_flag_sources",
+        lambda sources, *a, **k: sources,
+    )
+    monkeypatch.setattr(
+        "backend.store._check_doi_sources",
+        lambda *a, **k: None,
     )
 
     profile = PersonProfile(name="Test Researcher")

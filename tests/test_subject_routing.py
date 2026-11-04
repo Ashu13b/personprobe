@@ -68,11 +68,10 @@ class IdentifyPreviewTests(TestCase):
 
 
 class ResearchStartRoutingTests(TestCase):
-    @patch("backend.routes_research.fetch_institution_sources", return_value=[])
-    @patch("backend.routes_research.fetch_auto_sources", return_value=([], None))
+    @patch("backend.routes_research._populate_initial_sources")
     @patch("backend.routes_research.check_existing_page")
     def test_confirmed_wikipedia_url_routes_by_article_title(
-        self, check_page, _auto, _inst
+        self, check_page, _populate
     ):
         class _WikiStatus:
             def model_dump(self):

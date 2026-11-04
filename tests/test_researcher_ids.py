@@ -89,6 +89,14 @@ def test_research_start_drops_orcid_from_source_url_when_validation_fails(
         lambda *a, **k: ([orcid_source], None),
     )
     monkeypatch.setattr(
+        "engine.researcher_ids.search_researcher_ids",
+        lambda *a, **k: {},
+    )
+    monkeypatch.setattr(
+        "engine.openalex.search_author",
+        lambda *a, **k: [],
+    )
+    monkeypatch.setattr(
         "backend.routes_research._enrich_and_flag_sources",
         lambda sources, *a: sources,
     )
@@ -124,6 +132,14 @@ def test_research_start_keeps_orcid_when_validation_passes(monkeypatch, tmp_path
     monkeypatch.setattr(
         "backend.routes_research.fetch_auto_sources",
         lambda *a, **k: ([orcid_source], None),
+    )
+    monkeypatch.setattr(
+        "engine.researcher_ids.search_researcher_ids",
+        lambda *a, **k: {},
+    )
+    monkeypatch.setattr(
+        "engine.openalex.search_author",
+        lambda *a, **k: [],
     )
     monkeypatch.setattr(
         "backend.routes_research._enrich_and_flag_sources",

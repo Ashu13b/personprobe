@@ -90,6 +90,7 @@ def _sweep_news(
     primary_outlets = (
         "timesofindia.indiatimes.com",
         "thehindu.com",
+        "ndtv.com",
         "indianexpress.com",
         "hindustantimes.com",
     )
@@ -100,7 +101,7 @@ def _sweep_news(
     sources: list[Source] = []
     seen: set[str] = set()
 
-    with ThreadPoolExecutor(max_workers=min(4, len(queries))) as executor:
+    with ThreadPoolExecutor(max_workers=min(5, len(queries))) as executor:
         for hits in executor.map(_search_web, queries):
             for result in hits:
                 if result.url not in seen:

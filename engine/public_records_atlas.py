@@ -689,8 +689,21 @@ def derive_subject_record_matrix(profile: PersonProfile) -> dict:
             ):
                 continue
 
-        # Check state & district relevance
-        if repo.jurisdiction_level in ("state", "district"):
+        # Check state & district relevance (built-in and custom repositories alike)
+        is_umbrella = bool(
+            repo.state
+            and any(
+                repo.state.startswith(p)
+                for p in ("Central", "National", "All-India")
+            )
+        )
+        is_state_specific = (
+            repo.jurisdiction_level in ("state", "district")
+            or bool(repo.state and not is_umbrella)
+            or bool(repo.is_custom and repo.state and not is_umbrella)
+        )
+
+        if is_state_specific:
             if not context.state:
                 # Fall back to national repositories only if state unknown
                 continue

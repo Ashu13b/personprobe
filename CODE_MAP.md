@@ -1,17 +1,17 @@
-<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-11-03 16:08 UTC · sha a4a0fda · host instance-trading-bot-restored -->
+<!-- context-kit CODE_MAP · v0.2.0 · generated 2026-11-04 03:25 UTC · sha f2788d4 · host instance-trading-bot-restored -->
 
 # CODE_MAP
 
 Symbol index (skim-grade). Consult before Grep/Read.
 
 ## Composition
-- Python — 116 files · 1024 symbols
+- Python — 118 files · 1035 symbols
 - TypeScript — 35 files · 293 symbols
 - HTML — 2 files · 3 symbols
 - JavaScript — 1 files · 0 symbols
 - CSS — 1 file (unindexed)
 - Shell Script — 1 file (unindexed)
-_Total: 156 files · 1320 symbols across 6 languages._
+_Total: 158 files · 1331 symbols across 6 languages._
 
 
 ## Compartments
@@ -121,6 +121,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `scripts/coauthor_harvest.py` — API, def harvest_coauthors, def payload_url
 - `scripts/crawl_link_bucket.py` — API_BASE, SESSION_ID, SESSION_FILE, SEEDS, WRONG_PERSON_ENTITIES, def load_existing_urls, def normalize_url, def is_valid_candidate, def verify_dr_yadav, def api_post, … +1 more
 - `scripts/deduplicate_session.py` — API_BASE, SESSION_ID, SESSION_FILE, DOMAIN_ALIAS_MAP, def canonical_url, def deduplicate
+- `scripts/dryrun_subject.py` — DEFAULT_BLOCKLIST, def check_differential_residue, def _http_request, def run_dryrun, def main
 - `scripts/forensic_hunter.py` — FORENSIC_QUERIES, def clean_google_url, def main
 - `scripts/generate_draft.py` — root_dir, session_file, data, profile, audit, wikitext, out_en
 - `scripts/google_harvest_phone.py` — SESSION_ID, SESSION_FILE, GOOGLE_QUERIES, def load_existing_canonical_urls, def main
@@ -153,6 +154,7 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_discarded_registry.py` — def test_record_discarded_canonical_dedup, def test_is_known_or_discarded, def test_get_known_and_discarded_canonical_urls, def test_recover_discarded, def test_get_discarded_by_reason
 - `tests/test_draft.py` — def _source, def _ready_profile, def test_audit_excludes_cv_animal_birth_and_unverified_sources, def test_audit_blocks_profiles_without_explicit_draft_approval, def test_audit_blocks_drafts_without_independent_secondary_coverage, def test_audit_warns_when_achievement_claim_rests_on_primary_source, def test_audit_no_achievement_warning_when_sources_are_independent, def test_research_action_rule_accepts_common_research_verbs, def test_birth_noise_rule_scans_source_title_too, def test_human_birth_claim_not_blocked_by_animal_rule, … +51 more
 - `tests/test_draft_hi.py` — def _sample_profile, def test_render_hindi_draft_contains_hindi_infobox_and_sections
+- `tests/test_dryrun_subject.py` — def test_differential_residue_clean, def test_differential_residue_planted_violation, def test_differential_residue_word_boundaries_and_legitimate_overlap, def test_custom_repository_state_gating, def test_harness_stage_report_mocked_http, def test_harness_resume_draft_mocked_http
 - `tests/test_fetcher_fallback.py` — def test_fetch_url_direct_success, def test_fetch_url_mobile_bridge_fallback, def test_fetch_url_browser_server_fallback_when_mobile_unavailable, def test_check_liveness_recovers_blocked_via_mobile_bridge, def test_fetch_telemetry_records_and_advises, def test_fetch_telemetry_cooldown_and_recheck, def test_liveness_stops_after_five_host_throttles, def test_looks_throttled_text_markers
 - `tests/test_forensics.py` — def test_seed_default_pivots_from_profile, def test_generate_forensic_queries, def test_forensic_routes, def test_generate_deductive_inquiries_unit, def test_forensic_inquiries_api
 - `tests/test_lifecycle_audit.py` — def test_audit_discovery_stage, def test_audit_provenance_stage, def test_audit_claims_stage, def test_audit_draft_stage_blocked_when_no_evidence, def test_audit_full_lifecycle
@@ -161,9 +163,8 @@ Run `ck compartment <name>` to load a compartment's warm symbol index.
 - `tests/test_multilingual_search.py` — def test_detect_languages, def test_transliterate_name, def test_get_regional_news_outlets, def test_build_bilingual_queries_hindi, def test_build_bilingual_queries_carries_date_and_event_hint_into_hindi, def test_build_bilingual_queries_french, def test_build_bilingual_queries_german
 - `tests/test_name_verifier.py` — def test_generate_name_variants_western, def test_generate_name_variants_indic, def test_verify_name_in_content_exact_and_initials, def test_verify_name_in_content_devanagari, def test_verify_name_no_match, def test_verify_name_homonym_risk, def test_namesake_risk_known_conflict_and_siblings, def test_identity_strength_full_vs_weak, def test_coauthor_profile_network_screen
 - `tests/test_osint.py` — def test_openalex_search_and_ranking, def test_openalex_get_works_and_convert_sources, def test_generate_osint_dorks, def test_pdf_metadata_extraction, def test_parse_pdf_date_variants, def test_multi_archive_fallback_to_archive_today
-- `tests/test_production_hardening.py` — def test_is_safe_public_url_blocks_private_and_loopback, def test_is_safe_public_url_allows_public_https, def test_fetch_url_and_liveness_reject_unsafe_urls, def test_liveness_rejects_redirect_to_private_ip, def test_atomic_session_save, def test_cite_value_escapes_wikitext_template_braces, def test_citation_with_curly_braces, def test_resume_and_delete_session_block_path_traversal, def test_browser_server_navigate_blocks_unsafe_urls, def test_network_guard_rejects_untrusted_client_addresses
 
 ### Collapsed Directories (Fractal Router)
-- 📁 `tests/` — 12 file(s) (test_domain_trust_classification, test_source_provenance_classification, test_academic_indexes_never_count_as_independent_news, test_search_discovery_does_not_make_unknown_site_independent…) · `ck show tests/` lists them
+- 📁 `tests/` — 13 file(s) (test_is_safe_public_url_blocks_private_and_loopback, test_is_safe_public_url_allows_public_https, test_fetch_url_and_liveness_reject_unsafe_urls, test_liveness_rejects_redirect_to_private_ip…) · `ck show tests/` lists them
 
-_Router mode: 134 of 146 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._
+_Router mode: 135 of 148 files shown, ranked by import fan-in. Locate a symbol with `ck where <name>`; list any file's symbols with `ck show <path>`; pull the working set with `ck compartment auto`._

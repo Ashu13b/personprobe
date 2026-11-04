@@ -28,10 +28,10 @@ def test_disambiguator_drops_institutional_stopwords():
 
 def test_news_sweep_issues_site_restricted_and_hindi_queries():
     def fake_search(query: str):
-        if "site:ndtv.com" in query:
+        if "site:thehindu.com" in query:
             return [
-                _result("https://www.ndtv.com/a"),
-                _result("https://www.ndtv.com/b"),
+                _result("https://www.thehindu.com/a"),
+                _result("https://www.thehindu.com/b"),
             ]
         return [_result("https://example.test/other")]
 
@@ -39,8 +39,8 @@ def test_news_sweep_issues_site_restricted_and_hindi_queries():
         sources = _sweep_news("Example Person", "Example Institute", "Science")
 
     urls = {s.url for s in sources}
-    assert "https://www.ndtv.com/a" in urls
-    assert "https://www.ndtv.com/b" in urls
+    assert "https://www.thehindu.com/a" in urls
+    assert "https://www.thehindu.com/b" in urls
 
 
 def test_news_sweep_deduplicates_across_queries():

@@ -1,0 +1,1961 @@
+{
+  "profile": {
+    "name": "Vishwa Mohan Katoch",
+    "session_id": "py-vishwa-mohan-katoch-5cf59b65",
+    "wikidata_id": "Q131160362",
+    "wikipedia_url": null,
+    "photo_url": null,
+    "full_name": null,
+    "birth_date": null,
+    "birth_place": null,
+    "nationality": null,
+    "field": "Medical Microbiology",
+    "affiliation": "Indian Council of Medical Research",
+    "known_for": null,
+    "awards": [],
+    "sources": [
+      {
+        "url": "https://www.lepra.org.uk/centenary/people/details/dr-vishwa-mohan-katoch",
+        "title": "Dr. Vishwa Mohan Katoch | LEPRA",
+        "publisher": "lepra.org.uk",
+        "reliability": "primary",
+        "snippet": "Dr. Vishwa Mohan Katoch. Trustees. Dr.Vishwa Mohan Katoch, M.D. (Microbiology) is currently the Chair, National Academy of Sciences, India (NASI), Indian Council of Medical Research (ICMR), Rajasthan University of Health Sciences (RUHS), Jaipur.",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": false,
+        "domain_trust": "low",
+        "provenance_category": "institutional_bio",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "unknown",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "discovered",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "rejected",
+            "timestamp": "2026-11-04T07:33:04.998754+00:00",
+            "summary": "Link accessibility checked (unknown) by Agent",
+            "details": {
+              "liveness": "unknown",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:04.998806+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Dr. Vishwa Mohan Katoch | LEPRA",
+              "publisher": "lepra.org.uk"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "rejected",
+            "timestamp": "2026-11-04T07:34:46.475840+00:00",
+            "summary": "Link accessibility checked (unknown) by Agent",
+            "details": {
+              "liveness": "unknown",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:46.475876+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Dr. Vishwa Mohan Katoch | LEPRA",
+              "publisher": "lepra.org.uk"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:46.475840+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:46.475876+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:45.891160+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "2 claims extracted from this source."
+      },
+      {
+        "url": "https://ijl.org.in/editorial-team-profile",
+        "title": "Editorial Team Profile | Indian Journal of Leprosy - a quarterly scientific...",
+        "publisher": "ijl.org.in",
+        "reliability": "primary",
+        "snippet": "Dr. vishwa mohan katoch.Joined Indian Council of Medical Research (ICMR) for Talent Search Schemes (TSS) Fellows; posted at JALMA Agra in 1978, Director of this Institute in December 2001- Nov 2008.",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "low",
+        "provenance_category": "general_web",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "dead",
+        "archive_url": "http://web.archive.org/web/20231025055623/https://www.ijl.org.in/editorial-team-profile",
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "discovered",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "warning",
+            "timestamp": "2026-11-04T07:33:15.860463+00:00",
+            "summary": "Link accessibility checked (dead) by Agent",
+            "details": {
+              "liveness": "dead",
+              "archive_url": "http://web.archive.org/web/20231025055623/https://www.ijl.org.in/editorial-team-profile"
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:15.860509+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Editorial Team Profile | Indian Journal of Leprosy - a quarterly scientific...",
+              "publisher": "ijl.org.in"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "warning",
+            "timestamp": "2026-11-04T07:34:45.865775+00:00",
+            "summary": "Link accessibility checked (dead) by Agent",
+            "details": {
+              "liveness": "dead",
+              "archive_url": "http://web.archive.org/web/20231025055623/https://www.ijl.org.in/editorial-team-profile"
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:45.865821+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Editorial Team Profile | Indian Journal of Leprosy - a quarterly scientific...",
+              "publisher": "ijl.org.in"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:45.865775+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:45.865821+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:44.016759+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "2 claims extracted from this source."
+      },
+      {
+        "url": "https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf",
+        "title": "Biography - infectiousdiseasescongress.com",
+        "publisher": "infectiousdiseasescongress.com",
+        "reliability": "primary",
+        "snippet": "Dr. Vishwa Mohan Katoch, PhD, FNASc, FAMS, FASc, NASI-ICMR Chair on Public Health Research, Rajasthan University of Health Sciences, Jaipur, Rajasthan.",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "low",
+        "provenance_category": "general_web",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "unknown",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "discovered",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "rejected",
+            "timestamp": "2026-11-04T07:33:16.282806+00:00",
+            "summary": "Link accessibility checked (unknown) by Agent",
+            "details": {
+              "liveness": "unknown",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:16.282842+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Biography - infectiousdiseasescongress.com",
+              "publisher": "infectiousdiseasescongress.com"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "rejected",
+            "timestamp": "2026-11-04T07:34:48.517947+00:00",
+            "summary": "Link accessibility checked (unknown) by Agent",
+            "details": {
+              "liveness": "unknown",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.517983+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Biography - infectiousdiseasescongress.com",
+              "publisher": "infectiousdiseasescongress.com"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:48.517947+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:48.517983+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:48.349451+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "3 claims extracted from this source."
+      },
+      {
+        "url": "https://fellows.ias.ac.in/profile/v/FL2007013",
+        "title": "Indian Academy of Sciences",
+        "publisher": "fellows.ias.ac.in",
+        "reliability": "primary",
+        "snippet": "Dr. Vishwa Mohan Katoch. MD (AIIMS), FAMS, FNASc, FNA.Profile image of Katoch, Dr. Vishwa Mohan. Contact: Address: B-16, Govind Marg, Opp.",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": false,
+        "domain_trust": "high",
+        "provenance_category": "institutional_bio",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:16.715236+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:16.715277+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Indian Academy of Sciences",
+              "publisher": "fellows.ias.ac.in"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:47.335404+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:47.335444+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Indian Academy of Sciences",
+              "publisher": "fellows.ias.ac.in"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:47.335404+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:47.335444+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:47.247786+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "2 claims extracted from this source."
+      },
+      {
+        "url": "https://jaipur.manipal.edu/bom-chair.php",
+        "title": "Board of Management |Chair -vManipal University Jaipur",
+        "publisher": "jaipur.manipal.edu",
+        "reliability": "reliable_secondary",
+        "snippet": "Dr. Vishwa Mohan Katoch, M.D. (Microbiology) is currently the Chair, National Academy of Sciences, India (NASI), Indian Council of Medical Research (ICMR), Rajasthan University of Health Sciences (RUHS), Jaipur.",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:16.865921+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:16.865958+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Board of Management |Chair -vManipal University Jaipur",
+              "publisher": "jaipur.manipal.edu"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.757967+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.758006+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Board of Management |Chair -vManipal University Jaipur",
+              "publisher": "jaipur.manipal.edu"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:48.757967+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:48.758006+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:48.703263+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "2 claims extracted from this source."
+      },
+      {
+        "url": "https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms",
+        "title": "Dr Vishwa Mohan Katoch, Secretary, Department of Health ...",
+        "publisher": "timesofindia.indiatimes.com",
+        "reliability": "reliable_secondary",
+        "snippet": "Oct 27, 2010 · Dr Vishwa Mohan Katoch, Secretary, Department of Health Research and director General, Indian Council of Medical Research (ICMR), says the Centre has decided to establish a large network of ...",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:17.074500+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:17.074539+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Dr Vishwa Mohan Katoch, Secretary, Department of Health ...",
+              "publisher": "timesofindia.indiatimes.com"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.323862+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.323901+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Dr Vishwa Mohan Katoch, Secretary, Department of Health ...",
+              "publisher": "timesofindia.indiatimes.com"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:48.323862+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:48.323901+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:48.229995+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "2 claims extracted from this source."
+      },
+      {
+        "url": "https://timesofindia.indiatimes.com/19th-annual-conference-of-indian-national-association-for-the-liver-inasl-in-association-with-the-international-liver-transplantation-society-department-of-hepatology-pgi-chandigarh-will-be-inaugurated-by-prof-vishwa-mohan-katochsecretary-department-of-health-research-govt-of-india-and-director-general-icmr-/articleshow/7779158.cms",
+        "title": "19th Annual Conference of Indian National Association for the ...",
+        "publisher": "timesofindia.indiatimes.com",
+        "reliability": "reliable_secondary",
+        "snippet": "Mar 24, 2011 · 19th Annual Conference of Indian National Association for the Liver (INASL) in association with the International Liver Transplantation Society, Department Of Hepatology, PGI Chandigarh will be ...",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.205798+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.205836+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "19th Annual Conference of Indian National Association for the ...",
+              "publisher": "timesofindia.indiatimes.com"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:48.205798+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:48.205836+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:48.022483+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "1 claims extracted from this source."
+      },
+      {
+        "url": "https://timesofindia.indiatimes.com/india/india-facing-double-burden-of-nutritional-problems-avers-former-dg-icmr/articleshow/66369173.cms",
+        "title": "India facing double burden of nutritional problems... - Times of India",
+        "publisher": "timesofindia.indiatimes.com",
+        "reliability": "reliable_secondary",
+        "snippet": "India is also facing the problem of overweight and obesity, noted Dr Vishwa Mohan Katoch, former director general, Indian Council of Medical Research (ICMR). This is largely due to reduced physical activity and poor dietary practices, Dr Katoch added.",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:47.223819+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:47.223860+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "India facing double burden of nutritional problems... - Times of India",
+              "publisher": "timesofindia.indiatimes.com"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:47.223819+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:47.223860+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:46.943997+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "1 claims extracted from this source."
+      },
+      {
+        "url": "https://timesofindia.indiatimes.com/city/mangaluru/Puttur-likely-to-figure-in-pesticide-study/articleshow/9455695.cms",
+        "title": "Puttur likely to figure in pesticide study - Times of India",
+        "publisher": "timesofindia.indiatimes.com",
+        "reliability": "reliable_secondary",
+        "snippet": "Aug 2, 2011 · ICMR director general Dr Vishwa Mohan Katoch said that he had taken the views of the doctors and medical practitioners from Puttur and neighbouring Kasargod and a decision to this effect would be ...",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.677464+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.677502+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Puttur likely to figure in pesticide study - Times of India",
+              "publisher": "timesofindia.indiatimes.com"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:48.677464+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:48.677502+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:48.545132+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "1 claims extracted from this source."
+      },
+      {
+        "url": "https://www.tribuneindia.com/2011/20110324/cth1.htm",
+        "title": "The Tribune, Chandigarh, India - Chandigarh Stories",
+        "publisher": "tribuneindia.com",
+        "reliability": "reliable_secondary",
+        "snippet": "The conference will be inaugurated by Prof Vishwa Mohan Katoch, secretary, department of health research, Government of India, and director-general (ICMR), who will also release a journal of clinical and experimental haematology (JCEH)...",
+        "date": null,
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "unassessed",
+        "editorial_origin": null,
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "duckduckgo",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "relevant",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:17.891888+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:17.891928+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "The Tribune, Chandigarh, India - Chandigarh Stories",
+              "publisher": "tribuneindia.com"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:43.990683+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:43.990721+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "The Tribune, Chandigarh, India - Chandigarh Stories",
+              "publisher": "tribuneindia.com"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:43.990683+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:43.990721+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:43.933603+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "2 claims extracted from this source."
+      },
+      {
+        "url": "https://pubmed.ncbi.nlm.nih.gov/27295919",
+        "title": "Early detection of multidrug resistant (MDR) Mycobacterium tuberculosis in a single tube with in-house designed fluorescence resonance energy transfer (FRET) probes using real-time PCR.",
+        "publisher": "PubMed",
+        "reliability": "primary",
+        "snippet": "",
+        "date": "2016",
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "passing_mention",
+        "editorial_origin": "PubMed",
+        "research_notes": "",
+        "is_independent": false,
+        "domain_trust": "high",
+        "provenance_category": "authored_publication",
+        "fetched_by": "openalex",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "unscored",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:21.815622+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:21.815752+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Early detection of multidrug resistant (MDR) Mycobacterium tuberculosis in a single tube with in-house designed fluorescence resonance energy transfer (FRET) probes using real-time PCR.",
+              "publisher": "PubMed"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:47.998404+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:47.998443+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Early detection of multidrug resistant (MDR) Mycobacterium tuberculosis in a single tube with in-house designed fluorescence resonance energy transfer (FRET) probes using real-time PCR.",
+              "publisher": "PubMed"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:47.998404+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:47.998443+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:47.360285+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "1 claims extracted from this source."
+      },
+      {
+        "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/4216491",
+        "title": "Establishment of Biosafety Level-3 (BSL-3) laboratory: important criteria to consider while designing, constructing, commissioning & operating the facility in Indian setting.",
+        "publisher": "PubMed Central",
+        "reliability": "reliable_secondary",
+        "snippet": "",
+        "date": "2014",
+        "user_provided": false,
+        "human_verified": true,
+        "coverage_depth": "passing_mention",
+        "editorial_origin": "PubMed Central",
+        "research_notes": "",
+        "is_independent": true,
+        "domain_trust": "high",
+        "provenance_category": "independent_secondary",
+        "fetched_by": "openalex",
+        "name_hit_in_body": null,
+        "name_hit_variant": null,
+        "liveness": "alive",
+        "archive_url": null,
+        "author_match_status": null,
+        "author_match_name": null,
+        "author_match_affiliation": null,
+        "all_paper_authors": [],
+        "relevance_flag": "unscored",
+        "redirected_to": null,
+        "profile_links": [],
+        "workflow_stage": "identity_checked",
+        "pdf_metadata": null,
+        "verification_trail": [
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:21.141334+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:33:21.141374+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Establishment of Biosafety Level-3 (BSL-3) laboratory: important criteria to consider while designing, constructing, commissioning & operating the facility in Indian setting.",
+              "publisher": "PubMed Central"
+            }
+          },
+          {
+            "level": "liveness",
+            "actor": "agent",
+            "action": "check_liveness",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:46.920283+00:00",
+            "summary": "Link accessibility checked (alive) by Agent",
+            "details": {
+              "liveness": "alive",
+              "archive_url": null
+            }
+          },
+          {
+            "level": "identity",
+            "actor": "agent",
+            "action": "confirm_person_and_extract",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:46.920323+00:00",
+            "summary": "Identity confirmed and claim extraction authorized by Agent",
+            "details": {
+              "title": "Establishment of Biosafety Level-3 (BSL-3) laboratory: important criteria to consider while designing, constructing, commissioning & operating the facility in Indian setting.",
+              "publisher": "PubMed Central"
+            }
+          }
+        ],
+        "liveness_by": "agent",
+        "liveness_at": "2026-11-04T07:34:46.920283+00:00",
+        "identity_status": "confirmed",
+        "identity_by": "agent",
+        "identity_at": "2026-11-04T07:34:46.920323+00:00",
+        "identity_note": null,
+        "provenance_by": null,
+        "provenance_at": null,
+        "confirmed_for_extraction_by": "agent",
+        "confirmed_for_extraction_at": "2026-11-04T07:34:46.500783+00:00",
+        "extraction_status": "extracted",
+        "extraction_note": "1 claims extracted from this source."
+      }
+    ],
+    "claims": [
+      {
+        "text": "Secretary, Department of Health Research, Government of India.",
+        "field": "position",
+        "source_url": "https://www.tribuneindia.com/2011/20110324/cth1.htm",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Secretary, Department of Health Research, Government of India.",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:43.991591+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785123+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:43.991591+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785123+00:00"
+      },
+      {
+        "text": "Director-General of the Indian Council of Medical Research (ICMR).",
+        "field": "position",
+        "source_url": "https://www.tribuneindia.com/2011/20110324/cth1.htm",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Director-General of the Indian Council of Medical Research (ICMR).",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:43.991614+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785161+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:43.991614+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785161+00:00"
+      },
+      {
+        "text": "Posted at the ICMR-JALMA institute, Agra, in 1978.",
+        "field": "position",
+        "source_url": "https://ijl.org.in/editorial-team-profile",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": "1978",
+        "draft_approved": true,
+        "draft_text": "Posted at the ICMR-JALMA institute, Agra, in 1978.",
+        "trust_score": 0.65,
+        "provenance_status": "unverified",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:45.866406+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785176+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:45.866406+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785176+00:00"
+      },
+      {
+        "text": "Director of the JALMA institute from December 2001 to November 2008.",
+        "field": "position",
+        "source_url": "https://ijl.org.in/editorial-team-profile",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": "December 2001 - Nov 2008",
+        "draft_approved": true,
+        "draft_text": "Director of the JALMA institute from December 2001 to November 2008.",
+        "trust_score": 0.65,
+        "provenance_status": "unverified",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:45.866421+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785187+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:45.866421+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785187+00:00"
+      },
+      {
+        "text": "Holds an M.D. in Microbiology.",
+        "field": "education",
+        "source_url": "https://www.lepra.org.uk/centenary/people/details/dr-vishwa-mohan-katoch",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Holds an M.D. in Microbiology.",
+        "trust_score": 0.65,
+        "provenance_status": "primary_sourced",
+        "is_independent": false,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:46.476313+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785199+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:46.476313+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785199+00:00"
+      },
+      {
+        "text": "Trustee of LEPRA.",
+        "field": "position",
+        "source_url": "https://www.lepra.org.uk/centenary/people/details/dr-vishwa-mohan-katoch",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Trustee of LEPRA.",
+        "trust_score": 0.65,
+        "provenance_status": "primary_sourced",
+        "is_independent": false,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:46.476327+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785209+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:46.476327+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785209+00:00"
+      },
+      {
+        "text": "Authored a paper on establishing a Biosafety Level-3 (BSL-3) laboratory in the Indian setting.",
+        "field": "publication",
+        "source_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/4216491",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Authored a paper on establishing a Biosafety Level-3 (BSL-3) laboratory in the Indian setting.",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:46.920848+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785220+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:46.920848+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785220+00:00"
+      },
+      {
+        "text": "Former Director-General of the Indian Council of Medical Research (ICMR).",
+        "field": "position",
+        "source_url": "https://timesofindia.indiatimes.com/india/india-facing-double-burden-of-nutritional-problems-avers-former-dg-icmr/articleshow/66369173.cms",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Former Director-General of the Indian Council of Medical Research (ICMR).",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:47.224450+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785231+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:47.224450+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785231+00:00"
+      },
+      {
+        "text": "Holds an M.D. from the All India Institute of Medical Sciences (AIIMS).",
+        "field": "education",
+        "source_url": "https://fellows.ias.ac.in/profile/v/FL2007013",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Holds an M.D. from the All India Institute of Medical Sciences (AIIMS).",
+        "trust_score": 0.9,
+        "provenance_status": "primary_sourced",
+        "is_independent": false,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:47.336487+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785241+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:47.336487+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785241+00:00"
+      },
+      {
+        "text": "Fellow of the Indian Academy of Sciences (FNA), the National Academy of Medical Sciences (FAMS), and the National Academy of Sciences, India (FNASc).",
+        "field": "award",
+        "source_url": "https://fellows.ias.ac.in/profile/v/FL2007013",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Fellow of the Indian Academy of Sciences (FNA), the National Academy of Medical Sciences (FAMS), and the National Academy of Sciences, India (FNASc).",
+        "trust_score": 0.9,
+        "provenance_status": "primary_sourced",
+        "is_independent": false,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:47.336502+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785251+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:47.336502+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785251+00:00"
+      },
+      {
+        "text": "Authored a paper on early detection of multidrug-resistant Mycobacterium tuberculosis using in-house FRET probes with real-time PCR.",
+        "field": "publication",
+        "source_url": "https://pubmed.ncbi.nlm.nih.gov/27295919",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Authored a paper on early detection of multidrug-resistant Mycobacterium tuberculosis using in-house FRET probes with real-time PCR.",
+        "trust_score": 0.9,
+        "provenance_status": "primary_sourced",
+        "is_independent": false,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:47.999176+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785261+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:47.999176+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785261+00:00"
+      },
+      {
+        "text": "Secretary, Department of Health Research, Government of India.",
+        "field": "position",
+        "source_url": "https://timesofindia.indiatimes.com/19th-annual-conference-of-indian-national-association-for-the-liver-inasl-in-association-with-the-international-liver-transplantation-society-department-of-hepatology-pgi-chandigarh-will-be-inaugurated-by-prof-vishwa-mohan-katochsecretary-department-of-health-research-govt-of-india-and-director-general-icmr-/articleshow/7779158.cms",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Secretary, Department of Health Research, Government of India.",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.206581+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785272+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.206581+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785272+00:00"
+      },
+      {
+        "text": "Secretary, Department of Health Research, Government of India.",
+        "field": "position",
+        "source_url": "https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Secretary, Department of Health Research, Government of India.",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.324611+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785283+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.324611+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785283+00:00"
+      },
+      {
+        "text": "Director-General of the Indian Council of Medical Research (ICMR).",
+        "field": "position",
+        "source_url": "https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Director-General of the Indian Council of Medical Research (ICMR).",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.324627+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785292+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.324627+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785292+00:00"
+      },
+      {
+        "text": "Holds a Ph.D.",
+        "field": "education",
+        "source_url": "https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Holds a Ph.D.",
+        "trust_score": 0.6,
+        "provenance_status": "unverified",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.518489+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785303+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.518489+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785303+00:00"
+      },
+      {
+        "text": "Fellow of the National Academy of Sciences, India (FNASc), the National Academy of Medical Sciences (FAMS), and the Indian Academy of Sciences (FASc).",
+        "field": "award",
+        "source_url": "https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Fellow of the National Academy of Sciences, India (FNASc), the National Academy of Medical Sciences (FAMS), and the Indian Academy of Sciences (FASc).",
+        "trust_score": 0.6,
+        "provenance_status": "unverified",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.518502+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785313+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.518502+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785313+00:00"
+      },
+      {
+        "text": "NASI-ICMR Chair on Public Health Research, Rajasthan University of Health Sciences, Jaipur.",
+        "field": "position",
+        "source_url": "https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "NASI-ICMR Chair on Public Health Research, Rajasthan University of Health Sciences, Jaipur.",
+        "trust_score": 0.6,
+        "provenance_status": "unverified",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.518510+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785322+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.518510+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785322+00:00"
+      },
+      {
+        "text": "Director-General of the Indian Council of Medical Research (ICMR).",
+        "field": "position",
+        "source_url": "https://timesofindia.indiatimes.com/city/mangaluru/Puttur-likely-to-figure-in-pesticide-study/articleshow/9455695.cms",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": "2011",
+        "draft_approved": true,
+        "draft_text": "Director-General of the Indian Council of Medical Research (ICMR).",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.678017+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785332+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.678017+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785332+00:00"
+      },
+      {
+        "text": "Holds an M.D. in Microbiology.",
+        "field": "education",
+        "source_url": "https://jaipur.manipal.edu/bom-chair.php",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "Holds an M.D. in Microbiology.",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.758821+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785341+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.758821+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785341+00:00"
+      },
+      {
+        "text": "NASI-ICMR Chair at Rajasthan University of Health Sciences (RUHS), Jaipur.",
+        "field": "position",
+        "source_url": "https://jaipur.manipal.edu/bom-chair.php",
+        "verification": "confirmed",
+        "user_provided": false,
+        "auto_source_attempted": false,
+        "date_context": null,
+        "draft_approved": true,
+        "draft_text": "NASI-ICMR Chair at Rajasthan University of Health Sciences (RUHS), Jaipur.",
+        "trust_score": 1.0,
+        "provenance_status": "verified_independent",
+        "is_independent": true,
+        "verification_trail": [
+          {
+            "level": "claim",
+            "actor": "agent",
+            "action": "auto_extracted",
+            "verdict": "unverified",
+            "timestamp": "2026-11-04T07:34:48.758837+00:00",
+            "summary": "Claim auto-extracted from verified source by Agent",
+            "details": {}
+          },
+          {
+            "level": "draft",
+            "actor": "agent",
+            "action": "batch_approve",
+            "verdict": "passed",
+            "timestamp": "2026-11-04T07:34:48.785350+00:00",
+            "summary": "Batch approved by Agent",
+            "details": {}
+          }
+        ],
+        "verified_by": "agent",
+        "verified_at": "2026-11-04T07:34:48.758837+00:00",
+        "settled_quote": null,
+        "draft_approved_by": "agent",
+        "draft_approved_at": "2026-11-04T07:34:48.785350+00:00"
+      }
+    ],
+    "skipped_sources": [],
+    "rejected_sources": [],
+    "discarded_sources": [],
+    "investigation_pivots": [],
+    "auxiliary_leads": [],
+    "forensic_inquiries": [],
+    "known_namesakes": [],
+    "notability": {
+      "score": 0.0,
+      "label": "Insufficient coverage",
+      "rs_count": 0,
+      "reason": "No independent outlet currently supports a confirmed claim.",
+      "candidate_count": 0,
+      "wp_prof_signals": [
+        "1 confirmed authored publications (context only; not a notability criterion)"
+      ]
+    },
+    "saturation": {
+      "score": 0.64,
+      "level": "saturated",
+      "repetition_rate": 0.4,
+      "syndication_rate": 0.3,
+      "unique_fact_count": 12,
+      "total_claims_analyzed": 20,
+      "summary": "Research saturated (64%). Key facts are corroborating across 79 sources with 12 distinct fact clusters. Public web record is well-captured; diminishing returns on further searching.",
+      "corroborated_clusters": [
+        {
+          "canonical_text": "Former Director-General of the Indian Council of Medical Research (ICMR).",
+          "field": "position",
+          "corroborating_sources": [
+            "https://timesofindia.indiatimes.com/city/mangaluru/Puttur-likely-to-figure-in-pesticide-study/articleshow/9455695.cms",
+            "https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms",
+            "https://timesofindia.indiatimes.com/india/india-facing-double-burden-of-nutritional-problems-avers-former-dg-icmr/articleshow/66369173.cms",
+            "https://www.tribuneindia.com/2011/20110324/cth1.htm"
+          ],
+          "claim_indices": [
+            1,
+            7,
+            13,
+            17
+          ],
+          "repetition_count": 4
+        },
+        {
+          "canonical_text": "Secretary, Department of Health Research, Government of India.",
+          "field": "position",
+          "corroborating_sources": [
+            "https://timesofindia.indiatimes.com/19th-annual-conference-of-indian-national-association-for-the-liver-inasl-in-association-with-the-international-liver-transplantation-society-department-of-hepatology-pgi-chandigarh-will-be-inaugurated-by-prof-vishwa-mohan-katochsecretary-department-of-health-research-govt-of-india-and-director-general-icmr-/articleshow/7779158.cms",
+            "https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms",
+            "https://www.tribuneindia.com/2011/20110324/cth1.htm"
+          ],
+          "claim_indices": [
+            0,
+            11,
+            12
+          ],
+          "repetition_count": 3
+        },
+        {
+          "canonical_text": "Holds an M.D. in Microbiology.",
+          "field": "education",
+          "corroborating_sources": [
+            "https://jaipur.manipal.edu/bom-chair.php",
+            "https://www.lepra.org.uk/centenary/people/details/dr-vishwa-mohan-katoch"
+          ],
+          "claim_indices": [
+            4,
+            18
+          ],
+          "repetition_count": 2
+        },
+        {
+          "canonical_text": "Fellow of the National Academy of Sciences, India (FNASc), the National Academy of Medical Sciences (FAMS), and the Indian Academy of Sciences (FASc).",
+          "field": "award",
+          "corroborating_sources": [
+            "https://fellows.ias.ac.in/profile/v/FL2007013",
+            "https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf"
+          ],
+          "claim_indices": [
+            9,
+            15
+          ],
+          "repetition_count": 2
+        },
+        {
+          "canonical_text": "NASI-ICMR Chair on Public Health Research, Rajasthan University of Health Sciences, Jaipur.",
+          "field": "position",
+          "corroborating_sources": [
+            "https://jaipur.manipal.edu/bom-chair.php",
+            "https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf"
+          ],
+          "claim_indices": [
+            16,
+            19
+          ],
+          "repetition_count": 2
+        }
+      ]
+    },
+    "missing_slots": [
+      "full_name",
+      "birth_date",
+      "birth_place",
+      "nationality",
+      "known_for"
+    ],
+    "researcher_ids": {
+      "openalex": "A5019627093",
+      "orcid": "0000-0002-7892-2764"
+    },
+    "confirmed_ids": {},
+    "discovery_legs": {
+      "web_search": "duckduckgo",
+      "semantic_scholar": "no_match",
+      "active_id_search": "no_ids",
+      "openalex": "imported_50",
+      "institution_crawl": "none",
+      "profile_crawl": "found_2"
+    },
+    "wikitext_en": "{{Draft article}}\n{{Short description|Medical microbiology researcher}}\n\n{{Infobox scientist\n| name = Vishwa Mohan Katoch\n| workplaces = Indian Council of Medical Research\n}}\n\n'''Vishwa Mohan Katoch''' is a scientist<ref name=\"src-f2b01627f6\">{{cite web|url=https://www.tribuneindia.com/2011/20110324/cth1.htm|title=The Tribune, Chandigarh, India - Chandigarh Stories|website=tribuneindia.com}}</ref>.\nDirector-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-f2b01627f6\" />.\nFellow of the Indian Academy of Sciences (FNA), the National Academy of Medical Sciences (FAMS), and the National Academy of Sciences, India (FNASc)<ref name=\"src-5d725c7ad5\">{{cite web|url=https://fellows.ias.ac.in/profile/v/FL2007013|title=Indian Academy of Sciences|website=fellows.ias.ac.in}}</ref>.\n\n==Education==\nHolds an M.D. in Microbiology<ref name=\"src-0910c3ba8f\">{{cite web|url=https://jaipur.manipal.edu/bom-chair.php|title=Board of Management {{!}}Chair -vManipal University Jaipur|website=jaipur.manipal.edu}}</ref>. Holds an M.D. in Microbiology<ref name=\"src-a71ae057e5\">{{cite web|url=https://www.lepra.org.uk/centenary/people/details/dr-vishwa-mohan-katoch|title=Dr. Vishwa Mohan Katoch|website=lepra.org.uk}}</ref>. Holds an M.D. from the All India Institute of Medical Sciences (AIIMS)<ref name=\"src-5d725c7ad5\" />.\n\n==Career==\nDirector of the JALMA institute from December 2001 to November 2008<ref name=\"src-3be12bf1b2\">{{cite web|url=https://ijl.org.in/editorial-team-profile|title=Editorial Team Profile {{!}} Indian Journal of Leprosy - a quarterly scientific|website=ijl.org.in|archive-url=http://web.archive.org/web/20231025055623/https://www.ijl.org.in/editorial-team-profile|archive-date=25 October 2023}}</ref>. Director-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-45b39666e6\">{{cite web|url=https://timesofindia.indiatimes.com/city/mangaluru/Puttur-likely-to-figure-in-pesticide-study/articleshow/9455695.cms|title=Puttur likely to figure in pesticide study - Times of India|website=timesofindia.indiatimes.com}}</ref>. Former Director-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-a25b66756e\">{{cite web|url=https://timesofindia.indiatimes.com/india/india-facing-double-burden-of-nutritional-problems-avers-former-dg-icmr/articleshow/66369173.cms|title=India facing double burden of nutritional problems... - Times of India|website=timesofindia.indiatimes.com}}</ref>. Director-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-bf6b4a8b55\">{{cite web|url=https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms|title=Dr Vishwa Mohan Katoch, Secretary, Department of Health|website=timesofindia.indiatimes.com}}</ref>.\n\n==Selected publications==\n* Authored a paper on early detection of multidrug-resistant Mycobacterium tuberculosis using in-house FRET probes with real-time PCR<ref name=\"src-1976ae5d15\">{{cite web|url=https://pubmed.ncbi.nlm.nih.gov/27295919|title=Early detection of multidrug resistant (MDR) Mycobacterium tuberculosis in a single tube with in-house designed fluorescence resonance energy transfer (FRET) probes using real-time PCR.|website=PubMed|date=2016}}</ref>.\n* Authored a paper on establishing a Biosafety Level-3 (BSL-3) laboratory in the Indian setting<ref name=\"src-f00f5c6031\">{{cite web|url=https://www.ncbi.nlm.nih.gov/pmc/articles/4216491|title=Establishment of Biosafety Level-3 (BSL-3) laboratory: important criteria to consider while designing, constructing, commissioning & operating the facility in Indian setting|website=PubMed Central|date=2014}}</ref>.\n\n==Awards and recognition==\nFellow of the National Academy of Sciences, India (FNASc), the National Academy of Medical Sciences (FAMS), and the Indian Academy of Sciences (FASc)<ref name=\"src-f5ca0b7bf3\">{{cite web|url=https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf|title=Biography - infectiousdiseasescongress.com|website=infectiousdiseasescongress.com}}</ref>.\n\n==References==\n{{reflist}}\n\n{{Authority control}}\n{{DEFAULTSORT:Katoch, Vishwa Mohan}}\n[[Category:Living people]]\n",
+    "wikitext_hi": "{{प्रारूप लेख}}\n\n{{ज्ञानसन्दूक वैज्ञानिक\n| नाम = Vishwa Mohan Katoch\n| संस्थान = Indian Council of Medical Research\n}}\n\n'''Vishwa Mohan Katoch''' एक  वैज्ञानिक हैं<ref name=\"src-f2b01627f6\">{{cite web|url=https://www.tribuneindia.com/2011/20110324/cth1.htm|title=The Tribune, Chandigarh, India - Chandigarh Stories|website=tribuneindia.com}}</ref>।\nDirector-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-f2b01627f6\" />।\nFellow of the Indian Academy of Sciences (FNA), the National Academy of Medical Sciences (FAMS), and the National Academy of Sciences, India (FNASc)<ref name=\"src-5d725c7ad5\">{{cite web|url=https://fellows.ias.ac.in/profile/v/FL2007013|title=Indian Academy of Sciences|website=fellows.ias.ac.in}}</ref>।\n\n== प्रारंभिक जीवन एवं शिक्षा ==\nHolds an M.D. in Microbiology<ref name=\"src-0910c3ba8f\">{{cite web|url=https://jaipur.manipal.edu/bom-chair.php|title=Board of Management {{!}}Chair -vManipal University Jaipur|website=jaipur.manipal.edu}}</ref>। Holds an M.D. in Microbiology<ref name=\"src-a71ae057e5\">{{cite web|url=https://www.lepra.org.uk/centenary/people/details/dr-vishwa-mohan-katoch|title=Dr. Vishwa Mohan Katoch|website=lepra.org.uk}}</ref>। Holds an M.D. from the All India Institute of Medical Sciences (AIIMS)<ref name=\"src-5d725c7ad5\" />।\n\n== करियर ==\nDirector of the JALMA institute from December 2001 to November 2008<ref name=\"src-3be12bf1b2\">{{cite web|url=https://ijl.org.in/editorial-team-profile|title=Editorial Team Profile {{!}} Indian Journal of Leprosy - a quarterly scientific|website=ijl.org.in|archive-url=http://web.archive.org/web/20231025055623/https://www.ijl.org.in/editorial-team-profile|archive-date=25 October 2023}}</ref>। Director-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-45b39666e6\">{{cite web|url=https://timesofindia.indiatimes.com/city/mangaluru/Puttur-likely-to-figure-in-pesticide-study/articleshow/9455695.cms|title=Puttur likely to figure in pesticide study - Times of India|website=timesofindia.indiatimes.com}}</ref>। Former Director-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-a25b66756e\">{{cite web|url=https://timesofindia.indiatimes.com/india/india-facing-double-burden-of-nutritional-problems-avers-former-dg-icmr/articleshow/66369173.cms|title=India facing double burden of nutritional problems... - Times of India|website=timesofindia.indiatimes.com}}</ref>। Director-General of the Indian Council of Medical Research (ICMR)<ref name=\"src-bf6b4a8b55\">{{cite web|url=https://timesofindia.indiatimes.com/dr-vishwa-mohan-katoch-secretary-department-of-health-research-and-director-general-indian-council-of-medical-research-icmr-says-the-centre-has-decided-to-establish-a-large-network-of-virology-laboratories-in-the-country-at-a-cost-of-about-rs-800-to-1000-crore/articleshow/6819763.cms|title=Dr Vishwa Mohan Katoch, Secretary, Department of Health|website=timesofindia.indiatimes.com}}</ref>।\n\n== चयनित शोध पत्र ==\n* Authored a paper on early detection of multidrug-resistant Mycobacterium tuberculosis using in-house FRET probes with real-time PCR<ref name=\"src-1976ae5d15\">{{cite web|url=https://pubmed.ncbi.nlm.nih.gov/27295919|title=Early detection of multidrug resistant (MDR) Mycobacterium tuberculosis in a single tube with in-house designed fluorescence resonance energy transfer (FRET) probes using real-time PCR.|website=PubMed|date=2016}}</ref>।\n* Authored a paper on establishing a Biosafety Level-3 (BSL-3) laboratory in the Indian setting<ref name=\"src-f00f5c6031\">{{cite web|url=https://www.ncbi.nlm.nih.gov/pmc/articles/4216491|title=Establishment of Biosafety Level-3 (BSL-3) laboratory: important criteria to consider while designing, constructing, commissioning & operating the facility in Indian setting|website=PubMed Central|date=2014}}</ref>।\n\n== पुरस्कार एवं सम्मान ==\nFellow of the National Academy of Sciences, India (FNASc), the National Academy of Medical Sciences (FAMS), and the Indian Academy of Sciences (FASc)<ref name=\"src-f5ca0b7bf3\">{{cite web|url=https://www.infectiousdiseasescongress.com/files/images/advisory-board/biography-2020/vishwa-mohan-katoch-biography-dr.pdf|title=Biography - infectiousdiseasescongress.com|website=infectiousdiseasescongress.com}}</ref>।\n\n== सन्दर्भ ==\n{{reflist}}\n\n[[श्रेणी:जीवित लोग]]\n[[श्रेणी:भारतीय वैज्ञानिक]]\n"
+  },
+  "wiki_status": {
+    "status": "clear",
+    "url": null,
+    "note": null
+  },
+  "saved_at": "2026-11-04T07:40:30.924325+00:00",
+  "updated_at": "2026-11-04T07:40:30.924325+00:00"
+}

@@ -48,6 +48,50 @@ def extract_ids_from_sources(sources: list[Source]) -> dict[str, str]:
     return ids
 
 
+def is_valid_researchgate_slug(slug: str, name: str) -> bool:
+    """Check if a ResearchGate profile slug positively matches the target person.
+
+    A ResearchGate slug (e.g. 'Prem-Yadav-7', 'Vishwa-Mohan-Katoch') is derived
+    by splitting on '-' or '_'. To be accepted:
+    1. The slug's surname-equivalent (last alpha word >= 2 chars) must match the target surname.
+    2. The given-name token (first alpha word) must be compatible with the target's
+       given names (equal, or one is an initial/prefix of the other).
+    Rejects wrong surnames (e.g. 'Shivani-Bhardwaj-17' for 'Prem Singh Yadav') and
+    spelled-out given-name conflicts (e.g. 'Kiran-Yadav-2' for 'Prem Singh Yadav').
+    """
+    clean_target = re.sub(
+        r"^(dr\.?|prof\.?|shri|smt\.?|mr\.?|ms\.?|mrs\.?)\s+",
+        "",
+        name.strip(),
+        flags=re.I,
+    ).strip()
+    target_tokens = [t.lower().rstrip(".,") for t in clean_target.split() if len(t) > 1]
+    if len(target_tokens) < 2:
+        return False
+
+    target_last = target_tokens[-1]
+    target_given_tokens = target_tokens[:-1]
+
+    parts = [p.lower() for p in re.split(r"[-_]+", str(slug)) if p]
+    alpha_parts = [p for p in parts if p.isalpha()]
+    slug_words = [p for p in alpha_parts if len(p) >= 2]
+    if not slug_words or not alpha_parts:
+        return False
+
+    slug_last = slug_words[-1]
+    if slug_last != target_last:
+        return False
+
+    if len(alpha_parts) < 2:
+        return False
+
+    slug_first = alpha_parts[0]
+    return any(
+        gt == slug_first or gt.startswith(slug_first) or slug_first.startswith(gt)
+        for gt in target_given_tokens
+    )
+
+
 def search_researcher_ids(
     name: str,
     field: str | None = None,
@@ -96,7 +140,26 @@ def search_researcher_ids(
             hits = _search_web(query)
             for s in hits:
                 if m := regex.search(s.url):
-                    return id_type, m.group(1)
+                    cand_id = m.group(1)
+                    if id_type == "researchgate":
+                        if not is_valid_researchgate_slug(cand_id, name):
+                            continue
+                    elif id_type in ("google_scholar", "orcid"):
+                        from .name_verifier import verify_name_in_content
+
+                        # If title is present and distinct from url, ensure the person's name appears in it
+                        # to avoid picking up co-authors whose profiles merely mention the target.
+                        if s.title and s.title != s.url:
+                            v_res = verify_name_in_content(name, text="", title=s.title)
+                            if not v_res.matched:
+                                continue
+                        else:
+                            v_res = verify_name_in_content(
+                                name, text=s.snippet or "", title=s.title or ""
+                            )
+                            if not v_res.matched:
+                                continue
+                    return id_type, cand_id
         except Exception:
             pass
         return id_type, None
@@ -195,21 +258,10 @@ def validated_new_ids(
     ORCID is checked against the public API; a 404 or name/affiliation mismatch
     means it belongs to someone else and must not be stored. Semantic Scholar
     ids are checked against the S2 author profile name (first+last token).
-    Every other researcher ID (ResearchGate, Google Scholar, Scopus) is gated
-    against namesake collision risk (e.g. rejecting 'Kiran-Katoch-2' for 'Vishwa Mohan Katoch').
+    ResearchGate slug-based IDs must positively match the target person's name
+    (surname match and compatible given name). Opaque IDs (Google Scholar,
+    Scopus) are preserved without string-rejection.
     """
-    from .name_verifier import assess_namesake_risk
-
-    clean_target = re.sub(
-        r"^(dr\.?|prof\.?|shri|smt\.?|mr\.?|ms\.?|mrs\.?)\s+",
-        "",
-        name.strip(),
-        flags=re.I,
-    ).strip()
-    target_tokens = [t.lower().rstrip(".,") for t in clean_target.split() if len(t) > 1]
-    target_first = target_tokens[0] if target_tokens else ""
-    target_last = target_tokens[-1] if target_tokens else ""
-
     valid: dict[str, str] = {}
     for id_type, id_val in ids.items():
         if id_type == "orcid" and not validate_orcid(id_val, name, affiliation):
@@ -217,26 +269,9 @@ def validated_new_ids(
         if id_type == "semantic_scholar" and not validate_s2_author(id_val, name):
             continue
 
-        # Namesake risk audit for slug-based IDs (e.g. ResearchGate "Kiran-Katoch-2")
-        id_text = str(id_val).replace("-", " ").replace("_", " ")
-        id_words = [w.lower() for w in re.findall(r"[A-Za-z]{2,}", id_text)]
-        if id_words and target_last and target_last in id_words:
-            # Contains target's surname; verify given name is not a different sibling
-            if target_first and len(target_first) > 2:
-                other_first = id_words[0]
-                if (
-                    len(other_first) > 2
-                    and other_first != target_first
-                    and other_first != target_last
-                    and not target_first.startswith(other_first)
-                    and not other_first.startswith(target_first)
-                ):
-                    # Conflicting given name for same surname -> reject namesake decoy!
-                    continue
-
-        risk, _ = assess_namesake_risk(id_text, name, [])
-        if risk in ("known_conflict", "possible"):
-            continue
+        if id_type == "researchgate":
+            if not is_valid_researchgate_slug(id_val, name):
+                continue
 
         valid[id_type] = id_val
     return valid

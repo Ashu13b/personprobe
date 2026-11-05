@@ -201,3 +201,109 @@ def test_validated_new_ids_drops_wrong_semantic_scholar_id(monkeypatch):
     )
 
     assert out == {}
+
+
+def test_validated_new_ids_researchgate_slug_positive_matching():
+    # Prem-Yadav-7 for "Prem Singh Yadav" → ACCEPTED
+    res1 = researcher_ids.validated_new_ids(
+        {"researchgate": "Prem-Yadav-7"}, "Prem Singh Yadav"
+    )
+    assert res1 == {"researchgate": "Prem-Yadav-7"}
+
+    # Shivani-Bhardwaj-17 for "Prem Singh Yadav" → REJECTED (surname mismatch)
+    res2 = researcher_ids.validated_new_ids(
+        {"researchgate": "Shivani-Bhardwaj-17"}, "Prem Singh Yadav"
+    )
+    assert res2 == {}
+
+    # Kiran-Yadav-2 for "Prem Singh Yadav" → REJECTED (surname match, conflicting given name)
+    res3 = researcher_ids.validated_new_ids(
+        {"researchgate": "Kiran-Yadav-2"}, "Prem Singh Yadav"
+    )
+    assert res3 == {}
+
+    # Kiran-Katoch-2 for "Dr. Vishwa Mohan Katoch" → REJECTED
+    res4 = researcher_ids.validated_new_ids(
+        {"researchgate": "Kiran-Katoch-2"}, "Dr. Vishwa Mohan Katoch"
+    )
+    assert res4 == {}
+
+    # Vishwa-Katoch for "Dr. Vishwa Mohan Katoch" → ACCEPTED
+    res5 = researcher_ids.validated_new_ids(
+        {"researchgate": "Vishwa-Katoch"}, "Dr. Vishwa Mohan Katoch"
+    )
+    assert res5 == {"researchgate": "Vishwa-Katoch"}
+
+
+def test_validated_new_ids_preserves_opaque_scholar_and_scopus():
+    # a real-format Scholar user= id (e.g. AbC12dEAAAAJ) → NOT rejected by the slug string rule
+    res_scholar = researcher_ids.validated_new_ids(
+        {"google_scholar": "AbC12dEAAAAJ"}, "Prem Singh Yadav"
+    )
+    assert res_scholar == {"google_scholar": "AbC12dEAAAAJ"}
+
+    # Scopus 57225411188 → ACCEPTED (not rejected by string rule)
+    res_scopus = researcher_ids.validated_new_ids(
+        {"scopus": "57225411188"}, "Prem Singh Yadav"
+    )
+    assert res_scopus == {"scopus": "57225411188"}
+
+
+def test_search_researcher_ids_name_matching_filters_wrong_people(monkeypatch):
+    def mock_search_web(query):
+        if "site:researchgate.net" in query:
+            return [
+                Source(
+                    url="https://www.researchgate.net/profile/Shivani-Bhardwaj-17",
+                    title="Shivani Bhardwaj | CIRB",
+                    publisher="researchgate.net",
+                    reliability=SourceReliability.primary,
+                ),
+                Source(
+                    url="https://www.researchgate.net/profile/Prem-Yadav-7",
+                    title="Prem Singh Yadav | CIRB",
+                    publisher="researchgate.net",
+                    reliability=SourceReliability.primary,
+                ),
+            ]
+        if "site:scholar.google.com" in query:
+            return [
+                Source(
+                    url="https://scholar.google.com/citations?user=WrongPerson123",
+                    title="Shivani Bhardwaj - Google Scholar",
+                    publisher="scholar.google.com",
+                    reliability=SourceReliability.primary,
+                ),
+                Source(
+                    url="https://scholar.google.com/citations?user=AbC12dEAAAAJ",
+                    title="Prem Singh Yadav - Google Scholar",
+                    publisher="scholar.google.com",
+                    reliability=SourceReliability.primary,
+                ),
+            ]
+        if "site:orcid.org" in query:
+            return [
+                Source(
+                    url="https://orcid.org/0000-0003-3930-2201",
+                    title="Pradeep Kumar (0000-0003-3930-2201) - ORCID",
+                    publisher="orcid.org",
+                    reliability=SourceReliability.primary,
+                ),
+                Source(
+                    url="https://orcid.org/0000-0002-1825-0097",
+                    title="Prem Singh Yadav (0000-0002-1825-0097) - ORCID",
+                    publisher="orcid.org",
+                    reliability=SourceReliability.primary,
+                ),
+            ]
+        return []
+
+    monkeypatch.setattr("engine.researcher._search_web", mock_search_web)
+
+    found = researcher_ids.search_researcher_ids(
+        name="Prem Singh Yadav", affiliation="CIRB", quick_mode=False
+    )
+    assert found.get("researchgate") == "Prem-Yadav-7"
+    assert found.get("google_scholar") == "AbC12dEAAAAJ"
+    assert found.get("orcid") == "0000-0002-1825-0097"
+
